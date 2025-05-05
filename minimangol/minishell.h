@@ -11,6 +11,7 @@
 # include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdbool.h>
 
 typedef enum e_token_type
 {
@@ -48,18 +49,6 @@ struct s_stack_cmd
 	struct s_stack *next;
 };
 
-struct s_parser
-{
-	t_token	*current;
-	t_stack	*stack;
-	t_stack_cmd	*stack_cmd;
-};
-
-struct s_stack
-{
-	t_ast *node;
-	struct s_stack *next;
-};
 
 struct s_redir
 {
@@ -96,30 +85,22 @@ struct s_ast
 	struct s_ast *node;
 } ;
 
-// Tokenizer
-t_token     *tokenize(char *input);
-// void        free_tokens(t_token *tokens);
 void        print_tokens(t_token *tokens); // For debug
-
-// Parser
+void	ana_m9wd(t_ast *node);
 void print_tokens(t_token *tokens);
 int check_syntax_errors(t_token *tokens);
-// void        free_ast(t_ast *node);
-t_ast		*pop(t_stack **stack);
-void		push(t_stack **stack, t_token *token);
 t_ast *function_lmli7a(t_token *tokens, t_token *fin_t7bs);
-void		free_stack(t_stack **stack);
-t_ast		*peek(t_stack *stack);
-// Syntax Error Handling
-// int         has_syntax_error(t_token *tokens);
-// void        print_syntax_error(t_token *token);
-
-// Utils (if needed)
+int	execute_tree(t_ast *node, int fd, int outfd, int cs, char **env);
+t_redir *handle_redir(t_token **tokens);
+void	error(char *str);
+t_token *lexer(char *input);
+t_token *merge_consecutive_words(t_token *tokens);
 char        *ft_strdup(const char *s1);
-t_ast *parse(t_parser *parser);
-void compare(t_parser *stacks, t_token *tokens);
 int get_precedence(int token_type);
-void print_ast(t_ast *node, int level);
 int is_operator(t_token *token);
+
+void print_redirs(t_redir *redirs);
+void free_redirs(t_redir *redirs);
+t_redir *extract_redirs_from_command(char **args);
 
 #endif

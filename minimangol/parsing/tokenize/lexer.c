@@ -1,207 +1,39 @@
 #include "../../minishell.h"
 
-void handle_quotes(t_token **head, t_token **curr, char *input, int *i);
-void handle_word(t_token **head, t_token **curr, char *input, int *i);
-// static void parse_redirection(t_parser *parser, t_command *cmd);
-// static void parse_command(t_parser *parser, t_command *cmd);
-void handle_operator(t_token **head, t_token **curr, char *input, int *i);
+static void add_tokens(t_token **head, char *value, int type);
 
+// static t_token handel_paren(char *input)
+// {
+// 	int i = 0;
+// 	int start = 0;
+// 	while(input[i])
+// 	{
+// 		if(input[i] == '(')
+// 		{
 
-void flag_error(char *str)
+// 		}
+// 	}
+// }
+
+char *ft_strjoin_char(char *str, char c)
 {
-	ft_putstr_fd("minishell: syntax error near unexpected token `", 2);
-	ft_putstr_fd(str, 2);
-	ft_putstr_fd("'\n", 1);
-}
+	char    *new;
+	size_t  len;
 
-void ft_free_split(char **tokens)
-{
-	int i = 0;
-	while (tokens[i])
+	if (!str)
 	{
-		free(tokens[i]);
-		i++;
+		new = malloc(2);
+		new[0] = c;
+		new[1] = '\0';
+		return new;
 	}
-	free(tokens);
-}
-
-void check_s_char(char **token_value, int *token_type)
-{
-	if (ft_strcmp(*token_value, "(") == 0)
-		*token_type = TOKEN_LPAREN;
-	else if (ft_strcmp(*token_value, ")") == 0)
-		*token_type = TOKEN_RPAREN;
-	else
-		*token_type = TOKEN_WORD;
-}
-
-void free_tokens(t_token *tokens)
-{
-	t_token *current = tokens;
-	while (current)
-	{
-		t_token *next = current->next;
-		free(current->value);
-		free(current);
-		current = next;
-	}
-}
-
-void create_token(t_token **head, t_token **current, char *value, int type)
-{
-	t_token *new_token = malloc(sizeof(t_token));
-	if (!new_token)
-		return;
-	new_token->value = ft_strdup(value);
-	new_token->type = type;
-	new_token->next = NULL;
-	if (*head == NULL)
-		*head = new_token;
-	else
-		(*current)->next = new_token;
-	*current = new_token;
-}
-
-static void add_token(t_token **head, t_token **curr, char *value, int type)
-{
-	t_token *new;
-
-	new = malloc(sizeof(t_token));
-	new->value = ft_strdup(value);
-	new->type = type;
-	new->next = NULL;
-
-	if (!*head)
-		*head = new;
-	else
-		(*curr)->next = new;
-	*curr = new;
-}
-
-t_token *tokenize(char *input)
-{
-	t_token *head = NULL;
-	t_token *curr = NULL;
-	int i = 0;
-	
-	while (input[i])
-	{
-		if (ft_isspace(input[i]))
-		{
-			i++;
-			continue;
-		}
-		
-		if (input[i] == '|' || input[i] == '&' || 
-			input[i] == '<' || input[i] == '>' || 
-			input[i] == '(' || input[i] == ')')
-		{
-			handle_operator(&head, &curr, input, &i);
-			continue;
-		}
-		
-		if (input[i] == '"' || input[i] == '\'')
-		{
-			handle_quotes(&head, &curr, input, &i);
-			continue;
-		}
-		
-		handle_word(&head, &curr, input, &i);
-	}
-	
-	return head;
-}
-
-void handle_operator(t_token **head, t_token **curr, char *input, int *i)
-{
-	if (input[*i] == '&' && input[*i + 1] == '&')
-	{
-		add_token(head, curr, "&&", TOKEN_AND);
-		(*i) += 2;
-	}
-	else if (input[*i] == '|' && input[*i + 1] == '|')
-	{
-		add_token(head, curr, "||", TOKEN_OR);
-		(*i) += 2;
-	}
-	else if (input[*i] == '>' && input[*i + 1] == '>')
-	{
-		add_token(head, curr, ">>", TOKEN_APPEND);
-		(*i) += 2;
-	}
-	else if (input[*i] == '<' && input[*i + 1] == '<')
-	{
-		add_token(head, curr, "<<", TOKEN_HEREDOC);
-		(*i) += 2;
-	}
-	else if (input[*i] == '|')
-	{
-		add_token(head, curr, "|", TOKEN_PIPE);
-		(*i)++;
-	}
-	else if (input[*i] == '>')
-	{
-		add_token(head, curr, ">", TOKEN_REDIR_OUT);
-		(*i)++;
-	}
-	else if (input[*i] == '<')
-	{
-		add_token(head, curr, "<", TOKEN_REDIR_IN);
-		(*i)++;
-	}
-	else if (input[*i] == '(')
-	{
-		add_token(head, curr, "(", TOKEN_LPAREN);
-		(*i)++;
-	}
-	else if (input[*i] == ')')
-	{
-		add_token(head, curr, ")", TOKEN_RPAREN);
-		(*i)++;
-	}
-}
-
-void handle_quotes(t_token **head, t_token **curr, char *input, int *i)
-{
-	char quote = input[*i];
-	int start = ++(*i);
-	
-	while (input[*i] && input[*i] != quote)
-	{
-		if (quote == '"' && input[*i] == '\\' && input[*i + 1])
-			(*i)++;
-		(*i)++;
-	}
-	
-	int len = *i - start;
-	char *content = ft_substr(input, start, len);
-	add_token(head, curr, content, TOKEN_WORD);
-	free(content);
-	
-	if (input[*i])
-		(*i)++;
-}
-
-void handle_word(t_token **head, t_token **curr, char *input, int *i)
-{
-	int start = *i;
-	
-	while (input[*i] && !isspace(input[*i]) && 
-		   input[*i] != '|' && input[*i] != '&' && 
-		   input[*i] != '<' && input[*i] != '>' && 
-		   input[*i] != '(' && input[*i] != ')' && 
-		   input[*i] != '\'' && input[*i] != '"')
-	{
-		if (input[*i] == '\\' && input[*i + 1])
-			(*i) += 2;
-		else
-			(*i)++;
-	}
-	
-	int len = *i - start;
-	char *word = ft_substr(input, start, len);
-	add_token(head, curr, word, TOKEN_WORD);
-	free(word);
+	len = ft_strlen(str);
+	new = malloc(len + 2);
+	ft_strlcpy(new, str, len + 1);
+	new[len] = c;
+	new[len + 1] = '\0';
+	free(str);
+	return new;
 }
 
 void print_tokens(t_token *tokens)
@@ -216,92 +48,269 @@ void print_tokens(t_token *tokens)
 	printf("-----------------\n");
 }
 
-int check_syntax_errors(t_token *tokens)
+static bool is_redirection(t_token_type type)
 {
-	t_token *current = tokens;
-	int paren_count = 0;
-	
-	while (current)
-	{
-		if (current->type == TOKEN_LPAREN)
-			paren_count++;
-		else if (current->type == TOKEN_RPAREN)
-			paren_count--;
-		
-		if (paren_count < 0)
-		{
-			flag_error(")");
-			return 1;
-		}
-		
-		if (!current->next && 
-			(current->type == TOKEN_PIPE || 
-			 current->type == TOKEN_AND || 
-			 current->type == TOKEN_OR || 
-			 current->type == TOKEN_REDIR_IN || 
-			 current->type == TOKEN_REDIR_OUT ||
-			 current->type == TOKEN_APPEND ||
-			 current->type == TOKEN_HEREDOC))
-		{
-			flag_error("newline");
-			return 1;
-		}
-		
-		current = current->next;
-	}
-	
-	if (paren_count > 0)
-	{
-		flag_error("(");
-		return 1;
-	}
-	
-	return 0;
+	return (type == TOKEN_REDIR_IN || 
+			type == TOKEN_REDIR_OUT ||
+			type == TOKEN_APPEND ||
+			type == TOKEN_HEREDOC);
 }
 
-// static void parse_redirection(t_parser *parser, t_command *cmd)
-// {
-// 	t_redir *new;
+t_redir *create_redir_node(t_token_type type, char *file)
+{
+	t_redir *new_redir = malloc(sizeof(t_redir));
+	if (!new_redir)
+		return NULL;
 	
-// 	new = malloc(sizeof(t_redir));
-// 	if (!new)
-// 		return;
-// 	new->type = parser->current->type;
-// 	parser->current = parser->current->next;
-// 	if (!parser->current || parser->current->type != TOKEN_WORD)
-// 	{
-// 		ft_putstr_fd("minishell: syntax error near unexpected token\n", 2);
-// 		free(new);
-// 		return;
-// 	}
-// 	new->file = ft_strdup(parser->current->value);    
-// 	new->next = cmd->redirs;
-// 	cmd->redirs = new;    
-// 	parser->current = parser->current->next;
-// }
+	new_redir->file = ft_strdup(file);
+	if (!new_redir->file) {
+		free(new_redir);
+		return NULL;
+	}
+	
+	new_redir->type = type;
+	new_redir->next = NULL;
+	return new_redir;
+}
 
-// static void parse_command(t_parser *parser, t_command *cmd)
-// {
-// 	int arg_count = 0;
-// 	int capacity = 16;
-// 	cmd->args = malloc(capacity * sizeof(char *));
+static void add_tokens(t_token **head, char *value, int type)
+{
+	t_token *new_token;
+	t_token *last;
+
+	new_token = malloc(sizeof(t_token));
+	if (!new_token)
+		return;
 	
-// 	while (parser->current && 
-// 		  (parser->current->type == TOKEN_WORD ||
-// 		   parser->current->type >= TOKEN_REDIR_IN))
-// 	{
-// 		if (parser->current->type != TOKEN_WORD)
-// 		{
-// 			parse_redirection(parser, cmd);
-// 			continue;
-// 		}
-// 		if (arg_count >= capacity-1)
-// 		{
-// 			capacity *= 2;
-// 			cmd->args = realloc(cmd->args, capacity * sizeof(char *));
-// 		}
-// 		cmd->args[arg_count++] = ft_strdup(parser->current->value);
-// 		parser->current = parser->current->next;
-// 	}
-// 	cmd->args[arg_count] = NULL;
-// }
+	new_token->value = ft_strdup(value);
+	new_token->type = type;
+	new_token->next = NULL;
+
+	if (!*head)
+	{
+		*head = new_token;
+		return;
+	}
+
+	last = *head;
+	while (last->next)
+		last = last->next;
+	last->next = new_token;
+}
+
+void remove_token(t_token **head, t_token *to_remove, t_token *prev)
+{
+	if (!*head || !to_remove)
+		return;
+	
+	if (prev)
+		prev->next = to_remove->next;
+	else
+		*head = to_remove->next;
+	
+	free(to_remove->value);
+	free(to_remove);
+}
+
+static int handle_operator(char *input, int i, t_token **tokens)
+{
+	int type;
+	int len;
+
+	type = TOKEN_WORD;
+	len = 1;
+	if (input[i] == '>' && input[i + 1] == '>')
+	{
+		type = TOKEN_APPEND;
+		len = 2;
+	}
+	else if (input[i] == '<' && input[i + 1] == '<')
+	{
+		type = TOKEN_HEREDOC;
+		len = 2;
+	}
+	else if (input[i] == '>')
+		type = TOKEN_REDIR_OUT;
+	else if (input[i] == '<')
+		type = TOKEN_REDIR_IN;
+	else if (input[i] == '|' && input[i + 1] == '|')
+	{
+		type = TOKEN_OR;
+		len = 2;
+	}
+	else if (input[i] == '&' && input[i + 1] == '&')
+	{
+		type = TOKEN_AND;
+		len = 2;
+	}
+	else if (input[i] == '|')
+		type = TOKEN_PIPE;
+
+	char *value = ft_substr(input, i, len);
+	add_tokens(tokens, value, type);
+	return (i + len);
+}
+
+static int handle_quotes(char *input, int i, t_token **tokens, char quote)
+{
+	int start = i;
+	i++;
+
+	while (input[i] && input[i] != quote)
+		i++;
+
+	if (!input[i])
+	{
+		ft_putstr_fd("Error: Unclosed quotes\n", 2);
+		return (-1);
+	}
+
+	char *value = ft_substr(input, start + 1, i - start - 1);
+	add_tokens(tokens, value, TOKEN_WORD);
+	return (i + 1);
+}
+
+static int handel_paren(char *input, int i, t_token **tokens)
+{
+	int start = i;
+	int flager = 0;
+	int beg = 0;
+	while(input[i])
+	{
+		if(input[i] == '(' || input[i] == ')')
+		{
+			if(input[i] == '(')
+			{
+				flager ++;
+				beg++;
+			}	
+		}
+	}
+		// to do
+}
+
+static int handle_word(char *input, int i, t_token **tokens)
+{
+	int start = i;
+
+	while (input[i] && !ft_isspace(input[i]) && !ft_strchr("><|&", input[i]))
+		i++;
+
+	char *value = ft_substr(input, start, i - start);
+	add_tokens(tokens, value, TOKEN_WORD);
+	return (i);
+}
+
+t_token *lexer(char *input)
+{
+	t_token *tokens = NULL;
+	int i = 0;
+	int result;
+
+	while (input[i])
+	{
+		if (ft_isspace(input[i]))
+		{
+			i++;
+			continue;
+		}
+
+		if (ft_strchr("><|&", input[i]))
+			result = handle_operator(input, i, &tokens);
+		else if (input[i] == '\'' || input[i] == '"')
+			result = handle_quotes(input, i, &tokens, input[i]);
+		// else if (input[i] == '(' || input[i] == ')') to do
+		// 	handle_paren(input, i, &tokens);
+		else
+			result = handle_word(input, i, &tokens);
+		if (result == -1)
+		{
+			// free_tokens(tokens);
+			return (NULL);
+		}
+		i = result;
+	}
+	return (tokens);
+}
+
+t_redir *handle_redir(t_token **tokens)
+{
+	t_token *curr = *tokens;
+	t_redir *redirs = NULL;
+	t_redir *redir_tail = NULL;
+
+	while (curr && curr->next)
+	{
+		if (is_redirection(curr->type))
+		{
+			t_redir *new_redir = create_redir_node(curr->type, curr->next->value);            
+			if (!redirs) {
+				redirs = new_redir;
+				redir_tail = new_redir;
+			} else {
+				redir_tail->next = new_redir;
+				redir_tail = new_redir;
+			}            
+			curr = curr->next->next;
+		}
+		else
+		{
+			curr = curr->next;
+		}
+	}
+	return redirs;
+}
+
+void print_redirs(t_redir *redirs)
+{
+	t_redir *current = redirs;
+	printf("\n--- Redirections ---\n");
+	while (current)
+	{
+		printf("Type: %d, File: '%s'\n", current->type, current->file);
+		current = current->next;
+	}
+}
+
+void free_redirs(t_redir *redirs)
+{
+	t_redir *current = redirs;
+	while (current)
+	{
+		t_redir *next = current->next;
+		free(current->file);
+		free(current);
+		current = next;
+	}
+}
+
+t_token *merge_consecutive_words(t_token *tokens)
+{
+	t_token *current = tokens;
+	
+	while (current && current->next)
+	{
+		t_token *next = current->next;
+		
+		if (current->type == TOKEN_WORD && next->type == TOKEN_WORD)
+		{
+			char *merged = malloc(ft_strlen(current->value) + 
+						  ft_strlen(next->value) + 2);
+			if (!merged)
+				return tokens;
+			ft_strcpy(merged, current->value);
+			ft_strcat(merged, " ");
+			ft_strcat(merged, next->value);
+			free(current->value);
+			current->value = merged;			
+			current->next = next->next;
+			free(next->value);
+			free(next);			
+		}
+		else
+		{
+			current = current->next;
+		}
+	}
+	return tokens;
+}

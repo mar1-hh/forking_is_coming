@@ -2,45 +2,48 @@
 
 static int get_token_precedence(t_token *token);
 int is_operator(t_token *token);
-const char *get_token_type_name(t_token_type type)
+// const char *get_token_type_name(t_token_type type)
+// {
+// 	switch (type)
+// 	{
+// 		case TOKEN_WORD:       return "WORD";
+// 		case TOKEN_RPAREN:     return "RPAREN";
+// 		case TOKEN_REDIR_IN:   return "REDIR_IN";
+// 		case TOKEN_REDIR_OUT:  return "REDIR_OUT";
+// 		case TOKEN_APPEND:     return "APPEND";
+// 		case TOKEN_HEREDOC:    return "HEREDOC";
+// 		case TOKEN_LPAREN:     return "LPAREN";
+// 		case TOKEN_PIPE:       return "PIPE";
+// 		case TOKEN_OR:         return "OR";
+// 		case TOKEN_AND:        return "AND";
+// 		default:               return "UNKNOWN";
+// 	}
+// }
+
+static void free_ast(t_ast *node)
 {
-    switch (type)
-    {
-        case TOKEN_WORD:       return "WORD";
-        case TOKEN_RPAREN:     return "RPAREN";
-        case TOKEN_REDIR_IN:   return "REDIR_IN";
-        case TOKEN_REDIR_OUT:  return "REDIR_OUT";
-        case TOKEN_APPEND:     return "APPEND";
-        case TOKEN_HEREDOC:    return "HEREDOC";
-        case TOKEN_LPAREN:     return "LPAREN";
-        case TOKEN_PIPE:       return "PIPE";
-        case TOKEN_OR:         return "OR";
-        case TOKEN_AND:        return "AND";
-        default:               return "UNKNOWN";
-    }
+	if (node == NULL)
+		return;
+	free_ast(node->left);
+	free_ast(node->right);
+	free(node->cmd);
+	
+	// Free the args array
+	if (node->args)
+	{
+		int i = 0;
+		while (node->args[i])
+		{
+			free(node->args[i]);
+			i++;
+		}
+		free(node->args);
+	}
+	
+	free(node);
 }
 
-void print_ast_horizontal(struct s_ast *node, int level)
-{
-    if (!node)
-        return;
 
-    // Print right subtree first (it goes on the right side)
-    print_ast_horizontal(node->right, level + 1);
-
-    // Indentation per level
-    for (int i = 0; i < level; i++)
-        printf("    ");
-
-    // Print token type (and command if present)
-    printf("[%s]", get_token_type_name(node->e_token_type));
-    if (node->cmd)
-        printf(" -> %s", node->cmd);
-    printf("\n");
-
-    // Print left subtree next (it goes on the left side)
-    print_ast_horizontal(node->left, level + 1);
-}
 
 int get_precedence(int token_type)
 {
@@ -56,43 +59,64 @@ int get_precedence(int token_type)
 	return -1;
 }
 
-
 t_ast *function_lmli7a(t_token *tokens, t_token *fin_t7bs)
 {
-	
 	if (!tokens)
 		return NULL;
-	t_ast *head = NULL;
-	t_ast *left = NULL;
-	t_ast *right = NULL;
+
 	t_token *current = tokens;
 	t_token *highest_ptr = current;
-	if(!current || current->next == fin_t7bs)
-		return head;
-	while(current && current != fin_t7bs)
+	t_ast *head = NULL;
+	while (current && current != fin_t7bs)
 	{
-		if(is_operator(current))
-		{
-			if(!highest_ptr)
-				highest_ptr = current;
-			else if(get_token_precedence(current) >= get_token_precedence(highest_ptr))
-				highest_ptr = current;
-		}
+		if (get_token_precedence(current) > get_token_precedence(highest_ptr))
+			highest_ptr = current;
 		current = current->next;
 	}
-	if (highest_ptr)
+	if (!highest_ptr)
+		return NULL;
+	head = malloc(sizeof(t_ast));
+	if (!head)
+		return NULL;
+	head->e_token_type = highest_ptr->type;
+	head->cmd = NULL;
+	head->args = NULL;
+	head->redirs = NULL;
+	head->left = NULL;
+	head->right = NULL;
+	head->is_wait = 0;
+	head->ar_pipe = NULL;
+	if (highest_ptr->type == TOKEN_WORD)
 	{
-		head = malloc(sizeof(t_ast));
-		head->e_token_type = highest_ptr->type;
-		head->cmd = ft_strdup(highest_ptr->value);
-		if(highest_ptr->type != TOKEN_WORD)
+		head->args = ft_split(highest_ptr->value, ' ');
+		if (!head->args)
 		{
-			head->left = function_lmli7a(tokens, highest_ptr);
-			head->right = function_lmli7a(highest_ptr->next, fin_t7bs);
+			free(head);
+			return NULL;
+		}		
+		head->cmd = ft_strdup(head->args[0]);
+		if (!head->cmd)
+		{
+			free(head->args);
+			free(head);
+			return NULL;
 		}
+		head->redirs = handle_redir(&tokens);
+	}
+	else
+	{
+		head->cmd = ft_strdup(highest_ptr->value);
+		if (!head->cmd)
+		{
+			free(head);
+			return NULL;
+		}
+		head->left = function_lmli7a(tokens, highest_ptr);
+		head->right = function_lmli7a(highest_ptr->next, fin_t7bs);
 	}
 	return head;
 }
+
 
 int is_operator(t_token *token)
 {
@@ -108,26 +132,20 @@ int is_operator(t_token *token)
 
 static int get_token_precedence(t_token *token)
 {
-	if (token->type == TOKEN_WORD)
-		return 1;
+	if (!token)
+		return -1;
 	if (token->type == TOKEN_AND || token->type == TOKEN_OR)
 		return 4;
 	if (token->type == TOKEN_PIPE)
 		return 3;
-	if (token->type == TOKEN_REDIR_IN || token->type == TOKEN_REDIR_OUT
-		|| token->type == TOKEN_APPEND || token->type == TOKEN_HEREDOC)
-		return 2;
+	if (token->type == TOKEN_WORD)
+		return 2; 
+	if (token->type == TOKEN_REDIR_IN || 
+		token->type == TOKEN_REDIR_OUT ||
+		token->type == TOKEN_APPEND || 
+		token->type == TOKEN_HEREDOC)
+		return 1;
 	return 0;
-}
-
-void free_ast(t_ast *node)
-{
-	if (node == NULL)
-		return;
-	free_ast(node->left);
-	free_ast(node->right);
-	free(node->cmd);
-	free(node);
 }
 
 // int	ft_strcmp(char *str1, char *str2)
@@ -338,8 +356,6 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, char **env)
 {
 	int status;
 	
-	// if (is_builtin(node->args[0]))
-	// 	execute_builtin(node, infd, outfd);
 	node->pid = fork();
 	if (!node->pid)
 	{
@@ -356,11 +372,17 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, char **env)
 			dup2(outfd, 1);
 			close(outfd);
 		}
-		char *d = debug_okda(env, node->args[0]);
-		// fprintf(stderr, "xi7aja\n");
+		
+		// Use the command path
+		char *d = debug_okda(env, node->cmd);
+		if (!d)
+		{
+			fprintf(stderr, "Command not found: %s\n", node->cmd);
+			exit(127);
+		}        
 		execve(d, node->args, env);
 		exit(1);
-	}
+	}    
 	if (node->is_wait == 1)
 	{
 		if (node->ar_pipe)
@@ -371,13 +393,15 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, char **env)
 			node->ar_pipe = NULL;
 		}
 		waitpid(node->pid, &status, 0);
-    	return (WEXITSTATUS(status));
+		return (WEXITSTATUS(status));
 	}
 	return (0);
 }
 
 void	ana_m9wd(t_ast *node)
 {
+	if (!node)
+		return ;
 	//ma kan7tajxe parting m9wd parting ki7tajni
 	if (!node->right)
 	{
@@ -387,15 +411,16 @@ void	ana_m9wd(t_ast *node)
 	ana_m9wd(node->right);
 }
 
-int	execute_tree(t_ast *node, int fd, int outfd, int cs, char **env)
+int execute_tree(t_ast *node, int fd, int outfd, int cs, char **env)
 {
-	int		status;
+	int status = 1;
 
 	if (!node)
 		return (1);
 	if (node->e_token_type == TOKEN_PIPE)
 	{
-		printf("1337\n");
+		if (!node->right)// Check
+			return status;
 		node->right->ar_pipe = malloc(2 * sizeof(int));
 		// TO DO
 		pipe(node->right->ar_pipe);
@@ -422,6 +447,7 @@ int	execute_tree(t_ast *node, int fd, int outfd, int cs, char **env)
 		status = execute_tree(node->left, fd, outfd, cs, env);
 		if (status)
 			status = execute_tree(node->right, fd, outfd, cs, env);
+		printf("1337\n");
 	}
 	else if (node->e_token_type == TOKEN_WORD)
 		return (execute_command(node, fd, outfd, cs, env));
@@ -443,42 +469,49 @@ int	execute_tree(t_ast *node, int fd, int outfd, int cs, char **env)
 //     init_data(ast->right, 0);
 // }
 
-int waiting(t_ast *ast)
-{
-    int	status;
+// int waiting(t_ast *ast)
+// {
+// 	int	status;
 	
-	while (wait(NULL) > 0);
-	// if (!ast->right)
-	// {
-	// 	// waitpid(ast->pid, &status, 0);
-	// 	while (wait(NULL) > 0);
-	// 	return (0);
-    // 	// return (WEXITSTATUS(status));
-	// }
-	// waiting(ast->right);
-	// return (0);
-	// wait(NULL);
-	// if (!ast)
-    //     return ;
-    // if(ast->next)
-	// {    if (ast->type == AST_CMD && ast->next->token->type == TOKEN_PIPE)
-    //     	wait(NULL);
-	// }
-	// // wait(NULL);
-    // waiting(ast->left, counter);
-    // waiting(ast->right, counter);
-}
+// 	while (wait(NULL) > 0);
+// 	// if (!ast->right)
+// 	// {
+// 	// 	// waitpid(ast->pid, &status, 0);
+// 	// 	while (wait(NULL) > 0);
+// 	// 	return (0);
+// 	// 	// return (WEXITSTATUS(status));
+// 	// }
+// 	// waiting(ast->right);
+// 	// return (0);
+// 	// wait(NULL);
+// 	// if (!ast)
+// 	//     return ;
+// 	// if(ast->next)
+// 	// {    if (ast->type == AST_CMD && ast->next->token->type == TOKEN_PIPE)
+// 	//     	wait(NULL);
+// 	// }
+// 	// // wait(NULL);
+// 	// waiting(ast->left, counter);
+// 	// waiting(ast->right, counter);
+// }
 
-int main()
-{
-	t_token *tokens = tokenize("ls | cat");
-	t_token *fin_t7bs = NULL;
-	t_ast *head = function_lmli7a(tokens, NULL);
-    // print_ast_horizontal(head, 0);
-	execute_tree(head, 0, 1, -1, NULL);
-	free_ast(head);
-	return 0;
-}
+// int main()
+// {
+//     extern char **environ;  // Use system environment
+//     t_ast *ast;
+//     t_token *tokens = tokenize_compat("ls -la | grep minishell.h");
+// 	// printf("tokens %s: \n", tokens->value);
+//     if (!tokens)
+//         return 1;
+// 	// printf("tokens %s: \n", tokens->value);
+//     t_ast *head = function_lmli7a(tokens, NULL);
+// 	// printf("------>>>>>>>> %s: \n", head->left->cmd); 
+//     //   // Uncomment for debugging
+//     execute_tree(head, 0, 1, -1, environ);
+//     free_ast(head);
+//     // Free tokens here
+//     return 0;
+// }
 
 
 // && || | cmd redirection

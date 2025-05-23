@@ -1,151 +1,107 @@
 #include "../../minishell.h"
 
-static int get_token_precedence(t_token *token);
-int is_operator(t_token *token);
-// const char *get_token_type_name(t_token_type type)
-// {
-// 	switch (type)
-// 	{
-// 		case TOKEN_WORD:       return "WORD";
-// 		case TOKEN_RPAREN:     return "RPAREN";
-// 		case TOKEN_REDIR_IN:   return "REDIR_IN";
-// 		case TOKEN_REDIR_OUT:  return "REDIR_OUT";
-// 		case TOKEN_APPEND:     return "APPEND";
-// 		case TOKEN_HEREDOC:    return "HEREDOC";
-// 		case TOKEN_LPAREN:     return "LPAREN";
-// 		case TOKEN_PIPE:       return "PIPE";
-// 		case TOKEN_OR:         return "OR";
-// 		case TOKEN_AND:        return "AND";
-// 		default:               return "UNKNOWN";
-// 	}
-// }
-
-static void free_ast(t_ast *node)
+t_ast *create_ast_node(t_token_type type)
 {
-	if (node == NULL)
-		return;
-	free_ast(node->left);
-	free_ast(node->right);
-	free(node->cmd);
-	
-	// Free the args array
-	if (node->args)
-	{
-		int i = 0;
-		while (node->args[i])
-		{
-			free(node->args[i]);
-			i++;
-		}
-		free(node->args);
-	}
-	
-	free(node);
+    t_ast *node = (t_ast *)malloc(sizeof(t_ast));
+    if (!node) return NULL;
+    
+    node->e_token_type = type;
+    node->cmd = NULL;
+    node->args = NULL;
+    node->arg_count = 0;
+    node->ar_pipe = NULL;
+    node->redirs = NULL;
+    node->left = node->right = NULL;
+    node->pid = 0;
+	node->is_pipe = 0;
+    node->e_precedence = (type == TOKEN_PIPE) ? 1 : 0;
+    
+    return node;
 }
 
-
-
-int get_precedence(int token_type)
+t_ast *build_command_node(t_token **tokens)
 {
-	if (token_type == TOKEN_REDIR_IN || token_type == TOKEN_REDIR_OUT || 
-		token_type == TOKEN_APPEND || token_type == TOKEN_HEREDOC)
-		return 3;  // Highest precedence
-	else if (token_type == TOKEN_PIPE)
-		return 2;
-	else if (token_type == TOKEN_AND)
-		return 1;
-	else if (token_type == TOKEN_OR)
-		return 0;
-	return -1;
+    t_ast *cmd_node = create_ast_node(TOKEN_WORD);
+    t_token *current = *tokens;
+    int arg_count = 0;
+
+    while (current && current->type == TOKEN_WORD)
+    {
+        cmd_node->args = ft_realloc(cmd_node->args, sizeof(char *) * (arg_count + 2));
+        cmd_node->args[arg_count++] = ft_strdup(current->value);
+        current = current->next;
+    }
+    if (cmd_node->args) {
+        cmd_node->args[arg_count] = NULL;
+        cmd_node->arg_count = arg_count;
+    }
+    if (arg_count > 0)
+        cmd_node->cmd = ft_strdup(cmd_node->args[0]);
+    cmd_node->redirs = handle_redir(tokens);    
+    *tokens = current;
+    return cmd_node;
 }
 
-t_ast *function_lmli7a(t_token *tokens, t_token *fin_t7bs)
+t_ast *connect_pipe_nodes(t_token **tokens)
 {
-	if (!tokens)
+    t_ast *left = build_command_node(tokens);
+    if (!left) 
 		return NULL;
 
-	t_token *current = tokens;
-	t_token *highest_ptr = current;
-	t_ast *head = NULL;
-	while (current && current != fin_t7bs)
-	{
-		if (get_token_precedence(current) > get_token_precedence(highest_ptr))
-			highest_ptr = current;
-		current = current->next;
-	}
-	if (!highest_ptr)
-		return NULL;
-	head = malloc(sizeof(t_ast));
-	if (!head)
-		return NULL;
-	head->e_token_type = highest_ptr->type;
-	head->cmd = NULL;
-	head->args = NULL;
-	head->redirs = NULL;
-	head->left = NULL;
-	head->right = NULL;
-	head->is_wait = 0;
-	head->ar_pipe = NULL;
-	if (highest_ptr->type == TOKEN_WORD)
-	{
-		head->args = ft_split(highest_ptr->value, ' ');
-		if (!head->args)
+    while (*tokens && (*tokens)->type == TOKEN_PIPE)
+    {
+        t_ast *pipe_node = create_ast_node(TOKEN_PIPE);
+        if (!pipe_node) {
+            free_ast(left);
+            return NULL;
+        }
+        
+        pipe_node->left = left;
+        *tokens = (*tokens)->next;  // Skip PIPE token
+        pipe_node->right = build_command_node(tokens);
+        
+        if (!pipe_node->right)
 		{
-			free(head);
-			return NULL;
-		}		
-		head->cmd = ft_strdup(head->args[0]);
-		if (!head->cmd)
-		{
-			free(head->args);
-			free(head);
-			return NULL;
-		}
-		head->redirs = handle_redir(&tokens);
-	}
-	else
-	{
-		head->cmd = ft_strdup(highest_ptr->value);
-		if (!head->cmd)
-		{
-			free(head);
-			return NULL;
-		}
-		head->left = function_lmli7a(tokens, highest_ptr);
-		head->right = function_lmli7a(highest_ptr->next, fin_t7bs);
-	}
-	return head;
+            free_ast(pipe_node);
+            return NULL;
+        }
+        left = pipe_node;
+    }
+    return left;
 }
 
-
-int is_operator(t_token *token)
+t_ast *build_ast(t_token *tokens)
 {
-	if (!token)
-		return 0;
-	if (token->type == TOKEN_AND || token->type == TOKEN_OR
-		|| token->type == TOKEN_PIPE || token->type == TOKEN_REDIR_IN
-		|| token->type == TOKEN_REDIR_OUT || token->type == TOKEN_APPEND
-		|| token->type == TOKEN_HEREDOC)
-		return 1;
-	return 0;
+    return connect_pipe_nodes(&tokens);
 }
 
-static int get_token_precedence(t_token *token)
+void free_ast(t_ast *ast)
 {
-	if (!token)
-		return -1;
-	if (token->type == TOKEN_AND || token->type == TOKEN_OR)
-		return 4;
-	if (token->type == TOKEN_PIPE)
-		return 3;
-	if (token->type == TOKEN_WORD)
-		return 2; 
-	if (token->type == TOKEN_REDIR_IN || 
-		token->type == TOKEN_REDIR_OUT ||
-		token->type == TOKEN_APPEND || 
-		token->type == TOKEN_HEREDOC)
-		return 1;
-	return 0;
+    if (!ast)
+        return;
+    
+    free_ast(ast->left);
+    free_ast(ast->right);
+    
+    if (ast->cmd)
+        free(ast->cmd);
+    
+    if (ast->args)
+    {
+        for (int i = 0; i < ast->arg_count; i++)
+            free(ast->args[i]);
+        free(ast->args);
+    }
+    
+    t_redir *redir = ast->redirs;
+    while (redir)
+    {
+        t_redir *next = redir->next;
+        free(redir->file);
+        free(redir);
+        redir = next;
+    }    
+    free(ast);
 }
 
 // int	ft_strcmp(char *str1, char *str2)
@@ -228,58 +184,67 @@ void	handle_redirection(t_ast *node, int *infd, int *outfd)
 	}
 }
 
-// int my_execve(t_ast *node)
-// {
-// 	if (!ft_strcmp(node->cmd_args[0], "echo"))
-// 		return (ft_echo(node->cmd_args));
-// 	else if (!ft_strcmp(node->cmd_args[0], "cd"))
-// 		return (ft_cd(node->env_var, node->cmd_args[1]));
-// 	else if (!ft_strcmp(node->cmd_args[0], "pwd"))
-// 		return (ft_pwd());
-// 	else if (!ft_strcmp(node->cmd_args[0], "export"))
-// 		return (ft_export(node->env_var, node->cmd_args[1]));
-// 	else if (!ft_strcmp(node->cmd_args[0], "unset"))
-// 		return (ft_unset(node->env_var, node->cmd_args));
-// 	else if (!ft_strcmp(node->cmd_args[0], "env"))
-// 		return (ft_env(*(node->env_var)));
-// 	// else if (!ft_strcmp(node->cmd_args[0], "exit")) to do
-// 	// 	return (1);
-// }
+int my_execve(t_ast *node, t_shell *sh)
+{
+	if (!ft_strcmp(node->args[0], "env"))
+		return (ft_env(sh->env_lst));
+	else if (!ft_strcmp(node->args[0], "export"))
+		return (ft_export(&sh->env_lst, node->args));
+	else if (!ft_strcmp(node->args[0], "cd"))
+		return (ft_cd(sh->env_lst, node->args[1]));
+	else if (!ft_strcmp(node->args[0], "unset"))
+		return (ft_unset(&sh->env_lst, node->args));
+	else if (!ft_strcmp(node->args[0], "pwd"))
+		return (ft_pwd());
+	else if (!ft_strcmp(node->args[0], "echo"))
+		return (ft_echo(node->args));
+	else if (!ft_strcmp(node->args[0], "exit"))
+		ft_exit(0);
 
-// int execute_builtin(t_ast *node, int infd, int outfd)
-// {
-// 	handle_redirection(node, &infd, &outfd);
-// 	if (infd)
-// 	{
-// 		dup2(infd, 0);
-// 		close(infd);
-// 	}
-// 	if (outfd != 1)
-// 	{
-// 		dup2(outfd, 1);
-// 		close(outfd);
-// 	}
-// 	my_execve(node);
-// }
+	return (1);
+}
 
-// int	is_builtin(char *cmd)
-// {
-// 	if (!ft_strcmp(cmd, "echo"))
-// 		return (1);
-// 	else if (!ft_strcmp(cmd, "cd"))
-// 		return (1);
-// 	else if (!ft_strcmp(cmd, "pwd"))
-// 		return (1);
-// 	else if (!ft_strcmp(cmd, "export"))
-// 		return (1);
-// 	else if (!ft_strcmp(cmd, "unset"))
-// 		return (1);
-// 	else if (!ft_strcmp(cmd, "env"))
-// 		return (1);
-// 	else if (!ft_strcmp(cmd, "exit"))
-// 		return (1);
-// 	return (0);
-// }
+int execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh)
+{
+	handle_redirection(node, &infd, &outfd);
+	sh->stdinput_fl = dup(0);
+	sh->stdout_fl = dup(1);
+	if (infd)
+	{
+		dup2(infd, 0);
+		close(infd);
+	}
+	if (outfd != 1)
+	{
+		dup2(outfd, 1);
+		close(outfd);
+	}
+	my_execve(node, sh);
+	// printf("***************1337*********************\n");
+	dup2(sh->stdinput_fl, 0);
+	dup2(sh->stdout_fl, 1);
+	close(sh->stdinput_fl);
+	close(sh->stdout_fl);
+}
+
+int	is_builtin(char *cmd)
+{
+	if (!ft_strcmp(cmd, "echo"))
+		return (1);
+	else if (!ft_strcmp(cmd, "cd"))
+		return (1);
+	else if (!ft_strcmp(cmd, "pwd"))
+		return (1);
+	else if (!ft_strcmp(cmd, "export"))
+		return (1);
+	else if (!ft_strcmp(cmd, "unset"))
+		return (1);
+	else if (!ft_strcmp(cmd, "env"))
+		return (1);
+	else if (!ft_strcmp(cmd, "exit"))
+		return (1);
+	return (0);
+}
 
 char	*helper_path_cmd(char **commands_path, char *cmd)
 {
@@ -289,7 +254,8 @@ char	*helper_path_cmd(char **commands_path, char *cmd)
 	i = 0;
 	while (commands_path[i])
 	{
-		command_path = ft_strjoin(commands_path[i], cmd);
+		// Use path separator correctly
+		command_path = ft_strjoin(ft_strjoin(commands_path[i], "/"), cmd);
 		if (!command_path)
 		{
 			// free_args(commands_path);
@@ -352,15 +318,75 @@ char	*debug_okda(char **env, char *cmd)
 	return (NULL);
 }
 
-int execute_command(t_ast *node, int infd, int outfd, int cs, char **env)
+int	env_size(t_env *env_lst)
+{
+	int	i;
+
+	i = 0;
+	while (env_lst)
+	{
+		i++;
+		env_lst = env_lst->next;
+	}
+	return (i);
+}
+
+char	**create_mtr_env(t_env	*env_lst)
+{
+	char	**mtr;
+	char	*tmp;
+	int		size;
+	int		i;
+
+	i = 0;
+	size = env_size(env_lst);
+	mtr = malloc((size + 1) * sizeof(char*));
+	while (i < size)
+	{
+		tmp = ft_strjoin("=", env_lst->value);
+		mtr[i] = ft_strjoin(env_lst->key, tmp);
+		free(tmp);
+		// printf("%s\n", mtr[i]);
+		i++;
+		env_lst = env_lst->next;
+	}
+	mtr[i] = NULL;
+	return (mtr);
+}
+
+int	run_execve(t_ast *node, t_shell *sh)
+{
+	char	**env;
+	char	*path;
+
+	env = create_mtr_env(sh->env_lst);
+	if (!env)
+		return (0);
+	path = debug_okda(env, node->args[0]);
+	if (!path)
+	{
+		// mn ba3d nzide perror
+		exit(127);
+	}
+	execve(path, node->args, env);
+	exit(1);
+}
+
+
+
+int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 {
 	int status;
 	
 	node->pid = fork();
 	if (!node->pid)
 	{
+		if (is_builtin(node->args[0]))
+		{
+			execute_builtin(node, infd, outfd, sh);
+			exit(0);
+		}
 		close(cs);
-
 		handle_redirection(node, &infd, &outfd);
 		if (infd)
 		{
@@ -372,46 +398,23 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, char **env)
 			dup2(outfd, 1);
 			close(outfd);
 		}
-		
-		// Use the command path
-		char *d = debug_okda(env, node->cmd);
-		if (!d)
-		{
-			fprintf(stderr, "Command not found: %s\n", node->cmd);
-			exit(127);
-		}        
-		execve(d, node->args, env);
-		exit(1);
+		run_execve(node, sh);
 	}    
-	if (node->is_wait == 1)
-	{
-		if (node->ar_pipe)
-		{
-			close(node->ar_pipe[0]);
-			close(node->ar_pipe[1]);
-			free(node->ar_pipe);
-			node->ar_pipe = NULL;
-		}
-		waitpid(node->pid, &status, 0);
-		return (WEXITSTATUS(status));
-	}
 	return (0);
 }
 
-void	ana_m9wd(t_ast *node)
+int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 {
-	if (!node)
-		return ;
-	//ma kan7tajxe parting m9wd parting ki7tajni
-	if (!node->right)
+	if (node->is_pipe || !is_builtin(node->args[0]))
+		execute_command(node, infd, outfd, cs, sh);
+	else
 	{
-		node->is_wait = 1;
-		return ;
+		// printf("***************1337*********************\n");
+		execute_builtin(node, infd, outfd, sh);
 	}
-	ana_m9wd(node->right);
 }
 
-int execute_tree(t_ast *node, int fd, int outfd, int cs, char **env)
+int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 {
 	int status = 1;
 
@@ -419,38 +422,16 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, char **env)
 		return (1);
 	if (node->e_token_type == TOKEN_PIPE)
 	{
-		if (!node->right)// Check
-			return status;
+		flaging_pipe(node);
 		node->right->ar_pipe = malloc(2 * sizeof(int));
-		// TO DO
 		pipe(node->right->ar_pipe);
-		execute_tree(node->left, fd, node->right->ar_pipe[1], node->right->ar_pipe[0], env);
-		status = execute_tree(node->right, node->right->ar_pipe[0], outfd, node->right->ar_pipe[1], env);
-		if (node->right->ar_pipe)
-		{
-			close(node->right->ar_pipe[0]);
-			close(node->right->ar_pipe[1]);
-			free(node->right->ar_pipe);
-			node->right->ar_pipe = NULL;
-		}
-	}
-	else if (node->e_token_type == TOKEN_AND)
-	{
-		ana_m9wd(node->left);
-		status = execute_tree(node->left, fd, outfd, cs, env);
-		if (!status)
-			status = execute_tree(node->right, fd, outfd, cs, env);
-	}
-	else if (node->e_token_type == TOKEN_OR)
-	{
-		ana_m9wd(node->left);
-		status = execute_tree(node->left, fd, outfd, cs, env);
-		if (status)
-			status = execute_tree(node->right, fd, outfd, cs, env);
-		printf("1337\n");
+		execute_tree(node->left, fd, node->right->ar_pipe[1], node->right->ar_pipe[0], sh);
+		status = execute_tree(node->right, node->right->ar_pipe[0], outfd, node->right->ar_pipe[1], sh);
+		close(node->right->ar_pipe[0]);
+		close(node->right->ar_pipe[1]);
 	}
 	else if (node->e_token_type == TOKEN_WORD)
-		return (execute_command(node, fd, outfd, cs, env));
+		return (abs_execute(node, fd, outfd, cs, sh));
 	return (status);
 }
 
@@ -512,19 +493,3 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, char **env)
 //     // Free tokens here
 //     return 0;
 // }
-
-
-// && || | cmd redirection
-
-//           &&
-//          /  \
-//         /    \
-//        /      \
-//       /        \
-//      &&         echo hi
-//     /   \
-//    /     \
-// ls -l    |
-//          / \
-//         /   \
-//      cat j   la

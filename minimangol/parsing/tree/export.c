@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtins.c                                         :+:      :+:    :+:   */
+/*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:13:35 by marouane          #+#    #+#             */
-/*   Updated: 2025/05/21 22:53:51 by marouane         ###   ########.fr       */
+/*   Updated: 2025/05/24 16:10:29 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ int ft_export(t_env **lst, char **export_param)
 	char	*value;
 	t_env	*temp;
     int     i;
+    int     flag;
 	
 	if (!export_param[1])
     {
@@ -47,6 +48,7 @@ int ft_export(t_env **lst, char **export_param)
     i = 1;
     while (export_param[i])
     {
+        flag = 0;
         mtr = split_env(export_param[i]);
         if (!export_valide(mtr[0]))
         {
@@ -63,11 +65,14 @@ int ft_export(t_env **lst, char **export_param)
             {
                 free(temp->value);
                 temp->value = value;
-                return (0);
+                flag = 1;
+                break;
             }
             temp = temp->next;
         }
-        add_back_env(lst, new_env_node(mtr));
+        if (!flag)
+            add_back_env(lst, new_env_node(mtr));
+        i++;
     }
 	return (0);
 }

@@ -19,8 +19,6 @@ typedef enum e_token_type
 	TOKEN_REDIR_IN,   // <
 	TOKEN_REDIR_OUT,  // >
 	TOKEN_APPEND,     // >>
-	TOKEN_OR,
-	TOKEN_AND,
 	TOKEN_HEREDOC,    // <<
 	TOKEN_PIPE,
 } t_token_type;
@@ -77,7 +75,7 @@ typedef struct s_shell
 
 /* Tokenization functions */
 t_token     *lexer(char *input);
-t_token     *merge_consecutive_words(t_token *tokens);
+t_token	*merge_consecutive_words(t_token *tokens, t_ast *cmd_node);
 void        print_tokens(t_token *tokens);
 void        free_tokens(t_token *tokens);
 

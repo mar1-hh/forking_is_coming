@@ -1,5 +1,12 @@
 #include "../../minishell.h"
 
+t_token	*advance_token(t_token *token, int steps)
+{
+	while (token && steps-- > 0)
+		token = token->next;
+	return (token);
+}
+
 t_ast *create_ast_node(t_token_type type)
 {
     t_ast *node = (t_ast *)malloc(sizeof(t_ast));
@@ -13,34 +20,77 @@ t_ast *create_ast_node(t_token_type type)
     node->redirs = NULL;
     node->left = node->right = NULL;
     node->pid = 0;
-	node->is_pipe = 0;
-    node->e_precedence = (type == TOKEN_PIPE) ? 1 : 0;
-    
+	node->is_pipe = 0;    
     return node;
 }
 
-t_ast *build_command_node(t_token **tokens)
+static int	count_consecutive_words(t_token *token)
 {
-    t_ast *cmd_node = create_ast_node(TOKEN_WORD);
-    t_token *current = *tokens;
-    int arg_count = 0;
+	int	count;
 
-    while (current && current->type == TOKEN_WORD)
-    {
-        cmd_node->args = ft_realloc(cmd_node->args, sizeof(char *) * (arg_count + 2));
-        cmd_node->args[arg_count++] = ft_strdup(current->value);
-        current = current->next;
-    }
-    if (cmd_node->args) {
-        cmd_node->args[arg_count] = NULL;
-        cmd_node->arg_count = arg_count;
-    }
-    if (arg_count > 0)
-        cmd_node->cmd = ft_strdup(cmd_node->args[0]);
-    cmd_node->redirs = handle_redir(tokens);    
-    *tokens = current;
-    return cmd_node;
+	count = 0;
+	while (token && token->type == TOKEN_WORD)
+	{
+		count++;
+		token = token->next;
+	}
+	return (count);
 }
+
+static void	fill_args_array(t_ast *cmd_node, t_token *token, int count)
+{
+	int	i;
+	int k = 0;
+	i = 0;
+	while (i < count)
+	{
+		cmd_node->args[i] = ft_strdup(token->value);
+		token = token->next;
+		i++;
+	}
+	printf("ARGS == ");
+	while(cmd_node->args[k])
+	{
+		printf("%s ", cmd_node->args[k]);
+		k++;
+	}
+	printf("\n");
+	cmd_node->args[count] = NULL;
+	cmd_node->arg_count = count;
+	if (count > 0)
+		cmd_node->cmd = ft_strdup(cmd_node->args[0]);
+}
+
+t_token	*merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
+{
+	t_token	*temp;
+	int		word_count;
+
+	if (!tokens || tokens->type != TOKEN_WORD)
+		return (tokens);
+	word_count = count_consecutive_words(tokens);
+	if (word_count <= 0)
+		return (tokens);
+	cmd_node->args = malloc(sizeof(char *) * (word_count + 1));
+	if (!cmd_node->args)
+		return (tokens);
+	temp = tokens;
+	fill_args_array(cmd_node, temp, word_count);
+	return (advance_token(temp, word_count));
+}
+
+t_ast	*build_command_node(t_token **tokens)
+{
+	t_ast	*cmd_node;
+
+	cmd_node = create_ast_node(TOKEN_WORD);
+	if (!cmd_node)
+		return (NULL);
+	*tokens = merge_consecutive_words(*tokens, cmd_node);
+	cmd_node->redirs = handle_redir(tokens);
+	return (cmd_node);
+}
+
 
 t_ast *connect_pipe_nodes(t_token **tokens)
 {
@@ -55,9 +105,8 @@ t_ast *connect_pipe_nodes(t_token **tokens)
             free_ast(left);
             return NULL;
         }
-        
         pipe_node->left = left;
-        *tokens = (*tokens)->next;  // Skip PIPE token
+        *tokens = (*tokens)->next;
         pipe_node->right = build_command_node(tokens);
         
         if (!pipe_node->right)

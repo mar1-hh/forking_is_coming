@@ -2,19 +2,6 @@
 
 static void add_tokens(t_token **head, char *value, int type);
 
-// static t_token handel_paren(char *input)
-// {
-// 	int i = 0;
-// 	int start = 0;
-// 	while(input[i])
-// 	{
-// 		if(input[i] == '(')
-// 		{
-
-// 		}
-// 	}
-// }
-
 char *ft_strjoin_char(char *str, char c)
 {
 	char    *new;
@@ -133,16 +120,6 @@ static int handle_operator(char *input, int i, t_token **tokens)
 		type = TOKEN_REDIR_OUT;
 	else if (input[i] == '<')
 		type = TOKEN_REDIR_IN;
-	else if (input[i] == '|' && input[i + 1] == '|')
-	{
-		type = TOKEN_OR;
-		len = 2;
-	}
-	else if (input[i] == '&' && input[i + 1] == '&')
-	{
-		type = TOKEN_AND;
-		len = 2;
-	}
 	else if (input[i] == '|')
 		type = TOKEN_PIPE;
 
@@ -170,24 +147,6 @@ static int handle_quotes(char *input, int i, t_token **tokens, char quote)
 	return (i + 1);
 }
 
-static int handel_paren(char *input, int i, t_token **tokens)
-{
-	int start = i;
-	int flager = 0;
-	int beg = 0;
-	while(input[i])
-	{
-		if(input[i] == '(' || input[i] == ')')
-		{
-			if(input[i] == '(')
-			{
-				flager ++;
-				beg++;
-			}	
-		}
-	}
-		// to do
-}
 
 static int handle_word(char *input, int i, t_token **tokens)
 {
@@ -219,8 +178,6 @@ t_token *lexer(char *input)
 			result = handle_operator(input, i, &tokens);
 		else if (input[i] == '\'' || input[i] == '"')
 			result = handle_quotes(input, i, &tokens, input[i]);
-		// else if (input[i] == '(' || input[i] == ')') to do
-		// 	handle_paren(input, i, &tokens);
 		else
 			result = handle_word(input, i, &tokens);
 		if (result == -1)
@@ -284,35 +241,35 @@ void free_redirs(t_redir *redirs)
 	}
 }
 
-t_token *merge_consecutive_words(t_token *tokens)
-{
-	t_token *current = tokens;
-	
-	while (current && current->next)
-	{
-		t_token *next = current->next;
-		
-		if (current->type == TOKEN_WORD && next->type == TOKEN_WORD)
-		{
-			char *merged = malloc(ft_strlen(current->value) + 
-						  ft_strlen(next->value) + 2);
-			if (!merged)
-				return tokens;
-			ft_strcpy(merged, current->value);
-			ft_strcat(merged, " ");
-			ft_strcat(merged, next->value);
-			free(current->value);
-			current->value = merged;			
-			current->next = next->next;
-			free(next->value);
-			free(next);
-			printf("%s\n", current->value);
-		}
-		else
-		{
-			current = current->next;
-		}
-	}
 
-	return tokens;
-}
+
+// t_ast *merge_consecutive_words(t_token *tokens, t_ast *head)
+// {
+// 	t_token *current = tokens;
+// 	int args = 0;
+// 	while (current && current->next)
+// 	{
+// 		t_token *next = current->next;
+		
+// 		if (current->type == TOKEN_WORD && next->type == TOKEN_WORD)
+// 		{
+// 			char *merged = malloc(ft_strlen(current->value) + 
+// 						  ft_strlen(next->value) + 2);
+// 			if (!merged)
+// 				return tokens;
+// 			ft_strcpy(merged, current->value);
+// 			ft_strcat(merged, " ");
+// 			ft_strcat(merged, next->value);
+// 			free(current->value);
+// 			head->args[args++] = merged;
+// 			current->next = next->next;
+			
+// 			free(next->value);
+// 			free(next);
+// 			printf("%s\n", current->value);
+// 		}
+// 		else
+// 			current = current->next;
+// 	}
+// 	return head;
+// }

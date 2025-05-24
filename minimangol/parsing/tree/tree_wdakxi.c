@@ -48,13 +48,13 @@ static void	fill_args_array(t_ast *cmd_node, t_token *token, int count)
 		token = token->next;
 		i++;
 	}
-	printf("ARGS == ");
-	while(cmd_node->args[k])
-	{
-		printf("%s ", cmd_node->args[k]);
-		k++;
-	}
-	printf("\n");
+	// printf("ARGS == ");
+	// while(cmd_node->args[k])
+	// {
+	// 	printf("%s ", cmd_node->args[k]);
+	// 	k++;
+	// }
+	// printf("\n");
 	cmd_node->args[count] = NULL;
 	cmd_node->arg_count = count;
 	if (count > 0)

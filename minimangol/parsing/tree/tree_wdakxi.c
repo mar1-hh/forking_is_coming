@@ -153,49 +153,28 @@ void free_ast(t_ast *ast)
     free(ast);
 }
 
-// int	ft_strcmp(char *str1, char *str2)
-// {
-// 	int	i;
+void	compl_heredoc(t_ast *node, int *infd, int *outfd)
+{
+	t_redir	*lst;
 
-// 	i = 0;
-// 	while (str1[i] || str2[i])
-// 	{
-// 		if (str1[i] > str2[i])
-// 			return (1);
-// 		else if (str1[i] < str2[i])
-// 			return (-1);
-// 		i++;
-// 	}
-// 	return (0);
-// }
-
-// void	open_herdoc(t_redirection *node)
-// {
-// 	int		new_in_fd;
-// 	char	*line;
-
-// 	new_in_fd = open("here_doc", O_CREAT | O_WRONLY | O_TRUNC, 0644);
-// 	// if (new_in_fd == -1)
-// 	// 	t_error("pipex: input", data, 1);
-// 	line = get_next_line(0);
-// 	line[ft_strlen(line) - 1] = 0;
-// 	while (ft_strcmp(node->file, line))
-// 	{
-// 		line[ft_strlen(line)] = '\n';
-// 		write(new_in_fd, line, ft_strlen(line));
-// 		free(line);
-// 		line = get_next_line(0);
-// 		line[ft_strlen(line) - 1] = 0;
-// 	}
-// 	free(line);
-// 	close(new_in_fd);
-// }
+	lst = node->redirs;
+	while (lst)
+	{
+		if (lst->type == TOKEN_HEREDOC)
+		{
+			close(lst->fd[1]);
+			*infd = lst->fd[0];
+		}
+		lst = lst->next;
+	}
+}
 
 void	handle_redirection(t_ast *node, int *infd, int *outfd)
 {
 	t_redir	*lst;
 
 	lst = node->redirs;
+	// compl_heredoc(node, infd, outfd);
 	while (lst)
 	{
 		if (lst->type == TOKEN_REDIR_IN)
@@ -219,16 +198,11 @@ void	handle_redirection(t_ast *node, int *infd, int *outfd)
 				return ;
 			}
 		}
-		// else if (lst->type == TOKEN_HEREDOC)
-		// {
-		// 	open_herdoc(lst);
-		// 	*infd = open("here_doc", O_RDONLY);
-		// 	if (*outfd == -1)
-		// 	{
-		// 		perror("open");
-		// 		return ;
-		// 	}
-		// }
+		else if (lst->type == TOKEN_HEREDOC)
+		{
+			close(lst->fd[1]);
+			*infd = lst->fd[0];
+		}
 		lst = lst->next;
 	}
 }
@@ -467,6 +441,7 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 {
 	int status = 1;
 
+	prepare_all_herdocs(node);
 	if (!node)
 		return (1);
 	if (node->e_token_type == TOKEN_PIPE)
@@ -480,7 +455,10 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 		close(node->right->ar_pipe[1]);
 	}
 	else if (node->e_token_type == TOKEN_WORD)
-		return (abs_execute(node, fd, outfd, cs, sh));
+	{
+		status = abs_execute(node, fd, outfd, cs, sh);
+		close_all_herdocs(node->redirs);
+	}
 	return (status);
 }
 

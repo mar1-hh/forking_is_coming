@@ -6,7 +6,7 @@
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 16:21:39 by marouane          #+#    #+#             */
-/*   Updated: 2025/05/20 11:54:44 by marouane         ###   ########.fr       */
+/*   Updated: 2025/05/24 18:28:57 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,9 @@ int	size_of_var(char *str)
 {
 	int	i;
 
+	
 	i = 0;
-	while (str[i] != '=')
+	while (str[i] && str[i] != '=')
 		i++;
 	return (i);
 }

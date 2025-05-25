@@ -39,6 +39,7 @@ struct s_redir
 	t_token_type    type;
 	char            *file;
 	struct s_redir  *next;
+	int				fd[2];
 };
 
 struct s_ast
@@ -123,5 +124,6 @@ int	ft_unset(t_env **lst, char **argv);
 int	ft_pwd();
 int ft_echo(char **args);
 void    ft_exit(int num);
-
+int prepare_all_herdocs(t_ast *head);
+int close_all_herdocs(t_redir *redirs);
 #endif

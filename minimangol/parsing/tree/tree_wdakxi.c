@@ -7,150 +7,269 @@ t_token	*advance_token(t_token *token, int steps)
 	return (token);
 }
 
+static t_token *skip_redir_and_target(t_token *token)
+{
+	if (token && is_redirection(token->type))
+	{
+		token = token->next;
+		if (token && token->type == TOKEN_WORD)
+			token = token->next;
+	}
+	return token;
+}
+
+static void initialize_ast_fields(t_ast *node, t_token_type type)
+{
+	node->e_token_type = type;
+	node->cmd = NULL;
+	node->args = NULL;
+	node->arg_count = 0;
+	node->ar_pipe = NULL;
+	node->redirs = NULL;
+	node->left = NULL;
+	node->right = NULL;
+	node->pid = 0;
+	node->is_pipe = 0;
+}
+
 t_ast *create_ast_node(t_token_type type)
 {
-    t_ast *node = (t_ast *)malloc(sizeof(t_ast));
-    if (!node) return NULL;
-    
-    node->e_token_type = type;
-    node->cmd = NULL;
-    node->args = NULL;
-    node->arg_count = 0;
-    node->ar_pipe = NULL;
-    node->redirs = NULL;
-    node->left = node->right = NULL;
-    node->pid = 0;
-	node->is_pipe = 0;    
-    return node;
+	t_ast *node = malloc(sizeof(t_ast));
+	if (!node)
+		return NULL;
+	initialize_ast_fields(node, type);
+	return node;
 }
 
-static int	count_consecutive_words(t_token *token)
+static int is_redir_target(t_token *token)
 {
-	int	count;
-
-	count = 0;
-	while (token && token->type == TOKEN_WORD)
-	{
-		count++;
-		token = token->next;
-	}
-	return (count);
+	return token->prev && is_redirection(token->prev->type);
 }
 
-static void	fill_args_array(t_ast *cmd_node, t_token *token, int count)
+static int count_consecutive_words(t_token *token)
 {
-	int	i;
-	int k = 0;
-	i = 0;
-	while (i < count)
+	int count = 0;
+
+	while (token)
 	{
-		cmd_node->args[i] = ft_strdup(token->value);
+		if (token->type == TOKEN_WORD)
+		{
+			if (is_redir_target(token))
+			{
+				token = token->next;
+				continue;
+			}
+			count++;
+		}
+		else if (token->type == TOKEN_PIPE)
+			break;
 		token = token->next;
-		i++;
 	}
-	// printf("ARGS == ");
-	// while(cmd_node->args[k])
-	// {
-	// 	printf("%s ", cmd_node->args[k]);
-	// 	k++;
-	// }
-	// printf("\n");
+	return count;
+}
+
+static void add_token_to_args(t_ast *cmd_node, char *value, int index)
+{
+	cmd_node->args[index] = ft_strdup(value);
+}
+
+static void fill_args_array_skip_redirs(t_ast *cmd_node, t_token *token, int count)
+{
+	int i = 0;
+
+	while (token && i < count)
+	{
+		if (token->type == TOKEN_WORD)
+		{
+			if (is_redir_target(token))
+			{
+				token = token->next;
+				continue;
+			}
+			add_token_to_args(cmd_node, token->value, i++);
+		}
+		else if (is_redirection(token->type))
+		{
+			token = skip_redir_and_target(token);
+			continue;
+		}
+		else if (token->type == TOKEN_PIPE)
+			break;
+		token = token->next;
+	}
 	cmd_node->args[count] = NULL;
 	cmd_node->arg_count = count;
 	if (count > 0)
 		cmd_node->cmd = ft_strdup(cmd_node->args[0]);
 }
 
-t_token	*merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
+static void unlink_redir_pair(t_token **head, t_token *prev, t_token *target)
 {
-	t_token	*temp;
-	int		word_count;
-
-	if (!tokens || tokens->type != TOKEN_WORD)
-		return (tokens);
-	word_count = count_consecutive_words(tokens);
-	if (word_count <= 0)
-		return (tokens);
-	cmd_node->args = malloc(sizeof(char *) * (word_count + 1));
-	if (!cmd_node->args)
-		return (tokens);
-	temp = tokens;
-	fill_args_array(cmd_node, temp, word_count);
-	return (advance_token(temp, word_count));
+	if (prev)
+		prev->next = target->next;
+	else
+		*head = target->next;
 }
 
-t_ast	*build_command_node(t_token **tokens)
+t_token *remove_redirection_tokens(t_token **head)
 {
-	t_ast	*cmd_node;
+	t_token *current = *head;
+	t_token *prev = NULL;
 
+	while (current)
+	{
+		if (is_redirection(current->type))
+		{
+			t_token *redir_target = current->next;
+			if (!redir_target || redir_target->type != TOKEN_WORD)
+			{
+				current = current->next;
+				continue;
+			}
+			unlink_redir_pair(head, prev, redir_target);
+			current = redir_target->next;
+		}
+		else
+		{
+			prev = current;
+			current = current->next;
+		}
+	}
+	return *head;
+}
+
+static char **grow_args_array(char **args, int *capacity)
+{
+	*capacity *= 2;
+	return ft_realloc(args, sizeof(char *) * (*capacity));
+}
+
+static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count)
+{
+	cmd_node->args = malloc(sizeof(char *) * (count + 1));
+	if (!cmd_node->args)
+		return;
+	for (int i = 0; i < count; i++)
+		cmd_node->args[i] = args[i];
+	cmd_node->args[count] = NULL;
+	cmd_node->arg_count = count;
+	cmd_node->cmd = ft_strdup(cmd_node->args[0]);
+}
+
+t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
+{
+	t_token *current = tokens;
+	char **temp_args;
+	int word_count = 0, capacity = 10;
+
+	temp_args = malloc(sizeof(char *) * capacity);
+	if (!temp_args)
+		return tokens;
+
+	while (current && current->type != TOKEN_PIPE)
+	{
+		if (current->type == TOKEN_WORD)
+		{
+			if (word_count >= capacity - 1)
+			{
+				temp_args = grow_args_array(temp_args, &capacity);
+				if (!temp_args)
+					return tokens;
+			}
+			temp_args[word_count++] = ft_strdup(current->value);
+			current = current->next;
+		}
+		else if (is_redirection(current->type))
+		{
+			current = current->next;
+			if (current && current->type == TOKEN_WORD)
+				current = current->next;
+		}
+		else
+			current = current->next;
+	}
+
+	if (word_count > 0)
+		copy_args_to_cmd_node(cmd_node, temp_args, word_count);
+
+	free(temp_args);
+	return current;
+}
+
+
+t_ast *build_command_node(t_token **tokens)
+{
+	t_ast *cmd_node;
+	t_token *original_tokens = *tokens;
+	
 	cmd_node = create_ast_node(TOKEN_WORD);
 	if (!cmd_node)
-		return (NULL);
+		return NULL;    
+	cmd_node->redirs = handle_redir(tokens);    
 	*tokens = merge_consecutive_words(*tokens, cmd_node);
-	cmd_node->redirs = handle_redir(tokens);
-	return (cmd_node);
+	return cmd_node;
 }
 
 
 t_ast *connect_pipe_nodes(t_token **tokens)
 {
-    t_ast *left = build_command_node(tokens);
-    if (!left) 
+	t_ast *left = build_command_node(tokens);
+	if (!left) 
 		return NULL;
 
-    while (*tokens && (*tokens)->type == TOKEN_PIPE)
-    {
-        t_ast *pipe_node = create_ast_node(TOKEN_PIPE);
-        if (!pipe_node) {
-            free_ast(left);
-            return NULL;
-        }
-        pipe_node->left = left;
-        *tokens = (*tokens)->next;
-        pipe_node->right = build_command_node(tokens);
-        
-        if (!pipe_node->right)
+	while (*tokens && (*tokens)->type == TOKEN_PIPE)
+	{
+		t_ast *pipe_node = create_ast_node(TOKEN_PIPE);
+		if (!pipe_node) {
+			free_ast(left);
+			return NULL;
+		}
+		pipe_node->left = left;
+		*tokens = (*tokens)->next;
+		pipe_node->right = build_command_node(tokens);
+		
+		if (!pipe_node->right)
 		{
-            free_ast(pipe_node);
-            return NULL;
-        }
-        left = pipe_node;
-    }
-    return left;
+			free_ast(pipe_node);
+			return NULL;
+		}
+		left = pipe_node;
+	}
+	return left;
 }
 
 t_ast *build_ast(t_token *tokens)
 {
-    return connect_pipe_nodes(&tokens);
+	return connect_pipe_nodes(&tokens);
 }
 
 void free_ast(t_ast *ast)
 {
-    if (!ast)
-        return;
-    
-    free_ast(ast->left);
-    free_ast(ast->right);
-    
-    if (ast->cmd)
-        free(ast->cmd);
-    
-    if (ast->args)
-    {
-        for (int i = 0; i < ast->arg_count; i++)
-            free(ast->args[i]);
-        free(ast->args);
-    }
-    
-    t_redir *redir = ast->redirs;
-    while (redir)
-    {
-        t_redir *next = redir->next;
-        free(redir->file);
-        free(redir);
-        redir = next;
-    }    
-    free(ast);
+	if (!ast)
+		return;
+	
+	free_ast(ast->left);
+	free_ast(ast->right);
+	
+	if (ast->cmd)
+		free(ast->cmd);
+	
+	if (ast->args)
+	{
+		for (int i = 0; i < ast->arg_count; i++)
+			free(ast->args[i]);
+		free(ast->args);
+	}
+	
+	t_redir *redir = ast->redirs;
+	while (redir)
+	{
+		t_redir *next = redir->next;
+		free(redir->file);
+		free(redir);
+		redir = next;
+	}    
+	free(ast);
 }
 
 void	compl_heredoc(t_ast *node, int *infd, int *outfd)
@@ -468,61 +587,3 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 	return (status);
 }
 
-// void init_data(t_ast *ast, int flag)
-// {
-//     if (!ast)
-//         return ;
-//     if (ast->type == AST_PIPE)
-//         flag = 1;
-//     if (flag && ast->type == AST_CMD)
-//     {
-//         ast->is_wait = 1;
-//         flag = 0;
-//     }
-//     init_data(ast->left, flag);
-//     init_data(ast->right, 0);
-// }
-
-// int waiting(t_ast *ast)
-// {
-// 	int	status;
-	
-// 	while (wait(NULL) > 0);
-// 	// if (!ast->right)
-// 	// {
-// 	// 	// waitpid(ast->pid, &status, 0);
-// 	// 	while (wait(NULL) > 0);
-// 	// 	return (0);
-// 	// 	// return (WEXITSTATUS(status));
-// 	// }
-// 	// waiting(ast->right);
-// 	// return (0);
-// 	// wait(NULL);
-// 	// if (!ast)
-// 	//     return ;
-// 	// if(ast->next)
-// 	// {    if (ast->type == AST_CMD && ast->next->token->type == TOKEN_PIPE)
-// 	//     	wait(NULL);
-// 	// }
-// 	// // wait(NULL);
-// 	// waiting(ast->left, counter);
-// 	// waiting(ast->right, counter);
-// }
-
-// int main()
-// {
-//     extern char **environ;  // Use system environment
-//     t_ast *ast;
-//     t_token *tokens = tokenize_compat("ls -la | grep minishell.h");
-// 	// printf("tokens %s: \n", tokens->value);
-//     if (!tokens)
-//         return 1;
-// 	// printf("tokens %s: \n", tokens->value);
-//     t_ast *head = function_lmli7a(tokens, NULL);
-// 	// printf("------>>>>>>>> %s: \n", head->left->cmd); 
-//     //   // Uncomment for debugging
-//     execute_tree(head, 0, 1, -1, environ);
-//     free_ast(head);
-//     // Free tokens here
-//     return 0;
-// }

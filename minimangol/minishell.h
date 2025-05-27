@@ -31,6 +31,7 @@ struct s_token
 {
 	char            *value;
 	t_token_type    type;
+	t_token         *prev;
 	struct s_token  *next;
 };
 
@@ -84,6 +85,7 @@ void        free_tokens(t_token *tokens);
 t_ast       *create_ast_node(t_token_type type);
 t_ast       *build_ast(t_token *tokens);
 void        free_ast(t_ast *ast);
+bool is_redirection(t_token_type type);
 void        add_arg_to_command(t_ast *cmd_node, char *arg);
 t_ast       *parse_simple_command(t_token **tokens);
 t_ast       *build_pipeline_tree(t_token **tokens);

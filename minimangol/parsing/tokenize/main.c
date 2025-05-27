@@ -117,14 +117,15 @@ int main(int ac, char **av, char **env)
 	t_shell sh;
 	(void)ac;
 	(void)av;
-	(void)env;
 
 	get_env(&(sh.env_lst), env);
 	while (1)
 	{
 		const char *prompt = "\001\033[0;31m\002MINISHELL𒉭 > \001\033[0m\002";
 		input = readline(prompt);
-		
+		add_history(input);
+		input = expand_line(input, sh.env_lst);
+		printf("%s\n", input);
 		if (!input)
 		{
 			printf("\thala!\n");
@@ -136,7 +137,6 @@ int main(int ac, char **av, char **env)
 			continue;
 		}
 		
-		add_history(input);
 		execute_command_sequence(input, &sh);
 		while (wait(NULL) > 0);
 	}    

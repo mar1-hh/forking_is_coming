@@ -126,4 +126,6 @@ int ft_echo(char **args);
 void    ft_exit(int num);
 int prepare_all_herdocs(t_ast *head);
 int close_all_herdocs(t_redir *redirs);
+char	*expand_line(char *line, t_env *lst);
+
 #endif

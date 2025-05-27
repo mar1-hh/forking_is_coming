@@ -404,7 +404,7 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	node->pid = fork();
 	if (!node->pid)
 	{
-		if (is_builtin(node->args[0]))
+		if (node->args && is_builtin(node->args[0]))
 		{
 			execute_builtin(node, infd, outfd, sh);
 			exit(0);
@@ -428,8 +428,14 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 
 int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 {
-	if (node->is_pipe || !is_builtin(node->args[0]))
+	if (!node->args)
+	{
+		handle_redirection(node, &infd, &outfd);
+	}
+	else if (node->is_pipe || (!is_builtin(node->args[0])))
+	{
 		execute_command(node, infd, outfd, cs, sh);
+	}
 	else
 	{
 		// printf("***************1337*********************\n");

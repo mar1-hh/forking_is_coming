@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   echo.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 13:51:21 by marouane          #+#    #+#             */
-/*   Updated: 2025/05/23 22:40:16 by marouane         ###   ########.fr       */
+/*   Updated: 2025/05/28 15:44:49 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int ft_echo(char **args)
 	}
 	while (args[i])
 	{
-		if (i)
+		if (i != 1)
 			printf(" ");
 		printf("%s", args[i]);
 		i++;

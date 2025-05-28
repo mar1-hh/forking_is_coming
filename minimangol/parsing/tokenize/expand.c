@@ -40,7 +40,7 @@ char    *take_key(char *line, int *end, t_env *lst)
 		return (NULL);
 	ft_memcpy(key, line, size);
 	key = ret_env_v(lst, key);
-	*end = ft_strlen(key);
+	*end = size;
 	return (key);
 }
 
@@ -70,16 +70,14 @@ char	*expand_line(char *line, t_env *lst)
 		{
 			ptr = take_key(line + i + 1, &offset, lst);
 			size = i + ft_strlen(ptr) + ft_strlen(line + offset + i);
-			printf("%d\n", size);
 			return_value = ft_calloc(size + 1, 1);
-			printf("i == %d", i);
 			ft_memcpy(return_value, line, i);
 			ft_memcpy(return_value + i, ptr, ft_strlen(ptr));
-			printf("%s\n", return_value);
-			ft_memcpy(return_value + i + ft_strlen(ptr), line + i + ft_strlen(ptr) + 1, ft_strlen(line + i + ft_strlen(ptr) + 1));
+			ft_memcpy(return_value + i + ft_strlen(ptr), line + i + offset + 1, ft_strlen(line + i + offset + 1));
 			free(line);
 			line = return_value;
-			i = i + ft_strlen(ptr);
+			i = i + ft_strlen(ptr) - 1;
+			// printf("%c\n", return_value[i]);
 		}
 		i++;
 	}

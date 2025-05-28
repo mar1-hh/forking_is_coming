@@ -125,7 +125,6 @@ int main(int ac, char **av, char **env)
 		input = readline(prompt);
 		add_history(input);
 		input = expand_line(input, sh.env_lst);
-		printf("%s\n", input);
 		if (!input)
 		{
 			printf("\thala!\n");

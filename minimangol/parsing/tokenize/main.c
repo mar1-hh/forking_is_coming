@@ -23,8 +23,6 @@ static const char *get_token_type_name(t_token_type type)
 		case TOKEN_APPEND:     return "APPEND";
 		case TOKEN_HEREDOC:    return "HEREDOC";
 		case TOKEN_PIPE:       return "PIPE";
-		// case TOKEN_AND:       return "AND";
-		// case TOKEN_OR:        return "OR";
 		default:               return "UNKNOWN";
 	}
 }
@@ -45,8 +43,6 @@ static void print_ast_horizontal(t_ast *node, int level)
 static void cleanup(t_token *tokens, t_redir *redirs, t_ast *head, char *input)
 {
 	if (tokens) free_tokens(tokens);
-	// if (redirs) free_redirs(redirs);
-	// if (head) free_ast(head);
 	if (input) free(input);
 }
 
@@ -125,6 +121,10 @@ int main(int ac, char **av, char **env)
 		input = readline(prompt);
 		add_history(input);
 		input = expand_line(input, sh.env_lst);
+<<<<<<< HEAD
+=======
+		// printf("%s\n", input);
+>>>>>>> e15d12819223644775d163460e3701fec935bfa6
 		if (!input)
 		{
 			printf("\thala!\n");

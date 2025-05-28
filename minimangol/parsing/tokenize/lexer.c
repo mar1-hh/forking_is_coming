@@ -35,7 +35,7 @@ void print_tokens(t_token *tokens)
 	printf("-----------------\n");
 }
 
-static bool is_redirection(t_token_type type)
+bool is_redirection(t_token_type type)
 {
 	return (type == TOKEN_REDIR_IN || 
 			type == TOKEN_REDIR_OUT ||

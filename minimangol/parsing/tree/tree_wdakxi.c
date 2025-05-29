@@ -146,11 +146,17 @@ static char **grow_args_array(char **args, int *capacity)
 
 static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count)
 {
+	int i;
+
+	i = 0;
 	cmd_node->args = malloc(sizeof(char *) * (count + 1));
 	if (!cmd_node->args)
 		return;
-	for (int i = 0; i < count; i++)
+	while(i < count)
+	{
 		cmd_node->args[i] = args[i];
+		i++;
+	}
 	cmd_node->args[count] = NULL;
 	cmd_node->arg_count = count;
 	cmd_node->cmd = ft_strdup(cmd_node->args[0]);
@@ -204,19 +210,20 @@ t_ast *build_command_node(t_token **tokens)
 	
 	cmd_node = create_ast_node(TOKEN_WORD);
 	if (!cmd_node)
-		return NULL;    
+		return (NULL);    
 	cmd_node->redirs = handle_redir(tokens);    
 	*tokens = merge_consecutive_words(*tokens, cmd_node);
-	return cmd_node;
+	return (cmd_node);
 }
 
 
 t_ast *connect_pipe_nodes(t_token **tokens)
 {
-	t_ast *left = build_command_node(tokens);
-	if (!left) 
-		return NULL;
+	t_ast *left;
 
+	left = build_command_node(tokens);
+	if (!left) 
+		return (NULL);
 	while (*tokens && (*tokens)->type == TOKEN_PIPE)
 	{
 		t_ast *pipe_node = create_ast_node(TOKEN_PIPE);

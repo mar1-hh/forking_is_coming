@@ -48,13 +48,12 @@ t_redir *create_redir_node(t_token_type type, char *file)
 	t_redir *new_redir = malloc(sizeof(t_redir));
 	if (!new_redir)
 		return NULL;
-	
 	new_redir->file = ft_strdup(file);
-	if (!new_redir->file) {
+	if (!new_redir->file) 
+	{
 		free(new_redir);
 		return NULL;
 	}
-	
 	new_redir->type = type;
 	new_redir->next = NULL;
 	return new_redir;
@@ -152,9 +151,8 @@ static int handle_word(char *input, int i, t_token **tokens)
 {
 	int start = i;
 
-	while (input[i] && !ft_isspace(input[i]) && !ft_strchr("><|&", input[i]))
+	while (input[i] && !ft_isspace(input[i]) && !ft_strchr("><|", input[i]))
 		i++;
-
 	char *value = ft_substr(input, start, i - start);
 	add_tokens(tokens, value, TOKEN_WORD);
 	return (i);
@@ -174,7 +172,7 @@ t_token *lexer(char *input)
 			continue;
 		}
 
-		if (ft_strchr("><|&", input[i]))
+		if (ft_strchr("><|", input[i]))
 			result = handle_operator(input, i, &tokens);
 		else if (input[i] == '\'' || input[i] == '"')
 			result = handle_quotes(input, i, &tokens, input[i]);

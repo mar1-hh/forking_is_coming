@@ -121,7 +121,10 @@ int main(int ac, char **av, char **env)
 		input = readline(prompt);
 		add_history(input);
 		input = expand_line(input, sh.env_lst);
+<<<<<<< HEAD
+=======
 		// printf("%s\n", input);
+>>>>>>> e15d12819223644775d163460e3701fec935bfa6
 		if (!input)
 		{
 			printf("\thala!\n");

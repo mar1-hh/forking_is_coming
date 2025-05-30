@@ -19,18 +19,6 @@ static void cleanup(t_token *tokens, t_redir *redirs, t_ast *head, char *input)
 	if (input) free(input);
 }
 
-static void print_debug_info(t_token *tokens, t_redir *redirs, t_ast *head)
-{
-	printf("\n=== DEBUG OUTPUT ===\n");
-	printf("\n[TOKENS]\n");
-	print_tokens(tokens);
-	printf("\n[REDIRECTIONS]\n");
-	print_redirs(redirs);
-	printf("\n[ABSTRACT SYNTAX TREE]\n");
-	print_ast_horizontal(head, 0);
-	printf("\n====================\n");
-}
-
 static int execute_command_sequence(char *input, t_shell *sh)
 {
 	extern char **environ;
@@ -45,26 +33,14 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		free(input);
 		return 1;
 	}
-
-	// Handle redirections (ensure this function exists in your project)
-	redirs = handle_redir(&tokens);
-	
-	// Syntax checking
-	// if (check_syntax_errors(tokens))
-	// {
-	//     cleanup(tokens, redirs, head, input);
-	//     return 1;
-	// }
-
-	// tokens = merge_consecutive_words(tokens);
 	head = build_ast(tokens);
-	
 	if (!head)
 	{
 		printf("Parser error!\n");
 		cleanup(tokens, redirs, head, input);
 		return 1;
 	}
+	prepare_all_herdocs(head); // hafin lmoxkil almangoli
 	int status = execute_tree(head, 0, 1, -1, sh);
 	cleanup(tokens, redirs, head, input);
 	return 0;

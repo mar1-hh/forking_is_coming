@@ -1,6 +1,6 @@
 #include "../../minishell.h"
 
-static void add_tokens(t_token **head, char *value, int type);
+static void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type);
 
 char *ft_strjoin_char(char *str, char c)
 {
@@ -59,7 +59,7 @@ t_redir *create_redir_node(t_token_type type, char *file)
 	return new_redir;
 }
 
-static void add_tokens(t_token **head, char *value, int type)
+static void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type)
 {
 	t_token *new_token;
 	t_token *last;
@@ -71,7 +71,8 @@ static void add_tokens(t_token **head, char *value, int type)
 	new_token->value = ft_strdup(value);
 	new_token->type = type;
 	new_token->next = NULL;
-
+	new_token->is_space = is_space;
+	new_token->quote_type = quote_type;
 	if (!*head)
 	{
 		*head = new_token;
@@ -123,15 +124,19 @@ static int handle_operator(char *input, int i, t_token **tokens)
 		type = TOKEN_PIPE;
 
 	char *value = ft_substr(input, i, len);
-	add_tokens(tokens, value, type);
+	add_tokens(tokens, value, type, -1, -1);
 	return (i + len);
 }
 
-static int handle_quotes(char *input, int i, t_token **tokens, char quote)
+static int handle_quotes(char *input, int i, t_token **tokens, char quote, int is_space)
 {
 	int start = i;
+	int	quote_type;
 	i++;
-
+	if (quote == '\'')
+		quote_type = 1;
+	else
+		quote_type = 2;
 	while (input[i] && input[i] != quote)
 		i++;
 
@@ -142,19 +147,19 @@ static int handle_quotes(char *input, int i, t_token **tokens, char quote)
 	}
 
 	char *value = ft_substr(input, start + 1, i - start - 1);
-	add_tokens(tokens, value, TOKEN_WORD);
+	add_tokens(tokens, value, TOKEN_WORD, is_space, quote_type);
 	return (i + 1);
 }
 
 
-static int handle_word(char *input, int i, t_token **tokens)
+static int handle_word(char *input, int i, t_token **tokens, int is_space)
 {
 	int start = i;
 
-	while (input[i] && !ft_isspace(input[i]) && !ft_strchr("><|", input[i]))
+	while (input[i] && !ft_isspace(input[i]) && !ft_strchr(">'\"<|", input[i]))
 		i++;
 	char *value = ft_substr(input, start, i - start);
-	add_tokens(tokens, value, TOKEN_WORD);
+	add_tokens(tokens, value, TOKEN_WORD, is_space, -1);
 	return (i);
 }
 
@@ -163,11 +168,14 @@ t_token *lexer(char *input)
 	t_token *tokens = NULL;
 	int i = 0;
 	int result;
+	int	is_space;
 
+	is_space = 1;
 	while (input[i])
 	{
 		if (ft_isspace(input[i]))
 		{
+			is_space = 1;
 			i++;
 			continue;
 		}
@@ -175,9 +183,15 @@ t_token *lexer(char *input)
 		if (ft_strchr("><|", input[i]))
 			result = handle_operator(input, i, &tokens);
 		else if (input[i] == '\'' || input[i] == '"')
-			result = handle_quotes(input, i, &tokens, input[i]);
+		{
+			result = handle_quotes(input, i, &tokens, input[i], is_space);
+			is_space = 0;
+		}
 		else
-			result = handle_word(input, i, &tokens);
+		{
+			result = handle_word(input, i, &tokens, is_space);
+			is_space = 0;
+		}
 		if (result == -1)
 		{
 			// free_tokens(tokens);
@@ -190,30 +204,34 @@ t_token *lexer(char *input)
 
 t_redir *handle_redir(t_token **tokens)
 {
-	t_token *curr = *tokens;
-	t_redir *redirs = NULL;
-	t_redir *redir_tail = NULL;
+    t_token *curr = *tokens;
+    t_redir *redirs = NULL;
+    t_redir *redir_tail = NULL;
 
-	while (curr && curr->next)
-	{
-		if (is_redirection(curr->type))
-		{
-			t_redir *new_redir = create_redir_node(curr->type, curr->next->value);            
-			if (!redirs) {
-				redirs = new_redir;
-				redir_tail = new_redir;
-			} else {
-				redir_tail->next = new_redir;
-				redir_tail = new_redir;
-			}            
-			curr = curr->next->next;
-		}
-		else
-		{
-			curr = curr->next;
-		}
-	}
-	return redirs;
+    // Stop at pipe boundary - only process redirections for current command
+    while (curr && curr->next && curr->type != TOKEN_PIPE)
+    {
+        if (is_redirection(curr->type))
+        {
+            t_redir *new_redir = create_redir_node(curr->type, curr->next->value);            
+            if (!redirs) 
+            {
+                redirs = new_redir;
+                redir_tail = new_redir;
+            }
+            else 
+            {
+                redir_tail->next = new_redir;
+                redir_tail = new_redir;
+            }            
+            curr = curr->next->next;
+        }
+        else
+        {
+            curr = curr->next;
+        }
+    }
+    return redirs;
 }
 
 void print_redirs(t_redir *redirs)

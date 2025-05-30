@@ -32,6 +32,8 @@ struct s_token
 	char            *value;
 	t_token_type    type;
 	t_token         *prev;
+	int				is_space;
+	int				quote_type;
 	struct s_token  *next;
 };
 
@@ -49,6 +51,8 @@ struct s_ast
 	int           e_precedence;
 	char          *cmd;
 	char          **args;
+	int				*arr_space;
+	int				*quote_type;
 	int           arg_count;
 	int           *ar_pipe;
 	t_redir       *redirs;

@@ -60,7 +60,6 @@ static void print_debug_info(t_token *tokens, t_redir *redirs, t_ast *head)
 
 static int execute_command_sequence(char *input, t_shell *sh)
 {
-	extern char **environ;
 	t_ast *head = NULL;
 	t_redir *redirs = NULL;
 	t_token *tokens = NULL;
@@ -92,13 +91,9 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		cleanup(tokens, redirs, head, input);
 		return 1;
 	}
-
-	#ifdef DEBUG
-	print_debug_info(tokens, redirs, head);
-	#endif
 	// for (int i = 0; head->args[i]; i++)
 	// {
-	//     printf("%s\n", head->args[i]);
+	//     printf("%d\n", head->args[i][0]);
 	// }
 
 	int status = execute_tree(head, 0, 1, -1, sh);
@@ -121,10 +116,6 @@ int main(int ac, char **av, char **env)
 		input = readline(prompt);
 		add_history(input);
 		input = expand_line(input, sh.env_lst);
-<<<<<<< HEAD
-=======
-		// printf("%s\n", input);
->>>>>>> e15d12819223644775d163460e3701fec935bfa6
 		if (!input)
 		{
 			printf("\thala!\n");

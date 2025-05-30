@@ -162,12 +162,33 @@ static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count)
 	cmd_node->cmd = ft_strdup(cmd_node->args[0]);
 }
 
+static int culc_words(t_token *token)
+{
+	int count;
+
+	count = 0;
+	while (token && token->type != TOKEN_PIPE)
+	{
+		if (token->type == TOKEN_WORD)
+			count++;
+		else if (is_redirection(token->type))
+		{
+			token = token->next;
+			if (token && token->type == TOKEN_WORD)
+				token = token->next;
+			continue;
+		}
+		token = token->next;
+	}
+	return (count + 1);
+}
+
 t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 {
 	t_token *current = tokens;
 	char **temp_args;
-	int word_count = 0, capacity = 10;
-
+	int word_count = 0;
+	int capacity = culc_words(tokens);
 	temp_args = malloc(sizeof(char *) * capacity);
 	if (!temp_args)
 		return tokens;
@@ -374,6 +395,7 @@ int execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh)
 	dup2(sh->stdout_fl, 1);
 	close(sh->stdinput_fl);
 	close(sh->stdout_fl);
+	return (0);
 }
 
 int	is_builtin(char *cmd)

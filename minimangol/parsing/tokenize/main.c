@@ -76,7 +76,7 @@ static int execute_command_sequence(char *input, t_shell *sh)
 	redirs = handle_redir(&tokens);
 	
 	// Syntax checking
-	// if (check_syntax_errors(tokens))
+	// if (check_syntax_errors(tokens))x
 	// {
 	//     cleanup(tokens, redirs, head, input);
 	//     return 1;
@@ -95,7 +95,7 @@ static int execute_command_sequence(char *input, t_shell *sh)
 	// {
 	//     printf("%d\n", head->args[i][0]);
 	// }
-
+	prepare_all_herdocs(head);
 	int status = execute_tree(head, 0, 1, -1, sh);
 	// close_all_herdocs(head);
 	cleanup(tokens, redirs, head, input);

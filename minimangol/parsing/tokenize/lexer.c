@@ -208,7 +208,7 @@ t_redir *handle_redir(t_token **tokens)
 	t_redir *redirs = NULL;
 	t_redir *redir_tail = NULL;
 
-	while (curr && curr->next)
+	while (curr && curr->next && curr->type != TOKEN_PIPE)
 	{
 		if (is_redirection(curr->type))
 		{

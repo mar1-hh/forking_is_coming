@@ -13,33 +13,6 @@ void free_tokens(t_token *tokens)
 	}
 }
 
-static const char *get_token_type_name(t_token_type type)
-{
-	switch (type)
-	{
-		case TOKEN_WORD:       return "WORD";
-		case TOKEN_REDIR_IN:   return "REDIR_IN";
-		case TOKEN_REDIR_OUT:  return "REDIR_OUT";
-		case TOKEN_APPEND:     return "APPEND";
-		case TOKEN_HEREDOC:    return "HEREDOC";
-		case TOKEN_PIPE:       return "PIPE";
-		default:               return "UNKNOWN";
-	}
-}
-
-static void print_ast_horizontal(t_ast *node, int level)
-{
-	if (!node) return;
-	print_ast_horizontal(node->right, level + 1);
-	for (int i = 0; i < level; i++)
-		printf("    ");
-	printf("[%s]", get_token_type_name(node->e_token_type));
-	if (node->cmd)
-		printf(" -> %s", node->cmd);
-	printf("\n");
-	print_ast_horizontal(node->left, level + 1);
-}
-
 static void cleanup(t_token *tokens, t_redir *redirs, t_ast *head, char *input)
 {
 	if (tokens) free_tokens(tokens);
@@ -92,17 +65,7 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		cleanup(tokens, redirs, head, input);
 		return 1;
 	}
-
-	#ifdef DEBUG
-	print_debug_info(tokens, redirs, head);
-	#endif
-	// for (int i = 0; head->args[i]; i++)
-	// {
-	//     printf("%s\n", head->args[i]);
-	// }
-
 	int status = execute_tree(head, 0, 1, -1, sh);
-	// close_all_herdocs(head);
 	cleanup(tokens, redirs, head, input);
 	return 0;
 }
@@ -121,10 +84,6 @@ int main(int ac, char **av, char **env)
 		input = readline(prompt);
 		add_history(input);
 		input = expand_line(input, sh.env_lst);
-<<<<<<< HEAD
-=======
-		// printf("%s\n", input);
->>>>>>> e15d12819223644775d163460e3701fec935bfa6
 		if (!input)
 		{
 			printf("\thala!\n");
@@ -135,7 +94,6 @@ int main(int ac, char **av, char **env)
 			free(input);
 			continue;
 		}
-		
 		execute_command_sequence(input, &sh);
 		while (wait(NULL) > 0);
 	}    

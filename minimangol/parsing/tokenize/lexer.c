@@ -208,6 +208,7 @@ t_redir *handle_redir(t_token **tokens)
     t_redir *redirs = NULL;
     t_redir *redir_tail = NULL;
 
+<<<<<<< HEAD
     // Stop at pipe boundary - only process redirections for current command
     while (curr && curr->next && curr->type != TOKEN_PIPE)
     {
@@ -232,6 +233,28 @@ t_redir *handle_redir(t_token **tokens)
         }
     }
     return redirs;
+=======
+	while (curr && curr->next && curr->type != TOKEN_PIPE)
+	{
+		if (is_redirection(curr->type))
+		{
+			t_redir *new_redir = create_redir_node(curr->type, curr->next->value);            
+			if (!redirs) {
+				redirs = new_redir;
+				redir_tail = new_redir;
+			} else {
+				redir_tail->next = new_redir;
+				redir_tail = new_redir;
+			}            
+			curr = curr->next->next;
+		}
+		else
+		{
+			curr = curr->next;
+		}
+	}
+	return redirs;
+>>>>>>> 0314b49e3f6663de966dae95f2a5746cbeb152c0
 }
 
 void print_redirs(t_redir *redirs)

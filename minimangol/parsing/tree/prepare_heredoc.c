@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   prepare_heredoc.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 12:46:47 by marouane          #+#    #+#             */
-/*   Updated: 2025/05/25 12:53:57 by marouane         ###   ########.fr       */
+/*   Updated: 2025/05/30 17:47:24 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ void    read_froma_stdin(t_redir *redir)
     char    *tmp;
 
     close(redir->fd[0]);
+    printf("%s\n", redir->file);
     line = readline("> ");
 	while (ft_strcmp(redir->file, line))
 	{

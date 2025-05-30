@@ -189,7 +189,7 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 	char **temp_args;
 	int word_count = 0;
 	int capacity = culc_words(tokens);
-	temp_args = malloc(sizeof(char *) * capacity);
+	temp_args = malloc(sizeof(char *));
 	if (!temp_args)
 		return tokens;
 	while (current && current->type != TOKEN_PIPE)
@@ -593,6 +593,10 @@ int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 {
 	int status = 1;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0314b49e3f6663de966dae95f2a5746cbeb152c0
 	if (!node)
 		return (1);
 	if (node->e_token_type == TOKEN_PIPE)

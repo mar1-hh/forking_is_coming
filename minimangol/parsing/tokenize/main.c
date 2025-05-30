@@ -33,6 +33,21 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		free(input);
 		return 1;
 	}
+<<<<<<< HEAD
+=======
+
+	// Handle redirections (ensure this function exists in your project)
+	redirs = handle_redir(&tokens);
+	
+	// Syntax checking
+	// if (check_syntax_errors(tokens))x
+	// {
+	//     cleanup(tokens, redirs, head, input);
+	//     return 1;
+	// }
+
+	// tokens = merge_consecutive_words(tokens);
+>>>>>>> 0314b49e3f6663de966dae95f2a5746cbeb152c0
 	head = build_ast(tokens);
 	if (!head)
 	{
@@ -40,7 +55,15 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		cleanup(tokens, redirs, head, input);
 		return 1;
 	}
+<<<<<<< HEAD
 	prepare_all_herdocs(head); // hafin lmoxkil almangoli
+=======
+	// for (int i = 0; head->args[i]; i++)
+	// {
+	//     printf("%d\n", head->args[i][0]);
+	// }
+	prepare_all_herdocs(head);
+>>>>>>> 0314b49e3f6663de966dae95f2a5746cbeb152c0
 	int status = execute_tree(head, 0, 1, -1, sh);
 	cleanup(tokens, redirs, head, input);
 	return 0;

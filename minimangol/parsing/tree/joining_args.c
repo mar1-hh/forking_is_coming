@@ -1,51 +1,56 @@
 #include "../../minishell.h"
 
-char    *helper_join(char **args, int *arr, int *start)
+static void	free_mtx(char **args)
 {
-    int i;
-    char    *tmp;
-    char    *return_value;
+	int i;
 
-    return_value = ft_strdup(args[*start]);
-    i = *start;
-    i++;
-    while (i < 5 && !arr[i])
-    {
-        tmp = return_value;
-        return_value = ft_strjoin(return_value, args[i]);
-        free(tmp);
-        i++;
-    }
-    *start = i;
-    return (return_value);
+	i = 0;
+	while (args[i])
+	{
+		free(args[i]);
+		i++;
+	}
+	free(args);
 }
 
-char **join_arg(char **args, int *arr)
+char    *helper_join(char **args, int *arr, int *start, int size)
 {
-    int size;
-    int j;
-    char    **mtr;
-    
-    mtr = malloc(sizeof(char *) * 5);
-    size = 5;
-    j = 0;
-    int i;
-    i = 0;
-    while (i < size)
-    {
-        mtr[j] = helper_join(args, arr, &i);
-        j++;
-    }
-    mtr[j] = NULL;
-    return (mtr);
+	int i;
+	char    *tmp;
+	char    *return_value;
+
+	return_value = ft_strdup(args[*start]);
+	i = *start;
+	i++;
+	while (i < size && !arr[i])
+	{
+		printf("%d\n", arr[i]);
+		tmp = return_value;
+		return_value = ft_strjoin(return_value, args[i]);
+		free(tmp);
+		i++;
+	}
+	*start = i;
+	return (return_value);
 }
 
-int	main(void)
+char	**join_arg(char **args, int *arr, int size)
 {
-	int arr[] = {1, 1, 0, 0, 1};
-    char *args[] = {"'", "c", "a", "t", "'"};
-    char **mtr = join_arg(args, arr);
-	for (int i = 0; mtr[i]; i++)
-		printf("%s\n", mtr[i]);
-	return (0);
+	int j;
+	char    **mtr;
+	int i;
+	
+	if (!args)
+		return (NULL);
+	mtr = malloc(sizeof(char *) * (size + 1));
+	j = 0;
+	i = 0;
+	while (i < size)
+	{
+		mtr[j] = helper_join(args, arr, &i, size);
+		j++;
+	}
+	mtr[j] = NULL;
+	return (mtr);
 }
+

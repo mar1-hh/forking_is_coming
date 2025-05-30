@@ -144,12 +144,13 @@ static char **grow_args_array(char **args, int *capacity)
 	return ft_realloc(args, sizeof(char *) * (*capacity));
 }
 
-static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count)
+static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count, int *arr)
 {
 	int i;
 
 	i = 0;
 	cmd_node->args = malloc(sizeof(char *) * (count + 1));
+	cmd_node->arr_space = malloc(sizeof(int) * (count + 1));;
 	if (!cmd_node->args)
 		return;
 	while(i < count)
@@ -190,6 +191,9 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 	int word_count = 0;
 	int capacity = culc_words(tokens);
 	temp_args = malloc(sizeof(char *) * capacity);
+	int	*arr;
+	arr = malloc(sizeof(int) * capacity);
+
 	if (!temp_args)
 		return tokens;
 	while (current && current->type != TOKEN_PIPE)
@@ -202,7 +206,8 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 				if (!temp_args)
 					return tokens;
 			}
-			temp_args[word_count++] = ft_strdup(current->value);
+			temp_args[word_count] = ft_strdup(current->value);
+			arr[word_count++] = current->is_space;
 			current = current->next;
 		}
 		else if (is_redirection(current->type))
@@ -216,9 +221,10 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 	}
 
 	if (word_count > 0)
-		copy_args_to_cmd_node(cmd_node, temp_args, word_count);
+		copy_args_to_cmd_node(cmd_node, temp_args, word_count, arr);
 
 	free(temp_args);
+	// 5as tdi free matrix han ^
 	return current;
 }
 
@@ -607,6 +613,9 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 	}
 	else if (node->e_token_type == TOKEN_WORD)
 	{
+		node->args = join_arg(node->args, node->arr_space, node->arg_count);
+		for (int i = 0; node->args[i]; i++)
+			printf("%s\n", node->args[i]);
 		status = abs_execute(node, fd, outfd, cs, sh);
 		close_all_herdocs(node->redirs);
 	}

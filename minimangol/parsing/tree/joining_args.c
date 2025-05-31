@@ -24,7 +24,6 @@ char    *helper_join(char **args, int *arr, int *start, int size)
 	i++;
 	while (i < size && !arr[i])
 	{
-		printf("%d\n", arr[i]);
 		tmp = return_value;
 		return_value = ft_strjoin(return_value, args[i]);
 		free(tmp);

@@ -60,6 +60,7 @@ static void add_tokens(t_token **head, char *value, int type, int is_space, int 
 	new_token->type = type;
 	new_token->next = NULL;
 	new_token->is_space = is_space;
+	// printf("%s %d\n", new_token->value, new_token->is_space);
 	new_token->quote_type = quote_type;
 	if (!*head)
 	{
@@ -161,7 +162,6 @@ t_token *lexer(char *input)
 	is_space = 1;
 	while (input[i])
 	{
-		// printf("%c1\n", input[i]);
 		if (ft_isspace(input[i]))
 		{
 			is_space = 1;

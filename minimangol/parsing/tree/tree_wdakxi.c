@@ -156,6 +156,7 @@ static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count, int *
 	while(i < count)
 	{
 		cmd_node->args[i] = args[i];
+		cmd_node->arr_space[i] = arr[i];
 		i++;
 	}
 	cmd_node->args[count] = NULL;
@@ -614,8 +615,8 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 	else if (node->e_token_type == TOKEN_WORD)
 	{
 		node->args = join_arg(node->args, node->arr_space, node->arg_count);
-		for (int i = 0; node->args[i]; i++)
-			printf("%s\n", node->args[i]);
+		// for (int i = 0; node->args[i]; i++)
+		// 	printf("%s\n", node->args[i]);
 		status = abs_execute(node, fd, outfd, cs, sh);
 		close_all_herdocs(node->redirs);
 	}

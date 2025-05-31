@@ -140,12 +140,12 @@ void	expand_tokens(t_token **token, t_env *env)
 	char	*line;
 
 	tmp = *token;
-	if (tmp->quote_type == -1)
+	if (tmp->type == TOKEN_WORD && tmp->quote_type == -1)
 	{
 		line = expand_line(tmp->value, env);
 		add_first_node(token, tmp->next, line, tmp->is_space);
 	}
-	else if (tmp->quote_type == 2)
+	else if (tmp->type == TOKEN_WORD && tmp->quote_type == 2)
 	{
 		line = expand_line(tmp->value, env);
 		free(tmp->value);
@@ -153,15 +153,14 @@ void	expand_tokens(t_token **token, t_env *env)
 	}
 	while (tmp->next)
 	{
-		if (tmp->next->quote_type == -1)
+		if (tmp->type == TOKEN_WORD && tmp->next->quote_type == -1)
 		{
 			line = expand_line(tmp->next->value, env);
 			add_nodes(tmp, tmp->next->next, line, tmp->is_space);
 		}
-		else if (tmp->next->quote_type == 2)
+		else if (tmp->type == TOKEN_WORD && tmp->next->quote_type == 2)
 		{
 			line = expand_line(tmp->next->value, env);
-			free(tmp->next->value);
 			tmp->next->value = line;
 		}
 		tmp = tmp->next;

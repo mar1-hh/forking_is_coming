@@ -21,6 +21,15 @@ static void cleanup(t_token *tokens, t_redir *redirs, t_ast *head, char *input)
 	if (input) free(input);
 }
 
+void	print_lst(t_token *token)
+{
+	while (token)
+	{
+		printf("%s\n", token->value);
+		token = token->next;
+	}
+}
+
 static int execute_command_sequence(char *input, t_shell *sh)
 {
 	t_ast *head = NULL;
@@ -34,7 +43,8 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		free(input);
 		return 1;
 	}
-	expand_tokens(&tokens, sh->env);
+	expand_tokens(&tokens, sh->env_lst);
+	print_lst(tokens);
 	head = build_ast(tokens);
 	if (!head)
 	{

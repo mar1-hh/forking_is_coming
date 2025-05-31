@@ -27,6 +27,15 @@ typedef struct s_redir t_redir;
 typedef struct s_token t_token;
 typedef struct s_ast t_ast;
 
+struct s_global
+{
+	int				status;
+	int				hd;
+	int				interrupted;
+};
+
+extern struct s_global	g_data;
+
 struct s_token
 {
 	char            *value;
@@ -82,7 +91,7 @@ typedef struct s_shell
 /* Tokenization functions */
 t_token     *lexer(char *input);
 t_token	*merge_consecutive_words(t_token *tokens, t_ast *cmd_node);
-void        print_tokens(t_token *tokens);
+
 void        free_tokens(t_token *tokens);
 
 /* AST functions */
@@ -90,19 +99,9 @@ t_ast       *create_ast_node(t_token_type type);
 t_ast       *build_ast(t_token *tokens);
 void        free_ast(t_ast *ast);
 bool is_redirection(t_token_type type);
-void        add_arg_to_command(t_ast *cmd_node, char *arg);
-t_ast       *parse_simple_command(t_token **tokens);
-t_ast       *build_pipeline_tree(t_token **tokens);
-
 /* Redirection functions */
 /* Redirections */
 t_redir     *handle_redir(t_token **tokens);
-t_redir     *create_redir(t_token_type type, char *file);
-void        add_redir(t_redir **list, t_redir *new_redir);
-
-/* Tokenization */
-
-/* Syntax checking */
 int         check_syntax_errors(t_token *tokens);
 
 /* Execution functions */

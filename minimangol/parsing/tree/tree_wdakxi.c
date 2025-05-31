@@ -233,8 +233,9 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 t_ast *build_command_node(t_token **tokens)
 {
 	t_ast *cmd_node;
-	t_token *original_tokens = *tokens;
-	
+	t_token *original_tokens;
+
+	original_tokens = *tokens;
 	cmd_node = create_ast_node(TOKEN_WORD);
 	if (!cmd_node)
 		return (NULL);    
@@ -599,7 +600,9 @@ int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 
 int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 {
-	int status = 1;
+	int status;
+	
+	status = 1;
 	if (!node)
 		return (1);
 	if (node->e_token_type == TOKEN_PIPE)
@@ -622,4 +625,3 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 	}
 	return (status);
 }
-

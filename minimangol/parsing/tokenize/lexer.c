@@ -161,6 +161,7 @@ t_token *lexer(char *input)
 	is_space = 1;
 	while (input[i])
 	{
+		// printf("%c1\n", input[i]);
 		if (ft_isspace(input[i]))
 		{
 			is_space = 1;

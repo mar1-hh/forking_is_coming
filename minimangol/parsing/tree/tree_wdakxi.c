@@ -543,7 +543,7 @@ int	run_execve(t_ast *node, t_shell *sh)
 	path = debug_okda(env, node->args[0]);
 	if (!path)
 	{
-		// mn ba3d nzide perror
+		perror("minishell");
 		exit(127);
 	}
 	execve(path, node->args, env);

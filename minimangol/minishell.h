@@ -133,5 +133,6 @@ int prepare_all_herdocs(t_ast *head);
 int close_all_herdocs(t_redir *redirs);
 char	*expand_line(char *line, t_env *lst);
 char	**join_arg(char **args, int *arr, int size);
+void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type);
 
 #endif

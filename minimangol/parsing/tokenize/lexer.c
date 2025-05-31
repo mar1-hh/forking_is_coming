@@ -1,7 +1,5 @@
 #include "../../minishell.h"
 
-static void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type);
-
 char *ft_strjoin_char(char *str, char c)
 {
 	char    *new;
@@ -47,7 +45,7 @@ t_redir *create_redir_node(t_token_type type, char *file)
 	return new_redir;
 }
 
-static void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type)
+void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type)
 {
 	t_token *new_token;
 	t_token *last;

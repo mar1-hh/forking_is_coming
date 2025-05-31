@@ -83,3 +83,87 @@ char	*expand_line(char *line, t_env *lst)
 	}
 	return (line);
 }
+
+void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
+{
+	char	**mtx;
+	int		i;
+	t_token *lst;
+
+	i = 0;
+	lst = NULL;
+	mtx = ft_split(line, ' ');
+	if (!mtx)
+		return ;
+	while (mtx[i])
+	{
+		if (!i)
+			add_tokens(&lst, mtx[i], TOKEN_WORD, is_space, -1);
+		else
+			add_tokens(&lst, mtx[i], TOKEN_WORD, 1, -1);
+		i++;
+	}
+	*token = lst;
+	while (lst->next)
+		lst = lst->next;
+	lst->next = next;
+}
+
+void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
+{
+	char	**mtx;
+	int		i;
+	t_token	*lst;
+
+	i = 0;
+	lst = NULL;
+	mtx = ft_split(line, ' ');
+	if (!mtx)
+		return ;
+	while (mtx[i])
+	{
+		if (!i)
+			add_tokens(&lst, mtx[i], TOKEN_WORD, is_space, -1);
+		else
+			add_tokens(&lst, mtx[i], TOKEN_WORD, 1, -1);
+		i++;
+	}
+	token->next = lst;
+	while (lst->next)
+		lst = lst->next;
+	lst->next = next;
+}
+
+void	expand_tokens(t_token **token, t_env *env)
+{
+	t_token	*tmp;
+	char	*line;
+
+	tmp = *token;
+	if (tmp->quote_type == -1)
+	{
+		line = expand_line(tmp->value, env);
+		add_first_node(token, tmp->next, line, tmp->is_space);
+	}
+	else if (tmp->quote_type == 2)
+	{
+		line = expand_line(tmp->value, env);
+		free(tmp->value);
+		tmp->value = line;
+	}
+	while (tmp->next)
+	{
+		if (tmp->next->quote_type == -1)
+		{
+			line = expand_line(tmp->next->value, env);
+			add_nodes(tmp, tmp->next->next, line, tmp->is_space);
+		}
+		else if (tmp->next->quote_type == 2)
+		{
+			line = expand_line(tmp->next->value, env);
+			free(tmp->next->value);
+			tmp->next->value = line;
+		}
+		tmp = tmp->next;
+	}
+}

@@ -1,5 +1,7 @@
 #include "../../minishell.h"
 
+struct s_global	g_data;
+
 void free_tokens(t_token *tokens)
 {
 	t_token *tmp;
@@ -46,6 +48,50 @@ static int execute_command_sequence(char *input, t_shell *sh)
 	return 0;
 }
 
+static void	handle_quit(int sign)
+{
+	pid_t	pid;
+	int		status;
+
+	(void)sign;
+	pid = waitpid(-1, &status, 0);
+	if (pid == -1)
+		SIG_IGN ;
+	else if (!g_data.hd)
+	{
+		write(1, "Quit (core dumped)\n", 20);
+		return ;
+	}
+}
+
+static void	handle_sign(int sign)
+{
+	pid_t	pid;
+	int		status;
+
+	pid = waitpid(-1, &status, 0);
+
+	(void)sign;
+	write(2, "\n", 1);
+	if (g_data.hd)
+	{
+		g_data.interrupted = 1;
+		return ;
+	}
+	if (pid == -1)
+	{
+		rl_replace_line("", 0);
+		rl_on_new_line();
+		rl_redisplay();
+	}
+}
+
+static void	signals(void)
+{
+	signal(SIGINT, handle_sign);
+	signal(SIGQUIT, SIG_IGN);
+}
+
 int main(int ac, char **av, char **env)
 {
 	char *input;
@@ -53,6 +99,7 @@ int main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 
+	signals();
 	get_env(&(sh.env_lst), env);
 	while (1)
 	{

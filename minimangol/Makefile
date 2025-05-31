@@ -18,8 +18,11 @@ CC = gcc
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-READLINE_INCLUDE = -I/usr/include/readline
-READLINE_LIB = -lreadline
+READLINE_PATH = /Users/achat/homebrew/opt/readline
+
+READLINE_INCLUDE = -I$(READLINE_PATH)/include
+READLINE_LIB = -L$(READLINE_PATH)/lib -lreadline -lncurses
+
 
 all: $(NAME)
 

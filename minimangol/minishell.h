@@ -11,6 +11,7 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <stdbool.h>
+#include <signal.h>
 # include "libft/libft.h"
 
 typedef enum e_token_type
@@ -84,6 +85,7 @@ typedef struct s_shell
 {
 	int     stdinput_fl;
 	int     stdout_fl;
+	// int		exit_status;
 	char	**env;
 	t_env	*env_lst;
 }   t_shell;
@@ -129,7 +131,7 @@ int	ft_unset(t_env **lst, char **argv);
 int	ft_pwd();
 int ft_echo(char **args);
 void    ft_exit(int num);
-int prepare_all_herdocs(t_ast *head);
+int prepare_all_herdocs(t_ast *head, t_shell *sh);
 int close_all_herdocs(t_redir *redirs);
 char	*expand_line(char *line, t_env *lst);
 char	**join_arg(char **args, int *arr, int size);

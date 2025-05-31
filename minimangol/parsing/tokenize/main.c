@@ -52,7 +52,7 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		cleanup(tokens, redirs, head, input);
 		return 1;
 	}
-	prepare_all_herdocs(head); // hafin lmoxkil almangoli
+	prepare_all_herdocs(head, sh);
 	int status = execute_tree(head, 0, 1, -1, sh);
 	cleanup(tokens, redirs, head, input);
 	return 0;

@@ -84,6 +84,14 @@ char	*expand_line(char *line, t_env *lst)
 	return (line);
 }
 
+void	print_nodes(t_token *tk)
+{
+	while (tk)
+	{
+		printf("%s\n", tk->value);
+		tk = tk->next;
+	}
+}
 void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 {
 	char	**mtx;
@@ -134,6 +142,7 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 	lst->next = next;
 }
 
+
 void	expand_tokens(t_token **token, t_env *env)
 {
 	t_token	*tmp;
@@ -144,6 +153,7 @@ void	expand_tokens(t_token **token, t_env *env)
 	{
 		line = expand_line(tmp->value, env);
 		add_first_node(token, tmp->next, line, tmp->is_space);
+		tmp = *token;
 	}
 	else if (tmp->type == TOKEN_WORD && tmp->quote_type == 2)
 	{
@@ -153,12 +163,12 @@ void	expand_tokens(t_token **token, t_env *env)
 	}
 	while (tmp->next)
 	{
-		if (tmp->type == TOKEN_WORD && tmp->next->quote_type == -1)
+		if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == -1)
 		{
 			line = expand_line(tmp->next->value, env);
-			add_nodes(tmp, tmp->next->next, line, tmp->is_space);
+			add_nodes(tmp, tmp->next->next, line, tmp->next->is_space);
 		}
-		else if (tmp->type == TOKEN_WORD && tmp->next->quote_type == 2)
+		else if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == 2)
 		{
 			line = expand_line(tmp->next->value, env);
 			tmp->next->value = line;

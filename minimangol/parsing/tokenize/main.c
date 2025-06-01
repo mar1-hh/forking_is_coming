@@ -116,9 +116,11 @@ int main(int ac, char **av, char **env)
 		const char *prompt = "\001\033[0;31m\002MINISHELL𒉭 > \001\033[0m\002";
 		input = readline(prompt);
 		if (!input)
-			exit (1);
+		{
+			printf("exit\n");
+			exit (0);
+		}
 		add_history(input);
-		input = expand_line(input, sh.env_lst);
 		if (!input)
 		{
 			printf("\thala!\n");

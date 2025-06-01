@@ -44,15 +44,6 @@ char    *take_key(char *line, int *end, t_env *lst)
 	return (key);
 }
 
-int	is_valide(char *line, int i)
-{
-	if (!i)
-		return (1);
-	if (line[i - 1] == '\'')
-		return (0);
-	return (1);
-}
-
 // why clear doesn't work when i dont pass env to execve
 
 char	*expand_line(char *line, t_env *lst)
@@ -66,7 +57,7 @@ char	*expand_line(char *line, t_env *lst)
 	i = 0;
 	while (line[i])
 	{
-		if (line[i] == '$' && is_valide(line, i))
+		if (line[i] == '$')
 		{
 			ptr = take_key(line + i + 1, &offset, lst);
 			size = i + ft_strlen(ptr) + ft_strlen(line + offset + i);
@@ -158,7 +149,6 @@ void	expand_tokens(t_token **token, t_env *env)
 	else if (tmp->type == TOKEN_WORD && tmp->quote_type == 2)
 	{
 		line = expand_line(tmp->value, env);
-		free(tmp->value);
 		tmp->value = line;
 	}
 	while (tmp->next)

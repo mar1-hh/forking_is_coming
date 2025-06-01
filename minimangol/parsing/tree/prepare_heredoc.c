@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   prepare_heredoc.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 12:46:47 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/01 13:32:42 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/01 23:19:37 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ void    read_froma_stdin(t_redir *redir, t_shell *sh)
 	while (ft_strcmp(redir->file, line))
 	{
 		tmp = ft_strjoin(line, "\n");
-		// printf("%s\n", tmp);
 		write(redir->fd[1], tmp, ft_strlen(tmp));
 		free(line);
 		free(tmp);

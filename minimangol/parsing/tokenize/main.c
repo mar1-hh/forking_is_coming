@@ -44,7 +44,6 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		return 1;
 	}
 	expand_tokens(&tokens, sh->env_lst);
-	// print_lst(tokens);
 	head = build_ast(tokens);
 	if (!head)
 	{

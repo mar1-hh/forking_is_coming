@@ -598,6 +598,15 @@ int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	}
 }
 
+void	print_red(t_redir *rd)
+{
+	while (rd)
+	{
+		printf("%s\n", rd->file);
+		rd = rd->next;
+	}
+}
+
 int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 {
 	int status;
@@ -619,6 +628,7 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 	{
 		// for (int i = 0; node->args[i]; i++)
 		// 	printf("%s\n", node->args[i]);
+		// print_red(node->redirs);
 		node->args = join_arg(node->args, node->arr_space, node->arg_count);
 		status = abs_execute(node, fd, outfd, cs, sh);
 		close_all_herdocs(node->redirs);

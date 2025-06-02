@@ -16,15 +16,15 @@ char	*ret_env_v(t_env *lst, char *str)
 	
 	while (lst)
 	{
-		if (!ft_strncmp(lst->key, str, ft_strlen(str)))
+		if (!ft_strcmp(lst->key, str))
 		{
-			// printf("%s\n", lst->key);
 			free(str);
 			return lst->value;
 		}
 		lst = lst->next;
 	}
-	return (NULL);
+	// printf("1337\n");
+	return (ft_strdup(""));
 }
 
 char    *take_key(char *line, int *end, t_env *lst)
@@ -39,6 +39,7 @@ char    *take_key(char *line, int *end, t_env *lst)
 	if (!key)
 		return (NULL);
 	ft_memcpy(key, line, size);
+	// printf("%s|||||\n", key);
 	key = ret_env_v(lst, key);
 	*end = size;
 	return (key);
@@ -94,6 +95,11 @@ void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 	mtx = ft_split(line, ' ');
 	if (!mtx)
 		return ;
+	if (!mtx[i])
+	{
+		
+		return ;
+	}
 	while (mtx[i])
 	{
 		if (!i)
@@ -119,6 +125,12 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 	mtx = ft_split(line, ' ');
 	if (!mtx)
 		return ;
+		// printf("1337\n");
+	if (!mtx[i])
+	{
+		token->next->value = ft_strdup("");
+		return ;
+	}
 	while (mtx[i])
 	{
 		if (!i)
@@ -156,11 +168,13 @@ void	expand_tokens(t_token **token, t_env *env)
 		if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == -1)
 		{
 			line = expand_line(tmp->next->value, env);
+			// printf("%s||||\n", line);
 			add_nodes(tmp, tmp->next->next, line, tmp->next->is_space);
 		}
 		else if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == 2)
 		{
 			line = expand_line(tmp->next->value, env);
+			// printf("%s||||\n", line);
 			tmp->next->value = line;
 		}
 		tmp = tmp->next;

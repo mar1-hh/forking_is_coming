@@ -3,19 +3,47 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:13:35 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/02 17:40:48 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/03 00:04:10 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-// t_token	*joining_tokens(t_token *old_lst)
-// {
-// 	to do in home
-// }
+char	*token_join(t_token **start)
+{
+	t_token	*tmp;
+	char	*rt_value;
+	char	*rt_tmp;
+
+	tmp = *start;
+	rt_value = ft_strdup(tmp->type);
+	tmp = tmp->next;
+	while (tmp && !tmp->is_space)
+	{
+		rt_tmp = rt_value;
+		rt_value = ft_strjoin(rt_value, tmp->value);
+		free(rt_tmp);
+		tmp = tmp->next;
+	}
+	*start = tmp;
+	return (rt_value);
+}
+
+t_token	*joining_tokens(t_token *old_lst)
+{
+	t_token	*new_lst;
+	char	*line;
+
+	new_lst = NULL;
+	while (old_lst)
+	{
+		line = token_join(&old_lst);
+		add_token(&new_lst, line, )
+	}
+}
 
 int env_export(t_env *lst)
 {

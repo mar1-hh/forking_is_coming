@@ -629,7 +629,7 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 		// for (int i = 0; node->args[i]; i++)
 		// 	printf("%s\n", node->args[i]);
 		// print_red(node->redirs);
-		node->args = join_arg(node->args, node->arr_space, node->arg_count);
+		// node->args = join_arg(node->args, node->arr_space, node->arg_count);
 		status = abs_execute(node, fd, outfd, cs, sh);
 		close_all_herdocs(node->redirs);
 	}

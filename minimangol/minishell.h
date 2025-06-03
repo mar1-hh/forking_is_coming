@@ -137,5 +137,6 @@ char	*expand_line(char *line, t_env *lst);
 char	**join_arg(char **args, int *arr, int size);
 void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type);
 void	expand_tokens(t_token **token, t_env *env);
+t_token	*joining_tokens(t_token *old_lst);
 
 #endif

@@ -35,6 +35,7 @@ static int execute_command_sequence(char *input, t_shell *sh)
 	t_ast *head = NULL;
 	t_redir *redirs = NULL;
 	t_token *tokens = NULL;
+	t_token	*new;
 
 	tokens = lexer(input);
 	if (!tokens)
@@ -44,11 +45,12 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		return 1;
 	}
 	expand_tokens(&tokens, sh->env_lst);
-	head = build_ast(tokens);
+	new = joining_tokens(tokens);
+	head = build_ast(new);
 	if (!head)
 	{
 		printf("Parser error!\n");
-		cleanup(tokens, redirs, head, input);
+		cleanup(new, redirs, head, input);
 		return 1;
 	}
 	prepare_all_herdocs(head, sh);
@@ -89,7 +91,7 @@ static void	handle_sign(int sign)
 	}
 	if (pid == -1)
 	{
-		rl_replace_line("", 0);
+		// rl_replace_line("", 0);
 		rl_on_new_line();
 		rl_redisplay();
 	}
@@ -119,7 +121,7 @@ int main(int ac, char **av, char **env)
 			printf("exit\n");
 			exit (0);
 		}
-		add_history(input);
+		// add_history(input);
 		if (!input)
 		{
 			printf("\thala!\n");

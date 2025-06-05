@@ -69,10 +69,10 @@ char	*expand_line(char *line, t_env *lst)
 			free(line);
 			line = return_value;
 			i = i + ft_strlen(ptr) - 1;
-			// printf("%c\n", return_value[i]);
 		}
 		i++;
 	}
+
 	return (line);
 }
 
@@ -150,33 +150,48 @@ void	expand_tokens(t_token **token, t_env *env)
 {
 	t_token	*tmp;
 	char	*line;
+	int		is_heredoc;
 
 	tmp = *token;
-	if (tmp->type == TOKEN_WORD && tmp->quote_type == -1)
+	is_heredoc = 0;
+	if (tmp->type == TOKEN_HEREDOC)
+		is_heredoc = 1;
+	else if (tmp->type == TOKEN_WORD && tmp->quote_type == -1)
 	{
-		line = expand_line(tmp->value, env);
-		add_first_node(token, tmp->next, line, tmp->is_space);
+		if (!is_heredoc)
+		{
+			line = expand_line(tmp->value, env);
+			add_first_node(token, tmp->next, line, tmp->is_space);
+		}
 		tmp = *token;
 	}
 	else if (tmp->type == TOKEN_WORD && tmp->quote_type == 2)
 	{
-		line = expand_line(tmp->value, env);
+		if (!is_heredoc)
+			line = expand_line(tmp->value, env);
 		tmp->value = line;
 	}
 	while (tmp->next)
 	{
 		if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == -1)
 		{
-			line = expand_line(tmp->next->value, env);
-			// printf("%s||||\n", line);
-			add_nodes(tmp, tmp->next->next, line, tmp->next->is_space);
+			if (!is_heredoc)
+			{
+				line = expand_line(tmp->next->value, env);
+				add_nodes(tmp, tmp->next->next, line, tmp->next->is_space);
+			}
 		}
 		else if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == 2)
 		{
-			line = expand_line(tmp->next->value, env);
+			if (!is_heredoc)
+				line = expand_line(tmp->next->value, env);
 			// printf("%s||||\n", line);
 			tmp->next->value = line;
 		}
+		if (tmp->next->type == TOKEN_HEREDOC)
+			is_heredoc = 1;
+		else
+			is_heredoc = 0;
 		tmp = tmp->next;
 	}
 }

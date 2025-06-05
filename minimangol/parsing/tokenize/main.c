@@ -91,7 +91,7 @@ static void	handle_sign(int sign)
 	}
 	if (pid == -1)
 	{
-		// rl_replace_line("", 0);
+		rl_replace_line("", 0);
 		rl_on_new_line();
 		rl_redisplay();
 	}
@@ -121,7 +121,7 @@ int main(int ac, char **av, char **env)
 			printf("exit\n");
 			exit (0);
 		}
-		// add_history(input);
+		add_history(input);
 		if (!input)
 		{
 			printf("\thala!\n");

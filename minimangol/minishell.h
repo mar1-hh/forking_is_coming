@@ -131,7 +131,7 @@ int	ft_cd(t_env *head, char *path);
 int	ft_unset(t_env **lst, char **argv);
 int	ft_pwd();
 int ft_echo(char **args);
-void    ft_exit(int num);
+void    ft_exit(char **args, t_shell *sh);
 int prepare_all_herdocs(t_ast *head, t_shell *sh);
 int close_all_herdocs(t_redir *redirs);
 char	*expand_line(char *line, t_shell *sh);
@@ -139,5 +139,6 @@ char	**join_arg(char **args, int *arr, int size);
 void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type);
 void	expand_tokens(t_token **token, t_shell *sh);
 t_token	*joining_tokens(t_token *old_lst);
+int	is_builtin(char *cmd);
 
 #endif

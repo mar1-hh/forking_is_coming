@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:13:35 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/03 16:39:27 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/06 18:53:08 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,9 @@ int ft_export(t_env **lst, char **export_param)
 	t_env	*temp;
 	int     i;
 	int     flag;
+	int		st;
 	
+	st = 0;
 	if (!export_param[1])
 	{
 		env_export(*lst);
@@ -115,6 +117,7 @@ int ft_export(t_env **lst, char **export_param)
 		mtr = split_env(export_param[i]);
 		if (!export_valide(mtr[0]))
 		{
+			st = 1;
 			i++;
 			continue ;
 		}
@@ -137,5 +140,5 @@ int ft_export(t_env **lst, char **export_param)
 			add_back_env(lst, new_env_node(mtr));
 		i++;
 	}
-	return (0);
+	return (st);
 }

@@ -376,13 +376,15 @@ int my_execve(t_ast *node, t_shell *sh)
 	else if (!ft_strcmp(node->args[0], "echo"))
 		return (ft_echo(node->args));
 	else if (!ft_strcmp(node->args[0], "exit"))
-		ft_exit(0);
+		ft_exit(node->args, sh);
 
 	return (1);
 }
 
 int execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh)
 {
+	int	st;
+	
 	handle_redirection(node, &infd, &outfd);
 	sh->stdinput_fl = dup(0);
 	sh->stdout_fl = dup(1);
@@ -396,13 +398,13 @@ int execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh)
 		dup2(outfd, 1);
 		close(outfd);
 	}
-	my_execve(node, sh);
+	st = my_execve(node, sh);
 	// printf("***************1337*********************\n");
 	dup2(sh->stdinput_fl, 0);
 	dup2(sh->stdout_fl, 1);
 	close(sh->stdinput_fl);
 	close(sh->stdout_fl);
-	return (0);
+	return (st);
 }
 
 int	is_builtin(char *cmd)
@@ -560,10 +562,7 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	if (!node->pid)
 	{
 		if (node->args && is_builtin(node->args[0]))
-		{
-			execute_builtin(node, infd, outfd, sh);
-			exit(0);
-		}
+			exit(execute_builtin(node, infd, outfd, sh));
 		close(cs);
 		handle_redirection(node, &infd, &outfd);
 		if (infd)
@@ -594,7 +593,7 @@ int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	else
 	{
 		// printf("***************1337*********************\n");
-		execute_builtin(node, infd, outfd, sh);
+		sh->exit_status = execute_builtin(node, infd, outfd, sh);
 	}
 }
 

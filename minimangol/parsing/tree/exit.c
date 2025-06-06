@@ -6,13 +6,15 @@
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 13:54:28 by marouane          #+#    #+#             */
-/*   Updated: 2025/05/23 13:55:15 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/06 18:27:30 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-void    ft_exit(int num)
+void    ft_exit(char **args, t_shell *sh)
 {
-    exit(num);
+    if (!args[1])
+        exit(sh->exit_status);
+    exit(ft_atoi(args[1]));
 }

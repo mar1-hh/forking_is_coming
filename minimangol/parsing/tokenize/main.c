@@ -35,7 +35,9 @@ int	wai_st(t_ast *node)
 	int	status;
 	
 	if (node->right && node->right->is_pipe)
+	{
 		waitpid(node->right->pid, &status, 0);
+	}
 	else if (node->e_token_type == TOKEN_WORD)
 	{
 		// if (!is_builtin(node->args[0]))
@@ -70,8 +72,9 @@ static int execute_command_sequence(char *input, t_shell *sh)
 	}
 	prepare_all_herdocs(head, sh);
 	int status = execute_tree(head, 0, 1, -1, sh);
-	if (head->args && !is_builtin(head->args[0]))
+	if (head->e_token_type == TOKEN_PIPE || (head->args && !is_builtin(head->args[0])))
 		sh->exit_status = wai_st(head);
+	// while (wait(NULL) > 0);
 	cleanup(tokens, redirs, head, input);
 	return 0;
 }
@@ -151,7 +154,6 @@ int main(int ac, char **av, char **env)
 			continue;
 		}
 		execute_command_sequence(input, &sh);
-		// while (wait(NULL) > 0);
 	}    
 	return 0;
 }

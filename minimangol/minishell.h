@@ -67,6 +67,7 @@ struct s_ast
 	int           *ar_pipe;
 	t_redir       *redirs;
 	int           is_pipe;
+	int				is_last;
 	pid_t         pid;
 	struct s_ast  *left;
 	struct s_ast  *right;
@@ -85,9 +86,9 @@ typedef struct s_shell
 {
 	int     stdinput_fl;
 	int     stdout_fl;
-	// int		exit_status;
 	char	**env;
 	t_env	*env_lst;
+	int		exit_status; // mra kisigfolti mra la 
 }   t_shell;
 
 /* Tokenization functions */
@@ -133,10 +134,10 @@ int ft_echo(char **args);
 void    ft_exit(int num);
 int prepare_all_herdocs(t_ast *head, t_shell *sh);
 int close_all_herdocs(t_redir *redirs);
-char	*expand_line(char *line, t_env *lst);
+char	*expand_line(char *line, t_shell *sh);
 char	**join_arg(char **args, int *arr, int size);
 void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type);
-void	expand_tokens(t_token **token, t_env *env);
+void	expand_tokens(t_token **token, t_shell *sh);
 t_token	*joining_tokens(t_token *old_lst);
 
 #endif

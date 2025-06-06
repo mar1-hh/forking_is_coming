@@ -30,6 +30,18 @@ void	print_lst(t_token *token)
 	}
 }
 
+int	wai_st(t_ast *node)
+{
+	int	status;
+	
+	if (node->right && node->right->is_pipe)
+		waitpid(node->right->pid, &status, 0);
+	else if (node->e_token_type == TOKEN_WORD)
+		waitpid(node->pid, &status, 0);
+	while (wait(NULL) > 0);
+	return (WEXITSTATUS(status));
+}
+
 static int execute_command_sequence(char *input, t_shell *sh)
 {
 	t_ast *head = NULL;
@@ -44,7 +56,7 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		free(input);
 		return 1;
 	}
-	expand_tokens(&tokens, sh->env_lst);
+	expand_tokens(&tokens, sh);
 	new = joining_tokens(tokens);
 	head = build_ast(new);
 	if (!head)
@@ -55,6 +67,7 @@ static int execute_command_sequence(char *input, t_shell *sh)
 	}
 	prepare_all_herdocs(head, sh);
 	int status = execute_tree(head, 0, 1, -1, sh);
+	sh->exit_status = wai_st(head);
 	cleanup(tokens, redirs, head, input);
 	return 0;
 }
@@ -110,6 +123,7 @@ int main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 
+	sh.exit_status = 0;
 	signals();
 	get_env(&(sh.env_lst), env);
 	while (1)
@@ -133,7 +147,7 @@ int main(int ac, char **av, char **env)
 			continue;
 		}
 		execute_command_sequence(input, &sh);
-		while (wait(NULL) > 0);
+		// while (wait(NULL) > 0);
 	}    
 	return 0;
 }

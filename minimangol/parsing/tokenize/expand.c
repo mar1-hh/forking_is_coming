@@ -10,10 +10,13 @@
 // 	return (i);
 // }
 
-char	*ret_env_v(t_env *lst, char *str)
+char	*ret_env_v(t_shell *sh, char *str)
 {
-	t_env	*tmp;
-	
+	t_env	*lst;
+
+	if (!ft_strcmp(str, "?"))
+		return (ft_itoa(sh->exit_status));
+	lst = sh->env_lst;
 	while (lst)
 	{
 		if (!ft_strcmp(lst->key, str))
@@ -27,7 +30,7 @@ char	*ret_env_v(t_env *lst, char *str)
 	return (ft_strdup(""));
 }
 
-char    *take_key(char *line, int *end, t_env *lst)
+char    *take_key(char *line, int *end, t_shell *sh)
 {
 	int		size;
 	char	*key;
@@ -40,14 +43,14 @@ char    *take_key(char *line, int *end, t_env *lst)
 		return (NULL);
 	ft_memcpy(key, line, size);
 	// printf("%s|||||\n", key);
-	key = ret_env_v(lst, key);
+	key = ret_env_v(sh, key);
 	*end = size;
 	return (key);
 }
 
 // why clear doesn't work when i dont pass env to execve
 
-char	*expand_line(char *line, t_env *lst)
+char	*expand_line(char *line, t_shell *sh)
 {
 	int     i;
 	char    *ptr;
@@ -60,7 +63,7 @@ char	*expand_line(char *line, t_env *lst)
 	{
 		if (line[i] == '$')
 		{
-			ptr = take_key(line + i + 1, &offset, lst);
+			ptr = take_key(line + i + 1, &offset, sh);
 			size = i + ft_strlen(ptr) + ft_strlen(line + offset + i);
 			return_value = ft_calloc(size + 1, 1);
 			ft_memcpy(return_value, line, i);
@@ -146,12 +149,14 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 }
 
 
-void	expand_tokens(t_token **token, t_env *env)
+void	expand_tokens(t_token **token, t_shell *sh)
 {
 	t_token	*tmp;
 	char	*line;
 	int		is_heredoc;
-
+	t_env	*env;
+	
+	env = sh->env_lst;
 	tmp = *token;
 	is_heredoc = 0;
 	if (tmp->type == TOKEN_HEREDOC)
@@ -160,7 +165,7 @@ void	expand_tokens(t_token **token, t_env *env)
 	{
 		if (!is_heredoc)
 		{
-			line = expand_line(tmp->value, env);
+			line = expand_line(tmp->value, sh);
 			add_first_node(token, tmp->next, line, tmp->is_space);
 		}
 		tmp = *token;
@@ -168,7 +173,7 @@ void	expand_tokens(t_token **token, t_env *env)
 	else if (tmp->type == TOKEN_WORD && tmp->quote_type == 2)
 	{
 		if (!is_heredoc)
-			line = expand_line(tmp->value, env);
+			line = expand_line(tmp->value, sh);
 		tmp->value = line;
 	}
 	while (tmp->next)
@@ -177,14 +182,14 @@ void	expand_tokens(t_token **token, t_env *env)
 		{
 			if (!is_heredoc)
 			{
-				line = expand_line(tmp->next->value, env);
+				line = expand_line(tmp->next->value, sh);
 				add_nodes(tmp, tmp->next->next, line, tmp->next->is_space);
 			}
 		}
 		else if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == 2)
 		{
 			if (!is_heredoc)
-				line = expand_line(tmp->next->value, env);
+				line = expand_line(tmp->next->value, sh);
 			// printf("%s||||\n", line);
 			tmp->next->value = line;
 		}

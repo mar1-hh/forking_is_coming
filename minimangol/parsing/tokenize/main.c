@@ -115,6 +115,13 @@ static void	signals(void)
 	signal(SIGQUIT, SIG_IGN);
 }
 
+void	some_inits(t_shell *sh)
+{
+	signals();
+	sh->exit_status = 0;
+	sh->env_lst = NULL;
+}
+
 int main(int ac, char **av, char **env)
 {
 	char *input;
@@ -122,8 +129,7 @@ int main(int ac, char **av, char **env)
 	(void)ac;
 	(void)av;
 
-	sh.exit_status = 0;
-	signals();
+	some_inits(&sh);
 	get_env(&(sh.env_lst), env);
 	while (1)
 	{

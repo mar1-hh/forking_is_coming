@@ -216,10 +216,8 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 		else
 			current = current->next;
 	}
-
 	if (word_count > 0)
 		copy_args_to_cmd_node(cmd_node, temp_args, word_count);
-
 	free(temp_args);
 	return current;
 }
@@ -528,7 +526,8 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	{
 		if (node->args && is_builtin(node->args[0]))
 			exit(execute_builtin(node, infd, outfd, sh));
-		close(cs);
+		if (cs != -1)
+			close(cs);
 		handle_redirection(node, &infd, &outfd);
 		if (infd)
 		{

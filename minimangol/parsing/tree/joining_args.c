@@ -1,17 +1,5 @@
 #include "../../minishell.h"
 
-static void	free_mtx(char **args)
-{
-	int i;
-
-	i = 0;
-	while (args[i])
-	{
-		free(args[i]);
-		i++;
-	}
-	free(args);
-}
 
 char    *helper_join(char **args, int *arr, int *start, int size)
 {

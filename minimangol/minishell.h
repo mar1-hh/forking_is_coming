@@ -17,10 +17,10 @@
 typedef enum e_token_type
 {
 	TOKEN_WORD,
-	TOKEN_REDIR_IN,   // <
-	TOKEN_REDIR_OUT,  // >
-	TOKEN_APPEND,     // >>
-	TOKEN_HEREDOC,    // <<
+	TOKEN_REDIR_IN,
+	TOKEN_REDIR_OUT,
+	TOKEN_APPEND,
+	TOKEN_HEREDOC,
 	TOKEN_PIPE,
 } t_token_type;
 
@@ -61,8 +61,6 @@ struct s_ast
 	int           e_precedence;
 	char          *cmd;
 	char          **args;
-	int				*arr_space;
-	int				*quote_type;
 	int           arg_count;
 	int           *ar_pipe;
 	t_redir       *redirs;
@@ -100,7 +98,6 @@ void        free_tokens(t_token *tokens);
 /* AST functions */
 t_ast       *create_ast_node(t_token_type type);
 t_ast       *build_ast(t_token *tokens);
-void        free_ast(t_ast *ast);
 bool is_redirection(t_token_type type);
 /* Redirection functions */
 /* Redirections */
@@ -140,5 +137,9 @@ void add_tokens(t_token **head, char *value, int type, int is_space, int quote_t
 void	expand_tokens(t_token **token, t_shell *sh);
 t_token	*joining_tokens(t_token *old_lst);
 int	is_builtin(char *cmd);
+void	free_mtx(char **mtr);
+void free_tokens(t_token *tokens);
+void	free_node(t_token *token);
+void	free_tree(t_ast *head);
 
 #endif

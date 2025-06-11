@@ -10,11 +10,11 @@ SOURCES = \
 	parsing/tree/tree_wdakxi.c parsing/tokenize/main.c parsing/tree/prepare_env.c\
 	parsing/tree/export.c parsing/tree/cd.c parsing/tree/unset.c parsing/tree/pwd.c\
 	parsing/tree/echo.c parsing/tree/exit.c parsing/tree/prepare_heredoc.c parsing/tokenize/expand.c\
-	parsing/tree/joining_args.c
+	parsing/tree/joining_args.c parsing/tree/free_all.c
 
 OBJECTS = $(SOURCES:.c=.o)
 
-CC = gcc
+CC = cc
 
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a

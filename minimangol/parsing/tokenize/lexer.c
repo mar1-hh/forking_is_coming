@@ -45,7 +45,7 @@ t_redir *create_redir_node(t_token_type type, char *file)
 	return new_redir;
 }
 
-void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type)
+void	add_tokens(t_token **head, char *value, int type, int is_space, int quote_type)
 {
 	t_token *new_token;
 	t_token *last;
@@ -58,7 +58,6 @@ void add_tokens(t_token **head, char *value, int type, int is_space, int quote_t
 	new_token->type = type;
 	new_token->next = NULL;
 	new_token->is_space = is_space;
-	// printf("%s %d\n", new_token->value, new_token->is_space);
 	new_token->quote_type = quote_type;
 	if (!*head)
 	{
@@ -143,11 +142,13 @@ static int handle_quotes(char *input, int i, t_token **tokens, char quote, int i
 static int handle_word(char *input, int i, t_token **tokens, int is_space)
 {
 	int start = i;
+	char	*value;
 
 	while (input[i] && !ft_isspace(input[i]) && !ft_strchr(">'\"<|", input[i]))
 		i++;
-	char *value = ft_substr(input, start, i - start);
+	value = ft_substr(input, start, i - start);
 	add_tokens(tokens, value, TOKEN_WORD, is_space, -1);
+	free(value);
 	return (i);
 }
 

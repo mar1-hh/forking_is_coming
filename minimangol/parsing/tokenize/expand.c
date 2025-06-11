@@ -87,6 +87,8 @@ void	print_nodes(t_token *tk)
 		tk = tk->next;
 	}
 }
+
+
 void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 {
 	char	**mtx;
@@ -111,6 +113,8 @@ void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 			add_tokens(&lst, mtx[i], TOKEN_WORD, 1, -1);
 		i++;
 	}
+	free_mtx(mtx);
+	free_node(*token);
 	*token = lst;
 	while (lst->next)
 		lst = lst->next;
@@ -145,6 +149,7 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 	token->next = lst;
 	while (lst->next)
 		lst = lst->next;
+	free_mtx(mtx);
 	lst->next = next;
 }
 

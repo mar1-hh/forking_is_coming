@@ -6,11 +6,20 @@
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 12:46:47 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/06 17:57:30 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/10 16:30:00 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
+
+
+void sigint_heredoc_handler(int sig)
+{
+    (void)sig;
+    write(1, "\n", 1);
+    exit(130);
+}
+
 
 void    read_froma_stdin(t_redir *redir, t_shell *sh)
 {
@@ -39,6 +48,7 @@ void    read_froma_stdin(t_redir *redir, t_shell *sh)
 int prepare_one_heredoc(t_redir *redir, t_shell *sh)
 {
 	int pid;
+	int	st;
 	
 	while (redir)
 	{
@@ -47,11 +57,17 @@ int prepare_one_heredoc(t_redir *redir, t_shell *sh)
 			pipe(redir->fd);
 			pid = fork();
 			if (!pid)
+			{
+				signal(SIGINT, sigint_heredoc_handler);
 				read_froma_stdin(redir, sh);
+			}
 			else if (pid < 0)
 				perror("pipe: ");
 			else
-				waitpid(pid, NULL, 0);
+			{
+				waitpid(pid, &st, 0);
+				sh->exit_status = WEXITSTATUS(st);
+			}
 		}
 		redir = redir->next;
 	}

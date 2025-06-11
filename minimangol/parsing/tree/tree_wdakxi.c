@@ -144,19 +144,17 @@ static char **grow_args_array(char **args, int *capacity)
 	return ft_realloc(args, sizeof(char *) * (*capacity));
 }
 
-static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count, int *arr)
+static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count)
 {
 	int i;
 
 	i = 0;
 	cmd_node->args = malloc(sizeof(char *) * (count + 1));
-	cmd_node->arr_space = malloc(sizeof(int) * (count + 1));;
 	if (!cmd_node->args)
 		return;
 	while(i < count)
 	{
 		cmd_node->args[i] = args[i];
-		cmd_node->arr_space[i] = arr[i];
 		i++;
 	}
 	cmd_node->args[count] = NULL;
@@ -192,8 +190,7 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 	int word_count = 0;
 	int capacity = culc_words(tokens);
 	temp_args = malloc(sizeof(char *) * capacity);
-	int	*arr;
-	arr = malloc(sizeof(int) * capacity);
+
 
 	if (!temp_args)
 		return tokens;
@@ -207,8 +204,7 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 				if (!temp_args)
 					return tokens;
 			}
-			temp_args[word_count] = ft_strdup(current->value);
-			arr[word_count++] = current->is_space;
+			temp_args[word_count++] = ft_strdup(current->value);
 			current = current->next;
 		}
 		else if (is_redirection(current->type))
@@ -222,10 +218,9 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 	}
 
 	if (word_count > 0)
-		copy_args_to_cmd_node(cmd_node, temp_args, word_count, arr);
+		copy_args_to_cmd_node(cmd_node, temp_args, word_count);
 
 	free(temp_args);
-	// 5as tdi free matrix han ^
 	return current;
 }
 
@@ -256,7 +251,7 @@ t_ast *connect_pipe_nodes(t_token **tokens)
 	{
 		t_ast *pipe_node = create_ast_node(TOKEN_PIPE);
 		if (!pipe_node) {
-			free_ast(left);
+			free_tree(left);
 			return NULL;
 		}
 		pipe_node->left = left;
@@ -265,7 +260,7 @@ t_ast *connect_pipe_nodes(t_token **tokens)
 		
 		if (!pipe_node->right)
 		{
-			free_ast(pipe_node);
+			free_tree(pipe_node);
 			return NULL;
 		}
 		left = pipe_node;
@@ -276,35 +271,6 @@ t_ast *connect_pipe_nodes(t_token **tokens)
 t_ast *build_ast(t_token *tokens)
 {
 	return connect_pipe_nodes(&tokens);
-}
-
-void free_ast(t_ast *ast)
-{
-	if (!ast)
-		return;
-	
-	free_ast(ast->left);
-	free_ast(ast->right);
-	
-	if (ast->cmd)
-		free(ast->cmd);
-	
-	if (ast->args)
-	{
-		for (int i = 0; i < ast->arg_count; i++)
-			free(ast->args[i]);
-		free(ast->args);
-	}
-	
-	t_redir *redir = ast->redirs;
-	while (redir)
-	{
-		t_redir *next = redir->next;
-		free(redir->file);
-		free(redir);
-		redir = next;
-	}    
-	free(ast);
 }
 
 void	compl_heredoc(t_ast *node, int *infd, int *outfd)
@@ -399,7 +365,6 @@ int execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh)
 		close(outfd);
 	}
 	st = my_execve(node, sh);
-	// printf("***************1337*********************\n");
 	dup2(sh->stdinput_fl, 0);
 	dup2(sh->stdout_fl, 1);
 	close(sh->stdinput_fl);

@@ -2,23 +2,14 @@
 
 struct s_global	g_data;
 
-void free_tokens(t_token *tokens)
-{
-	t_token *tmp;
-	
-	while (tokens)
-	{
-		tmp = tokens;
-		tokens = tokens->next;
-		free(tmp->value);
-		free(tmp);
-	}
-}
-
 static void cleanup(t_token *tokens, t_redir *redirs, t_ast *head, char *input)
 {
-	if (tokens) free_tokens(tokens);
-	if (input) free(input);
+	if (tokens)
+		free_tokens(tokens);
+	if (input)
+		free(input);
+	if (head)
+		free_tree(head);
 }
 
 void	print_lst(t_token *token)
@@ -34,6 +25,7 @@ int	wai_st(t_ast *node)
 {
 	int	status;
 	
+
 	if (node->right && node->right->is_pipe)
 	{
 		waitpid(node->right->pid, &status, 0);
@@ -71,11 +63,11 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		return 1;
 	}
 	prepare_all_herdocs(head, sh);
-	int status = execute_tree(head, 0, 1, -1, sh);
+	execute_tree(head, 0, 1, -1, sh);
 	if (head->e_token_type == TOKEN_PIPE || (head->args && !is_builtin(head->args[0])))
 		sh->exit_status = wai_st(head);
-	// while (wait(NULL) > 0);
 	cleanup(tokens, redirs, head, input);
+	free_tokens(new);
 	return 0;
 }
 
@@ -154,6 +146,6 @@ int main(int ac, char **av, char **env)
 			continue;
 		}
 		execute_command_sequence(input, &sh);
-	}    
+	}
 	return 0;
 }

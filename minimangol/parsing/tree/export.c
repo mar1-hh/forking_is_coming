@@ -6,7 +6,7 @@
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:13:35 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/06 18:53:08 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/12 14:56:03 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,23 +121,21 @@ int ft_export(t_env **lst, char **export_param)
 			i++;
 			continue ;
 		}
-		value = ft_strdup(mtr[1]);
-		free(mtr[1]);
-		mtr[1] = value;
 		temp = *lst;
 		while (temp)
 		{
 			if (!ft_strcmp(temp->key, mtr[0]))
 			{
 				free(temp->value);
-				temp->value = value;
+				temp->value = ft_strdup(mtr[1]);
 				flag = 1;
-				break;
+				break ;
 			}
 			temp = temp->next;
 		}
 		if (!flag)
 			add_back_env(lst, new_env_node(mtr));
+		free_mtx(mtr);
 		i++;
 	}
 	return (st);

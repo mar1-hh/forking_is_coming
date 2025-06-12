@@ -52,8 +52,7 @@ void	add_tokens(t_token **head, char *value, int type, int is_space, int quote_t
 
 	new_token = malloc(sizeof(t_token));
 	if (!new_token)
-		return;
-	
+		return ;
 	new_token->value = ft_strdup(value);
 	new_token->type = type;
 	new_token->next = NULL;
@@ -64,7 +63,6 @@ void	add_tokens(t_token **head, char *value, int type, int is_space, int quote_t
 		*head = new_token;
 		return;
 	}
-
 	last = *head;
 	while (last->next)
 		last = last->next;

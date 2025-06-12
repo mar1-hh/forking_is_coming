@@ -47,8 +47,6 @@ char    *take_key(char *line, int *end, t_shell *sh)
 	return (key);
 }
 
-// why clear doesn't work when i dont pass env to execve
-
 char	*expand_line(char **line, t_shell *sh)
 {
 	int     i;
@@ -59,7 +57,9 @@ char	*expand_line(char **line, t_shell *sh)
 	char	*tmp;
 
 	i = 0;
-	tmp = *line;
+	tmp = ft_strdup(*line);
+	free(*line);
+	*line = NULL;
 	while (tmp[i])
 	{
 		if (tmp[i] == '$')
@@ -71,7 +71,6 @@ char	*expand_line(char **line, t_shell *sh)
 			ft_memcpy(return_value + i, ptr, ft_strlen(ptr));
 			ft_memcpy(return_value + i + ft_strlen(ptr), tmp + i + offset + 1, ft_strlen(tmp + i + offset + 1));
 			free(tmp);
-			*line = NULL;
 			tmp = return_value;
 			i = i + ft_strlen(ptr) - 1;
 		}
@@ -128,6 +127,7 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 	char	**mtx;
 	int		i;
 	t_token	*lst;
+	t_token	*tmp;
 
 	i = 0;
 	lst = NULL;
@@ -148,10 +148,12 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 			add_tokens(&lst, mtx[i], TOKEN_WORD, 1, -1);
 		i++;
 	}
+	tmp = token->next;
 	token->next = lst;
 	while (lst->next)
 		lst = lst->next;
 	free_mtx(mtx);
+	free_node(tmp);
 	lst->next = next;
 }
 
@@ -160,6 +162,7 @@ void	expand_tokens(t_token **token, t_shell *sh)
 {
 	t_token	*tmp;
 	char	*line;
+	char	*line_2;
 	int		is_heredoc;
 	t_env	*env;
 	
@@ -174,15 +177,17 @@ void	expand_tokens(t_token **token, t_shell *sh)
 		{
 			line = expand_line(&tmp->value, sh);
 			add_first_node(token, tmp->next, line, tmp->is_space);
-			// printf("1337\n");
+			free(line);
 		}
 		tmp = *token;
 	}
 	else if (tmp->type == TOKEN_WORD && tmp->quote_type == 2)
 	{
 		if (!is_heredoc)
+		{
 			line = expand_line(&tmp->value, sh);
-		tmp->value = line;
+			tmp->value = line;
+		}
 	}
 	while (tmp->next)
 	{
@@ -192,14 +197,16 @@ void	expand_tokens(t_token **token, t_shell *sh)
 			{
 				line = expand_line(&tmp->next->value, sh);
 				add_nodes(tmp, tmp->next->next, line, tmp->next->is_space);
+				free(line);
 			}
 		}
 		else if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == 2)
 		{
 			if (!is_heredoc)
+			{
 				line = expand_line(&tmp->next->value, sh);
-			// printf("%s||||\n", line);
-			tmp->next->value = line;
+				tmp->next->value = line;
+			}
 		}
 		if (tmp->next->type == TOKEN_HEREDOC)
 			is_heredoc = 1;

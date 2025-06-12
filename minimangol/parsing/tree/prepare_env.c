@@ -6,7 +6,7 @@
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 16:21:39 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/06 17:14:17 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/12 14:58:02 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,14 @@ char	**split_env(char *str)
 	int		size;
 
 	i = 0;
-	mtr = malloc(2 * sizeof(char *));
+	mtr = malloc(3 * sizeof(char *));
 	size = size_of_var(str);
 	mtr[0] = malloc(size + 1);
 	ft_memcpy(mtr[0], str, size + 1);
 	mtr[0][size] = 0;
 	mtr[1] = malloc(ft_strlen(str + size + 1) + 1);
 	ft_memcpy(mtr[1], str + size + 1, ft_strlen(str + size + 1) + 1);
+	mtr[2] = NULL;
 	return (mtr); 
 }
 
@@ -47,8 +48,8 @@ t_env	*new_env_node(char **mtr)
 	node = malloc(sizeof(t_env));
 	if (!node)
 		return (NULL);
-	node->key = mtr[0];
-	node->value = mtr[1];
+	node->key = ft_strdup(mtr[0]);
+	node->value = ft_strdup(mtr[1]);
 	node->next = NULL;
 	return (node);
 }
@@ -83,7 +84,7 @@ void	get_env(t_env **lst, char **env)
 	{
 		mtr = split_env(env[i]);
 		add_back_env(lst, new_env_node(mtr));
-		free(mtr);
+		free_mtx(mtr);
 		i++;
 	}
 }

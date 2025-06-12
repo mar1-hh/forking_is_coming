@@ -3,7 +3,6 @@
 // int	size_of_var(char *str)
 // {
 // 	int	i;
-	
 // 	i = 0;
 // 	while (str[i] && str[i] != '$')
 // 		i++;
@@ -50,38 +49,40 @@ char    *take_key(char *line, int *end, t_shell *sh)
 
 // why clear doesn't work when i dont pass env to execve
 
-char	*expand_line(char *line, t_shell *sh)
+char	*expand_line(char **line, t_shell *sh)
 {
 	int     i;
 	char    *ptr;
 	char	*return_value;
 	int		offset;
 	int		size;
+	char	*tmp;
 
 	i = 0;
-	while (line[i])
+	tmp = *line;
+	while (tmp[i])
 	{
-		if (line[i] == '$')
+		if (tmp[i] == '$')
 		{
-			ptr = take_key(line + i + 1, &offset, sh);
-			size = i + ft_strlen(ptr) + ft_strlen(line + offset + i);
+			ptr = take_key(tmp + i + 1, &offset, sh);
+			size = i + ft_strlen(ptr) + ft_strlen(tmp + offset + i);
 			return_value = ft_calloc(size + 1, 1);
-			ft_memcpy(return_value, line, i);
+			ft_memcpy(return_value, tmp, i);
 			ft_memcpy(return_value + i, ptr, ft_strlen(ptr));
-			ft_memcpy(return_value + i + ft_strlen(ptr), line + i + offset + 1, ft_strlen(line + i + offset + 1));
-			free(line);
-			line = return_value;
+			ft_memcpy(return_value + i + ft_strlen(ptr), tmp + i + offset + 1, ft_strlen(tmp + i + offset + 1));
+			free(tmp);
+			*line = NULL;
+			tmp = return_value;
 			i = i + ft_strlen(ptr) - 1;
 		}
 		i++;
 	}
-
-	return (line);
+	return (tmp);
 }
 
 void	print_nodes(t_token *tk)
 {
-	while (tk)
+	while (tk) 
 	{
 		printf("%s\n", tk->value);
 		tk = tk->next;
@@ -115,6 +116,7 @@ void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 	}
 	free_mtx(mtx);
 	free_node(*token);
+	// printf("1337\n");
 	*token = lst;
 	while (lst->next)
 		lst = lst->next;
@@ -170,15 +172,16 @@ void	expand_tokens(t_token **token, t_shell *sh)
 	{
 		if (!is_heredoc)
 		{
-			line = expand_line(tmp->value, sh);
+			line = expand_line(&tmp->value, sh);
 			add_first_node(token, tmp->next, line, tmp->is_space);
+			// printf("1337\n");
 		}
 		tmp = *token;
 	}
 	else if (tmp->type == TOKEN_WORD && tmp->quote_type == 2)
 	{
 		if (!is_heredoc)
-			line = expand_line(tmp->value, sh);
+			line = expand_line(&tmp->value, sh);
 		tmp->value = line;
 	}
 	while (tmp->next)
@@ -187,14 +190,14 @@ void	expand_tokens(t_token **token, t_shell *sh)
 		{
 			if (!is_heredoc)
 			{
-				line = expand_line(tmp->next->value, sh);
+				line = expand_line(&tmp->next->value, sh);
 				add_nodes(tmp, tmp->next->next, line, tmp->next->is_space);
 			}
 		}
 		else if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == 2)
 		{
 			if (!is_heredoc)
-				line = expand_line(tmp->next->value, sh);
+				line = expand_line(&tmp->next->value, sh);
 			// printf("%s||||\n", line);
 			tmp->next->value = line;
 		}

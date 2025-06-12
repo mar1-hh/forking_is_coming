@@ -15,7 +15,7 @@ void	free_mtx(char **mtr)
 	free(mtr);
 }
 
-void free_tokens(t_token *tokens)
+void	free_tokens(t_token *tokens)
 {
 	t_token *tmp;
 
@@ -28,7 +28,7 @@ void free_tokens(t_token *tokens)
 	}
 }
 
-void fr_rdi_lst(t_redir *tokens)
+void	fr_rdi_lst(t_redir *tokens)
 {
 	t_redir *tmp;
 

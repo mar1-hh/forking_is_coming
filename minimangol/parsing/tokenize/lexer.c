@@ -111,6 +111,7 @@ static int handle_operator(char *input, int i, t_token **tokens)
 
 	char *value = ft_substr(input, i, len);
 	add_tokens(tokens, value, type, -1, -1);
+	free(value);
 	return (i + len);
 }
 
@@ -135,6 +136,7 @@ static int handle_quotes(char *input, int i, t_token **tokens, char quote, int i
 	char *value = ft_substr(input, start + 1, i - start - 1);
 	// printf("%s %d\n", value, quote_type);
 	add_tokens(tokens, value, TOKEN_WORD, is_space, quote_type);
+	free(value);
 	return (i + 1);
 }
 

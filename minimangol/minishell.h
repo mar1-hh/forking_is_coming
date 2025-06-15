@@ -86,8 +86,18 @@ typedef struct s_shell
 	int     stdout_fl;
 	char	**env;
 	t_env	*env_lst;
-	int		exit_status; // mra kisigfolti mra la 
+	int		exit_status;
 }   t_shell;
+
+typedef struct s_expand
+{
+	char	*ptr;
+	char	*return_value;
+	char	*tmp;
+	int		offset;
+	int		size;
+	// int		i;
+}   t_expand;
 
 /* Tokenization functions */
 t_token     *lexer(char *input);
@@ -141,5 +151,6 @@ void	free_mtx(char **mtr);
 void free_tokens(t_token *tokens);
 void	free_node(t_token *token);
 void	free_tree(t_ast *head);
+void	free_env(t_env *env);
 
 #endif

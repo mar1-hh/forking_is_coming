@@ -154,5 +154,6 @@ int main(int ac, char **av, char **env)
 		}
 		execute_command_sequence(input, &sh);
 	}
+	free_env(sh.env_lst);
 	return 0;
 }

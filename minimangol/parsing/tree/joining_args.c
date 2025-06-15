@@ -1,43 +1,66 @@
 #include "../../minishell.h"
 
 
-char    *helper_join(char **args, int *arr, int *start, int size)
+void	cp_lbakiya(t_token *old, t_token *new)
 {
-	int i;
-	char    *tmp;
-	char    *return_value;
-
-	return_value = ft_strdup(args[*start]);
-	i = *start;
-	i++;
-	while (i < size && !arr[i])
-	{
-		tmp = return_value;
-		return_value = ft_strjoin(return_value, args[i]);
-		free(tmp);
-		i++;
-	}
-	*start = i;
-	return (return_value);
+	new->is_space = 1;
+	new->type = old->type;
+	new->next = NULL;
+	new->quote_type = old->quote_type;
+	new->prev = old->prev;
 }
 
-char	**join_arg(char **args, int *arr, int size)
+t_token	*token_join(t_token **start)
 {
-	int j;
-	char    **mtr;
-	int i;
-	
-	if (!args)
+	t_token	*tmp;
+	t_token	*new_tk;
+	char	*rt_tmp;
+
+	new_tk = malloc(sizeof(t_token));
+	if (!new_tk)
 		return (NULL);
-	mtr = malloc(sizeof(char *) * (size + 1));
-	j = 0;
-	i = 0;
-	while (i < size)
+	tmp = *start;
+	new_tk->value = ft_strdup(tmp->value);
+	cp_lbakiya(tmp, new_tk);
+	tmp = tmp->next;
+	while (tmp && !tmp->is_space)
 	{
-		mtr[j] = helper_join(args, arr, &i, size);
-		j++;
+		rt_tmp = new_tk->value;
+		new_tk->value = ft_strjoin(new_tk->value, tmp->value);
+		free(rt_tmp);
+		tmp = tmp->next;
 	}
-	mtr[j] = NULL;
-	return (mtr);
+	*start = tmp;
+	return (new_tk);
+}
+
+void	add_f_lkhr(t_token **head, t_token *new)
+{
+	t_token	*tmp;
+	
+	tmp = *head;
+	if (!*head)
+	{
+		new->next = *head;
+		*head = new;
+		return ;
+	}
+	while (tmp->next)
+		tmp = tmp->next;
+	tmp->next = new;
+}
+
+t_token	*joining_tokens(t_token *old_lst)
+{
+	t_token	*new_lst;
+	t_token	*new_node;
+
+	new_lst = NULL;
+	while (old_lst)
+	{
+		new_node = token_join(&old_lst);
+		add_f_lkhr(&new_lst, new_node);
+	}
+	return (new_lst);
 }
 

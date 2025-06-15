@@ -6,74 +6,11 @@
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:13:35 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/12 14:56:03 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/15 13:23:44 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
-
-void	cp_lbakiya(t_token *old, t_token *new)
-{
-	new->is_space = 1;
-	new->type = old->type;
-	new->next = NULL;
-	new->quote_type = old->quote_type;
-	new->prev = old->prev;
-}
-
-t_token	*token_join(t_token **start)
-{
-	t_token	*tmp;
-	t_token	*new_tk;
-	char	*rt_tmp;
-
-	new_tk = malloc(sizeof(t_token));
-	if (!new_tk)
-		return (NULL);
-	tmp = *start;
-	new_tk->value = ft_strdup(tmp->value);
-	cp_lbakiya(tmp, new_tk);
-	tmp = tmp->next;
-	while (tmp && !tmp->is_space)
-	{
-		rt_tmp = new_tk->value;
-		new_tk->value = ft_strjoin(new_tk->value, tmp->value);
-		free(rt_tmp);
-		tmp = tmp->next;
-	}
-	*start = tmp;
-	return (new_tk);
-}
-
-void	add_f_lkhr(t_token **head, t_token *new)
-{
-	t_token	*tmp;
-	
-	tmp = *head;
-	if (!*head)
-	{
-		new->next = *head;
-		*head = new;
-		return ;
-	}
-	while (tmp->next)
-		tmp = tmp->next;
-	tmp->next = new;
-}
-
-t_token	*joining_tokens(t_token *old_lst)
-{
-	t_token	*new_lst;
-	t_token	*new_node;
-
-	new_lst = NULL;
-	while (old_lst)
-	{
-		new_node = token_join(&old_lst);
-		add_f_lkhr(&new_lst, new_node);
-	}
-	return (new_lst);
-}
 
 int env_export(t_env *lst)
 {
@@ -95,21 +32,33 @@ int export_valide(char *ptr)
 	return (1);
 }
 
-int ft_export(t_env **lst, char **export_param)
+void	export_help_2(t_env **lst, char **mtr, int flag)
 {
-	char	**mtr;
-	char	*value;
 	t_env	*temp;
-	int     i;
-	int     flag;
+
+	temp = *lst;
+	while (temp)
+	{
+		if (!ft_strcmp(temp->key, mtr[0]))
+		{
+			free(temp->value);
+			temp->value = ft_strdup(mtr[1]);
+			flag = 1;
+			break ;
+		}
+		temp = temp->next;
+	}
+	if (!flag)
+		add_back_env(lst, new_env_node(mtr));
+}
+
+int	export_help(t_env **lst, char **export_param, int flag)
+{
+	int	i;
+	char	**mtr;
 	int		st;
 	
 	st = 0;
-	if (!export_param[1])
-	{
-		env_export(*lst);
-		return (0);
-	}
 	i = 1;
 	while (export_param[i])
 	{
@@ -121,22 +70,22 @@ int ft_export(t_env **lst, char **export_param)
 			i++;
 			continue ;
 		}
-		temp = *lst;
-		while (temp)
-		{
-			if (!ft_strcmp(temp->key, mtr[0]))
-			{
-				free(temp->value);
-				temp->value = ft_strdup(mtr[1]);
-				flag = 1;
-				break ;
-			}
-			temp = temp->next;
-		}
-		if (!flag)
-			add_back_env(lst, new_env_node(mtr));
+		export_help_2(lst, mtr, flag);
 		free_mtx(mtr);
 		i++;
 	}
 	return (st);
+}
+
+int ft_export(t_env **lst, char **export_param)
+{
+	int     flag;
+	
+	if (!export_param[1])
+	{
+		env_export(*lst);
+		return (0);
+	}
+	
+	return (export_help(lst, export_param, flag));
 }

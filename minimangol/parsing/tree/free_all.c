@@ -47,6 +47,20 @@ void	free_node(t_token *token)
 	free(token);
 }
 
+void	free_env(t_env *env)
+{
+	t_env	*tmp;
+	
+	while (env)
+	{
+		tmp = env;
+		env = env->next;
+		free(tmp->key);
+		free(tmp->value);
+		free(tmp);
+	}
+}
+
 void	free_tree(t_ast *head)
 {
 	if (!head)

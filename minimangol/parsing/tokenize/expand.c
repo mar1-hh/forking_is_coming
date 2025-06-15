@@ -1,14 +1,5 @@
 #include "../../minishell.h"
 
-// int	size_of_var(char *str)
-// {
-// 	int	i;
-// 	i = 0;
-// 	while (str[i] && str[i] != '$')
-// 		i++;
-// 	return (i);
-// }
-
 char	*ret_env_v(t_shell *sh, char *str)
 {
 	t_env	*lst;
@@ -49,34 +40,30 @@ char    *take_key(char *line, int *end, t_shell *sh)
 
 char	*expand_line(char **line, t_shell *sh)
 {
-	int     i;
-	char    *ptr;
-	char	*return_value;
-	int		offset;
-	int		size;
-	char	*tmp;
+	t_expand	exp_var;
+	int			i;
 
 	i = 0;
-	tmp = ft_strdup(*line);
+	exp_var.tmp = ft_strdup(*line);
 	free(*line);
 	*line = NULL;
-	while (tmp[i])
+	while (exp_var.tmp[i])
 	{
-		if (tmp[i] == '$')
+		if (exp_var.tmp[i] == '$')
 		{
-			ptr = take_key(tmp + i + 1, &offset, sh);
-			size = i + ft_strlen(ptr) + ft_strlen(tmp + offset + i);
-			return_value = ft_calloc(size + 1, 1);
-			ft_memcpy(return_value, tmp, i);
-			ft_memcpy(return_value + i, ptr, ft_strlen(ptr));
-			ft_memcpy(return_value + i + ft_strlen(ptr), tmp + i + offset + 1, ft_strlen(tmp + i + offset + 1));
-			free(tmp);
-			tmp = return_value;
-			i = i + ft_strlen(ptr) - 1;
+			exp_var.ptr = take_key(exp_var.tmp + i + 1, &exp_var.offset, sh);
+			exp_var.size = i + ft_strlen(exp_var.ptr) + ft_strlen(exp_var.tmp + exp_var.offset + i);
+			exp_var.return_value = ft_calloc(exp_var.size + 1, 1);
+			ft_memcpy(exp_var.return_value, exp_var.tmp, i);
+			ft_memcpy(exp_var.return_value + i, exp_var.ptr, ft_strlen(exp_var.ptr));
+			ft_memcpy(exp_var.return_value + i + ft_strlen(exp_var.ptr), exp_var.tmp + i + exp_var.offset + 1, ft_strlen(exp_var.tmp + i + exp_var.offset + 1));
+			free(exp_var.tmp);
+			exp_var.tmp = exp_var.return_value;
+			i = i + ft_strlen(exp_var.ptr) - 1;
 		}
 		i++;
 	}
-	return (tmp);
+	return (exp_var.tmp);
 }
 
 void	print_nodes(t_token *tk)
@@ -134,7 +121,6 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 	mtx = ft_split(line, ' ');
 	if (!mtx)
 		return ;
-		// printf("1337\n");
 	if (!mtx[i])
 	{
 		token->next->value = ft_strdup("");
@@ -157,38 +143,19 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 	lst->next = next;
 }
 
+void	is_here_doc(t_token *tmp, int *is_heredoc)
+{
+	if (tmp->next->type == TOKEN_HEREDOC)
+		*is_heredoc = 1;
+	else
+		*is_heredoc = 0;
+}
 
-void	expand_tokens(t_token **token, t_shell *sh)
+void	expand_tokens_2(t_token **token, t_shell *sh, int is_heredoc, char *line)
 {
 	t_token	*tmp;
-	char	*line;
-	char	*line_2;
-	int		is_heredoc;
-	t_env	*env;
-	
-	env = sh->env_lst;
+
 	tmp = *token;
-	is_heredoc = 0;
-	if (tmp->type == TOKEN_HEREDOC)
-		is_heredoc = 1;
-	else if (tmp->type == TOKEN_WORD && tmp->quote_type == -1)
-	{
-		if (!is_heredoc)
-		{
-			line = expand_line(&tmp->value, sh);
-			add_first_node(token, tmp->next, line, tmp->is_space);
-			free(line);
-		}
-		tmp = *token;
-	}
-	else if (tmp->type == TOKEN_WORD && tmp->quote_type == 2)
-	{
-		if (!is_heredoc)
-		{
-			line = expand_line(&tmp->value, sh);
-			tmp->value = line;
-		}
-	}
 	while (tmp->next)
 	{
 		if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == -1)
@@ -208,10 +175,36 @@ void	expand_tokens(t_token **token, t_shell *sh)
 				tmp->next->value = line;
 			}
 		}
-		if (tmp->next->type == TOKEN_HEREDOC)
-			is_heredoc = 1;
-		else
-			is_heredoc = 0;
+		is_here_doc(tmp, &is_heredoc);
 		tmp = tmp->next;
 	}
+}
+
+
+void	expand_tokens(t_token **token, t_shell *sh)
+{
+	char	*line;
+	int		is_heredoc;
+	
+	is_heredoc = 0;
+	if ((*token)->type == TOKEN_HEREDOC)
+		is_heredoc = 1;
+	else if ((*token)->type == TOKEN_WORD && (*token)->quote_type == -1)
+	{
+		if (!is_heredoc)
+		{
+			line = expand_line(&(*token)->value, sh);
+			add_first_node(token, (*token)->next, line, (*token)->is_space);
+			free(line);
+		}
+	}
+	else if ((*token)->type == TOKEN_WORD && (*token)->quote_type == 2)
+	{
+		if (!is_heredoc)
+		{
+			line = expand_line(&(*token)->value, sh);
+			(*token)->value = line;
+		}
+	}
+	expand_tokens_2(token, sh, is_heredoc, line);
 }

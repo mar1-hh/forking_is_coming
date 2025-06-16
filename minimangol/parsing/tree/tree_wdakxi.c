@@ -397,24 +397,20 @@ char	*helper_path_cmd(char **commands_path, char *cmd)
 	i = 0;
 	while (commands_path[i])
 	{
-		// Use path separator correctly
 		command_path = ft_strjoin(ft_strjoin(commands_path[i], "/"), cmd);
 		if (!command_path)
 		{
-			// free_args(commands_path);
 			free(cmd);
 			return (NULL);
 		}
 		if (!access(command_path, X_OK))
 		{
-			// free_args(commands_path);
 			free(cmd);
 			return (command_path);
 		}
 		free(command_path);
 		i++;
 	}
-	// free_args(commands_path);
 	free(cmd);
 	return (NULL);
 }
@@ -497,6 +493,13 @@ char	**create_mtr_env(t_env	*env_lst)
 	return (mtr);
 }
 
+void	cmd_nt_found(char *line)
+{
+	write(2, line, ft_strlen(line));
+	write(2, ": command not found\n", 21);
+	exit(127);
+}
+
 int	run_execve(t_ast *node, t_shell *sh)
 {
 	char	**env;
@@ -507,10 +510,7 @@ int	run_execve(t_ast *node, t_shell *sh)
 		return (0);
 	path = debug_okda(env, node->args[0]);
 	if (!path)
-	{
-		perror("minishell");
-		exit(127);
-	}
+		cmd_nt_found(node->args[0]);
 	execve(path, node->args, env);
 	exit(1);
 }
@@ -556,7 +556,6 @@ int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	}
 	else
 	{
-		// printf("***************1337*********************\n");
 		sh->exit_status = execute_builtin(node, infd, outfd, sh);
 	}
 }
@@ -589,10 +588,6 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 	}
 	else if (node->e_token_type == TOKEN_WORD)
 	{
-		// for (int i = 0; node->args[i]; i++)
-		// 	printf("%s\n", node->args[i]);
-		// print_red(node->redirs);
-		// node->args = join_arg(node->args, node->arr_space, node->arg_count);
 		status = abs_execute(node, fd, outfd, cs, sh);
 		close_all_herdocs(node->redirs);
 	}

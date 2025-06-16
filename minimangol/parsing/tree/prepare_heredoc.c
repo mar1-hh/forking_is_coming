@@ -6,7 +6,7 @@
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 12:46:47 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/12 13:04:42 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/16 11:50:42 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void    read_froma_stdin(t_redir *redir, t_shell *sh)
 	line = readline("> ");
 	while (ft_strcmp(redir->file, line))
 	{
-		line = expand_line(&line, sh);
+		line = expand_line(&line, sh, NULL);
 		tmp = ft_strjoin(line, "\n");
 		write(redir->fd[1], tmp, ft_strlen(tmp));
 		free(line);

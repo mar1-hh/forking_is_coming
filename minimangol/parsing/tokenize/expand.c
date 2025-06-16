@@ -44,7 +44,6 @@ int	is_valide(t_token *next, char *line, int i)
 		return (1);
 	if (line[i] == '$' && next)
 	{
-		// printf("%d\n", next->is_space);
 		if (!next->is_space)
 			return (1);
 	}

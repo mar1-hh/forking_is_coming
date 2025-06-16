@@ -51,6 +51,7 @@ struct s_redir
 {
 	t_token_type    type;
 	char            *file;
+	int				is_expand;
 	struct s_redir  *next;
 	int				fd[2];
 };

@@ -29,7 +29,7 @@ bool is_redirection(t_token_type type)
 			type == TOKEN_HEREDOC);
 }
 
-t_redir *create_redir_node(t_token_type type, char *file)
+t_redir *create_redir_node(t_token_type type, char *file, int is_expnd)
 {
 	t_redir *new_redir = malloc(sizeof(t_redir));
 	if (!new_redir)
@@ -42,6 +42,10 @@ t_redir *create_redir_node(t_token_type type, char *file)
 	}
 	new_redir->type = type;
 	new_redir->next = NULL;
+	if (is_expnd == 2)
+		new_redir->is_expand = 0;
+	else
+		new_redir->is_expand = 1;
 	return new_redir;
 }
 
@@ -201,13 +205,13 @@ t_redir *handle_redir(t_token **tokens)
     {
         if (is_redirection(curr->type))
         {
-            t_redir *new_redir = create_redir_node(curr->type, curr->next->value);            
+            t_redir *new_redir = create_redir_node(curr->type, curr->next->value, curr->next->quote_type);
             if (!redirs) 
             {
                 redirs = new_redir;
                 redir_tail = new_redir;
             }
-            else 
+            else
             {
                 redir_tail->next = new_redir;
                 redir_tail = new_redir;

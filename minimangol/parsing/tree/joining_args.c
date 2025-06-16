@@ -27,6 +27,8 @@ t_token	*token_join(t_token **start)
 	{
 		rt_tmp = new_tk->value;
 		new_tk->value = ft_strjoin(new_tk->value, tmp->value);
+		if (tmp->quote_type == 2 || tmp->quote_type == 1)
+			new_tk->quote_type = 2;
 		free(rt_tmp);
 		tmp = tmp->next;
 	}

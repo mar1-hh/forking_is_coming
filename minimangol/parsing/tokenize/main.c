@@ -54,7 +54,6 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		return 1;
 	}
 	expand_tokens(&tokens, sh);
-	// printf("1337\n");
 	new = joining_tokens(tokens);
 	head = build_ast(new);
 	if (!head)

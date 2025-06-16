@@ -42,7 +42,7 @@ t_redir *create_redir_node(t_token_type type, char *file, int is_expnd)
 	}
 	new_redir->type = type;
 	new_redir->next = NULL;
-	if (is_expnd == 2)
+	if (is_expnd == 2 || is_expnd == 1)
 		new_redir->is_expand = 0;
 	else
 		new_redir->is_expand = 1;

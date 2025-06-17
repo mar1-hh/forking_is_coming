@@ -271,6 +271,27 @@ t_ast *build_ast(t_token *tokens)
 	return connect_pipe_nodes(&tokens);
 }
 
+int	open_err(char *line)
+{
+	char	*str;
+
+	str = ft_strjoin("minishell: ", line);
+	perror(str);
+	free(str);
+	return (1);
+}
+
+int	app_norm_red(t_redir *lst, int *outfd)
+{
+	if (lst->type == TOKEN_APPEND)
+		*outfd = open(lst->file, O_CREAT | O_APPEND | O_WRONLY, 0644);
+	else
+		*outfd = open(lst->file, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+	if (*outfd == -1)
+		return (open_err(lst->file));
+	return (0);
+}
+
 int	handle_redirection(t_ast *node, int *infd, int *outfd)
 {
 	t_redir	*lst;
@@ -282,22 +303,12 @@ int	handle_redirection(t_ast *node, int *infd, int *outfd)
 		{
 			*infd = open(lst->file, O_RDONLY);
 			if (*infd == -1)
-			{
-				perror("open");
-				return 1;
-			}
+				return (open_err(lst->file));
 		}
 		else if (lst->type == TOKEN_APPEND || lst->type == TOKEN_REDIR_OUT)
 		{
-			if (lst->type == TOKEN_APPEND)
-				*outfd = open(lst->file, O_CREAT | O_APPEND | O_WRONLY, 0644);
-			else
-				*outfd = open(lst->file, O_CREAT | O_TRUNC | O_WRONLY, 0644);
-			if (*outfd == -1)
-			{
-				perror("open");
-				return 1;
-			}
+			if (app_norm_red(lst, outfd))
+				return (1);
 		}
 		else if (lst->type == TOKEN_HEREDOC)
 		{
@@ -306,6 +317,7 @@ int	handle_redirection(t_ast *node, int *infd, int *outfd)
 		}
 		lst = lst->next;
 	}
+	return (0);
 }
 
 int my_execve(t_ast *node, t_shell *sh)
@@ -332,7 +344,7 @@ int execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh)
 {
 	int	st;
 	
-	if (handle_redirection(node, &infd, &outfd) == 1)
+	if (handle_redirection(node, &infd, &outfd))
 		return (1);
 	sh->stdinput_fl = dup(0);
 	sh->stdout_fl = dup(1);
@@ -512,7 +524,7 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 			exit(execute_builtin(node, infd, outfd, sh));
 		if (cs != -1)
 			close(cs);
-		if (handle_redirection(node, &infd, &outfd) );
+		if (handle_redirection(node, &infd, &outfd))
 			exit(1);
 		if (infd)
 		{

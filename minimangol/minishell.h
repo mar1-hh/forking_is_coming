@@ -116,7 +116,7 @@ t_redir     *handle_redir(t_token **tokens);
 int         check_syntax_errors(t_token *tokens);
 
 /* Execution functions */
-void        handle_redirection(t_ast *node, int *infd, int *outfd);
+int        handle_redirection(t_ast *node, int *infd, int *outfd);
 t_redir *handle_redir(t_token **tokens);
 char        *debug_okda(char **env, char *cmd);
 int         execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh);

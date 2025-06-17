@@ -271,28 +271,11 @@ t_ast *build_ast(t_token *tokens)
 	return connect_pipe_nodes(&tokens);
 }
 
-void	compl_heredoc(t_ast *node, int *infd, int *outfd)
+int	handle_redirection(t_ast *node, int *infd, int *outfd)
 {
 	t_redir	*lst;
 
 	lst = node->redirs;
-	while (lst)
-	{
-		if (lst->type == TOKEN_HEREDOC)
-		{
-			close(lst->fd[1]);
-			*infd = lst->fd[0];
-		}
-		lst = lst->next;
-	}
-}
-
-void	handle_redirection(t_ast *node, int *infd, int *outfd)
-{
-	t_redir	*lst;
-
-	lst = node->redirs;
-	// compl_heredoc(node, infd, outfd);
 	while (lst)
 	{
 		if (lst->type == TOKEN_REDIR_IN)
@@ -301,7 +284,7 @@ void	handle_redirection(t_ast *node, int *infd, int *outfd)
 			if (*infd == -1)
 			{
 				perror("open");
-				return ;
+				return 1;
 			}
 		}
 		else if (lst->type == TOKEN_APPEND || lst->type == TOKEN_REDIR_OUT)
@@ -313,7 +296,7 @@ void	handle_redirection(t_ast *node, int *infd, int *outfd)
 			if (*outfd == -1)
 			{
 				perror("open");
-				return ;
+				return 1;
 			}
 		}
 		else if (lst->type == TOKEN_HEREDOC)
@@ -349,7 +332,8 @@ int execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh)
 {
 	int	st;
 	
-	handle_redirection(node, &infd, &outfd);
+	if (handle_redirection(node, &infd, &outfd) == 1)
+		return (1);
 	sh->stdinput_fl = dup(0);
 	sh->stdout_fl = dup(1);
 	if (infd)
@@ -528,7 +512,8 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 			exit(execute_builtin(node, infd, outfd, sh));
 		if (cs != -1)
 			close(cs);
-		handle_redirection(node, &infd, &outfd);
+		if (handle_redirection(node, &infd, &outfd) );
+			exit(1);
 		if (infd)
 		{
 			dup2(infd, 0);

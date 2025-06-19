@@ -3,28 +3,26 @@
 /*                                                        :::      ::::::::   */
 /*   prepare_heredoc.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 12:46:47 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/16 17:49:02 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/19 16:32:44 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-
-void sigint_heredoc_handler(int sig)
+void	sigint_heredoc_handler(int sig)
 {
-    (void)sig;
-    write(1, "\n", 1);
-    exit(130);
+	(void)sig;
+	write(1, "\n", 1);
+	exit(1);
 }
 
-
-void    read_froma_stdin(t_redir *redir, t_shell *sh)
+void	read_froma_stdin(t_redir *redir, t_shell *sh)
 {
-	char    *line;
-	char    *tmp;
+	char	*line;
+	char	*tmp;
 	char	*tmp_2;
 
 	close(redir->fd[0]);
@@ -44,12 +42,11 @@ void    read_froma_stdin(t_redir *redir, t_shell *sh)
 	exit(0);
 }
 
-
-int prepare_one_heredoc(t_redir *redir, t_shell *sh)
+int	prepare_one_heredoc(t_redir *redir, t_shell *sh)
 {
-	int pid;
+	int	pid;
 	int	st;
-	
+
 	while (redir)
 	{
 		if (redir->type == TOKEN_HEREDOC)
@@ -67,6 +64,8 @@ int prepare_one_heredoc(t_redir *redir, t_shell *sh)
 			{
 				waitpid(pid, &st, 0);
 				sh->exit_status = WEXITSTATUS(st);
+				if (WIFSIGNALED(st))
+					return (1);
 			}
 		}
 		redir = redir->next;
@@ -74,18 +73,18 @@ int prepare_one_heredoc(t_redir *redir, t_shell *sh)
 	return (0);
 }
 
-int prepare_all_herdocs(t_ast *head, t_shell *sh)
+int	prepare_all_herdocs(t_ast *head, t_shell *sh)
 {
 	if (!head)
 		return (0);
 	if (head->e_token_type == TOKEN_WORD)
-		prepare_one_heredoc(head->redirs, sh);
+		return (prepare_one_heredoc(head->redirs, sh));
 	prepare_all_herdocs(head->left, sh);
 	prepare_all_herdocs(head->right, sh);
 	return (0);
 }
 
-int close_all_herdocs(t_redir *redirs)
+int	close_all_herdocs(t_redir *redirs)
 {
 	while (redirs)
 	{

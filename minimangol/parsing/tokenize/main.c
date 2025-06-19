@@ -62,7 +62,8 @@ static int execute_command_sequence(char *input, t_shell *sh)
 		cleanup(new, redirs, head, input);
 		return 1;
 	}
-	prepare_all_herdocs(head, sh);
+	if (prepare_all_herdocs(head, sh))
+		return (1);
 	execute_tree(head, 0, 1, -1, sh);
 	if (head->e_token_type == TOKEN_PIPE || (head->args && !is_builtin(head->args[0])))
 		sh->exit_status = wai_st(head);
@@ -151,7 +152,8 @@ int main(int ac, char **av, char **env)
 			free(input);
 			continue;
 		}
-		execute_command_sequence(input, &sh);
+		if (execute_command_sequence(input, &sh))
+			continue;
 	}
 	free_env(sh.env_lst);
 	return 0;

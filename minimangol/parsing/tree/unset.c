@@ -3,33 +3,43 @@
 /*                                                        :::      ::::::::   */
 /*   unset.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 13:39:43 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/12 12:39:28 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/19 20:03:00 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-void	rm_node(t_env *lst, char *str)
+void	rm_node(t_env **lst, char *str)
 {
 	t_env	*tmp;
+	t_env	*env_lst;
 	
-	while (lst->next)
+	env_lst = *lst;
+	if (!ft_strcmp(env_lst->key, str))
 	{
-		if (!ft_strncmp(lst->next->key, str, ft_strlen(str)))
+		tmp = *lst;
+		*lst = tmp->next;
+		free(tmp);
+	}
+	while (env_lst->next)
+	{
+		if (!ft_strcmp(env_lst->next->key, str))
 		{
-			tmp = lst->next;
-			lst->next = tmp->next;
+			tmp = env_lst->next;
+			env_lst->next = tmp->next;
 			free(tmp->key);
 			free(tmp->value);
 			free(tmp);
 			return ;
 		}
-		lst = lst->next;
+		env_lst = env_lst->next;
 	}
 }
+
+// node1 -> node2 -> node3 -> node4 -> NULL
 
 int	ft_unset(t_env **lst, char **argv)
 {
@@ -38,7 +48,7 @@ int	ft_unset(t_env **lst, char **argv)
 	i = 1;
 	while (argv[i])
 	{
-		rm_node(*lst, argv[i]);
+		rm_node(lst, argv[i]);
 		i++;
 	}
 	return (0);

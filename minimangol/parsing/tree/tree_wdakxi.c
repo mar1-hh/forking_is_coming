@@ -496,6 +496,13 @@ void	cmd_nt_found(char *line)
 	exit(127);
 }
 
+// void	is_a_dir(char *line)
+// {
+// 	struct stat	dir;
+// 	(void)line;
+
+// }
+
 int	run_execve(t_ast *node, t_shell *sh)
 {
 	char	**env;
@@ -555,6 +562,7 @@ int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	{
 		sh->exit_status = execute_builtin(node, infd, outfd, sh);
 	}
+	return (0);
 }
 
 void	print_red(t_redir *rd)

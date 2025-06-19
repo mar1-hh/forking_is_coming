@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 13:39:43 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/19 20:03:00 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/19 20:07:00 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,6 @@ void	rm_node(t_env **lst, char *str)
 		env_lst = env_lst->next;
 	}
 }
-
-// node1 -> node2 -> node3 -> node4 -> NULL
 
 int	ft_unset(t_env **lst, char **argv)
 {

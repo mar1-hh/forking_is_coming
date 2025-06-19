@@ -6,13 +6,28 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 13:51:21 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/19 18:28:46 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/19 20:13:20 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-
+int	echo_valide(char *line)
+{
+	int	i;
+	
+	i = 0;
+	if (line[0] != '-')
+		return (0);
+	i++;
+	while (line[i])
+	{
+		if (line[i] != 'n')
+			return (0);
+		i++;
+	}
+	return (1);
+}
 
 int ft_echo(char **args)
 {
@@ -21,7 +36,7 @@ int ft_echo(char **args)
 
 	flag = 0;
 	i = 1;
-	if (args[1] && ft_strnstr(args[1], "-n", ft_strlen(args[1])))
+	if (args[1] && echo_valide(args[1]))
 	{
 		flag = 1;
 		i++;

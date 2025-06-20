@@ -544,7 +544,12 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 			close(outfd);
 		}
 		run_execve(node, sh);
-	}    
+	}
+	if (node->pid < 0)
+	{
+		perror("fork");
+		return (1);
+	}
 	return (0);
 }
 
@@ -557,7 +562,8 @@ int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	}
 	else if (node->is_pipe || (!is_builtin(node->args[0])))
 	{
-		execute_command(node, infd, outfd, cs, sh);
+		if (execute_command(node, infd, outfd, cs, sh))
+			return (1);
 	}
 	else
 	{
@@ -595,6 +601,8 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 	else if (node->e_token_type == TOKEN_WORD)
 	{
 		status = abs_execute(node, fd, outfd, cs, sh);
+		if (status == 1)
+			return (1);
 		close_all_herdocs(node->redirs);
 	}
 	return (status);

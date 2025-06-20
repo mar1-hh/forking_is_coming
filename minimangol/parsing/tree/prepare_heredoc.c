@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 12:46:47 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/19 16:32:44 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/20 13:32:35 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 void	sigint_heredoc_handler(int sig)
 {
 	(void)sig;
-	write(1, "\n", 1);
 	exit(1);
 }
 
@@ -39,34 +38,15 @@ void	read_froma_stdin(t_redir *redir, t_shell *sh)
 	}
 	free(line);
 	close(redir->fd[1]);
-	exit(0);
 }
 
 int	prepare_one_heredoc(t_redir *redir, t_shell *sh)
 {
-	int	pid;
-	int	st;
-
 	while (redir)
 	{
 		if (redir->type == TOKEN_HEREDOC)
 		{
-			pipe(redir->fd);
-			pid = fork();
-			if (!pid)
-			{
-				signal(SIGINT, sigint_heredoc_handler);
-				read_froma_stdin(redir, sh);
-			}
-			else if (pid < 0)
-				perror("pipe: ");
-			else
-			{
-				waitpid(pid, &st, 0);
-				sh->exit_status = WEXITSTATUS(st);
-				if (WIFSIGNALED(st))
-					return (1);
-			}
+			read_froma_stdin(redir, sh);
 		}
 		redir = redir->next;
 	}
@@ -78,9 +58,35 @@ int	prepare_all_herdocs(t_ast *head, t_shell *sh)
 	if (!head)
 		return (0);
 	if (head->e_token_type == TOKEN_WORD)
-		return (prepare_one_heredoc(head->redirs, sh));
+		prepare_one_heredoc(head->redirs, sh);
 	prepare_all_herdocs(head->left, sh);
 	prepare_all_herdocs(head->right, sh);
+	return (0);
+}
+
+int	prepare_herdoc(t_ast *head, t_shell *sh)
+{
+	int	pid;
+	int	st;
+
+	pid = fork();
+	if (!pid)
+	{
+		signal(SIGINT, sigint_heredoc_handler);
+		prepare_all_herdocs(head, sh);
+		exit(0);
+	}
+	else if (pid < 0)
+	{
+		perror("fork");
+		return (1);
+	}
+	else
+	{
+		waitpid(pid, &st, 0);
+		if (WIFSIGNALED(st))
+			return (1);
+	}
 	return (0);
 }
 

@@ -153,5 +153,6 @@ void free_tokens(t_token *tokens);
 void	free_node(t_token *token);
 void	free_tree(t_ast *head);
 void	free_env(t_env *env);
+int	prepare_herdoc(t_ast *head, t_shell *sh);
 
 #endif

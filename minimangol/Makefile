@@ -14,7 +14,7 @@ SOURCES = \
 
 OBJECTS = $(SOURCES:.c=.o)
 
-CC = cc
+CC = cc -fsanitize=address
 
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a

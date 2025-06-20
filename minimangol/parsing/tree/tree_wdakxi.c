@@ -552,7 +552,8 @@ int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 {
 	if (!node->args)
 	{
-		handle_redirection(node, &infd, &outfd);
+		if (handle_redirection(node, &infd, &outfd))
+			sh->exit_status = 1;
 	}
 	else if (node->is_pipe || (!is_builtin(node->args[0])))
 	{

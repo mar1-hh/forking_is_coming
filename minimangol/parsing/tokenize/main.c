@@ -56,7 +56,7 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	}
 	expand_tokens(&tokens, sh);
 	new = joining_tokens(tokens);
-	print_lst(new);
+	// print_lst(new);
 	head = build_ast(new);
 	if (!head)
 	{
@@ -64,7 +64,8 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 		cleanup(new, redirs, head, input);
 		return (1);
 	}
-	if (prepare_all_herdocs(head, sh))
+	sh->exit_status = prepare_herdoc(head, sh);
+	if (sh->exit_status)
 		return (1);
 	execute_tree(head, 0, 1, -1, sh);
 	if (head->e_token_type == TOKEN_PIPE ||
@@ -143,14 +144,9 @@ int	main(int ac, char **av, char **env)
 		if (!input)
 		{
 			printf("exit\n");
-			exit (0);
+			exit (1);
 		}
 		add_history(input);
-		if (!input)
-		{
-			printf("\thala!\n");
-			break ;
-		}
 		if (ft_strlen(input) == 0)
 		{
 			free(input);

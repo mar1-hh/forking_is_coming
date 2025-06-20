@@ -23,6 +23,8 @@ t_redir	*create_redir_node(t_token_type type, char *file, int is_expnd)
 	}
 	new_redir->type = type;
 	new_redir->next = NULL;
+	if (type == TOKEN_HEREDOC)
+		pipe(new_redir->fd);
 	if (is_expnd == 2 || is_expnd == 1)
 		new_redir->is_expand = 0;
 	else

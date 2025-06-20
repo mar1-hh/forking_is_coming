@@ -541,6 +541,14 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 		}
 		run_execve(node, sh);
 	}
+<<<<<<< HEAD
+=======
+	if (node->pid < 0)
+	{
+		perror("fork");
+		return (1);
+	}
+>>>>>>> eeaac112b20612fe27a0a71996721fdd27532d3f
 	return (0);
 }
 
@@ -548,11 +556,13 @@ int	abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 {
 	if (!node->args)
 	{
-		handle_redirection(node, &infd, &outfd);
+		if (handle_redirection(node, &infd, &outfd))
+			sh->exit_status = 1;
 	}
 	else if (node->is_pipe || (!is_builtin(node->args[0])))
 	{
-		execute_command(node, infd, outfd, cs, sh);
+		if (execute_command(node, infd, outfd, cs, sh))
+			return (1);
 	}
 	else
 	{
@@ -583,6 +593,8 @@ int	execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 	else if (node->e_token_type == TOKEN_WORD)
 	{
 		status = abs_execute(node, fd, outfd, cs, sh);
+		if (status == 1)
+			return (1);
 		close_all_herdocs(node->redirs);
 	}
 	return (status);

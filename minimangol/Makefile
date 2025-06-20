@@ -1,9 +1,6 @@
 NAME = minishell
 
 GREEN = \033[0;32m
-YELLOW = \033[0;33m
-BLUE = \033[0;34m
-RESET = \033[0m
 
 SOURCES = \
 	parsing/tokenize/lexer.c parsing/error/error.c parsing/tree/pipes_handling.c\
@@ -19,7 +16,7 @@ CC = cc -fsanitize=address
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-READLINE_PATH = /goinfre/msaadaou/homebrew/opt/readline
+READLINE_PATH = /Users/achat/homebrew/opt/readline
 
 READLINE_INCLUDE = -I$(READLINE_PATH)/include
 READLINE_LIB = -L$(READLINE_PATH)/lib -lreadline -lncurses

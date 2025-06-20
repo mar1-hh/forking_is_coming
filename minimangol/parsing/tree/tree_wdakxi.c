@@ -73,36 +73,6 @@ static void add_token_to_args(t_ast *cmd_node, char *value, int index)
 	cmd_node->args[index] = ft_strdup(value);
 }
 
-static void fill_args_array_skip_redirs(t_ast *cmd_node, t_token *token, int count)
-{
-	int i = 0;
-
-	while (token && i < count)
-	{
-		if (token->type == TOKEN_WORD)
-		{
-			if (is_redir_target(token))
-			{
-				token = token->next;
-				continue;
-			}
-			add_token_to_args(cmd_node, token->value, i++);
-		}
-		else if (is_redirection(token->type))
-		{
-			token = skip_redir_and_target(token);
-			continue;
-		}
-		else if (token->type == TOKEN_PIPE)
-			break;
-		token = token->next;
-	}
-	cmd_node->args[count] = NULL;
-	cmd_node->arg_count = count;
-	if (count > 0)
-		cmd_node->cmd = ft_strdup(cmd_node->args[0]);
-}
-
 static void unlink_redir_pair(t_token **head, t_token *prev, t_token *target)
 {
 	if (prev)
@@ -541,14 +511,11 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 		}
 		run_execve(node, sh);
 	}
-<<<<<<< HEAD
-=======
 	if (node->pid < 0)
 	{
 		perror("fork");
 		return (1);
 	}
->>>>>>> eeaac112b20612fe27a0a71996721fdd27532d3f
 	return (0);
 }
 

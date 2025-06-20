@@ -525,14 +525,11 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 		}
 		run_execve(node, sh);
 	}
-<<<<<<< HEAD
 	if (node->pid < 0)
 	{
 		perror("fork");
 		return (1);
 	}
-=======
->>>>>>> 48dc3862675bdb463bb0850b9d57fb992f3c86c9
 	return (0);
 }
 

@@ -19,6 +19,7 @@ char	*ret_env_v(t_shell *sh, char *str)
 		}
 		lst = lst->next;
 	}
+	free(str);
 	return (ft_strdup(""));
 }
 
@@ -117,6 +118,7 @@ void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 	if (!mtx[0])
 	{
 		free((*token)->value);
+		free(mtx);
 		(*token)->value = ft_strdup("");
 		return ;
 	}
@@ -143,6 +145,7 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 	{
 		free(token->next->value);
 		token->next->value = ft_strdup("");
+		free(mtx);
 		return ;
 	}
 	add_help(mtx, &lst, is_space);

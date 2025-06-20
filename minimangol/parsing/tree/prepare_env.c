@@ -6,7 +6,7 @@
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 16:21:39 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/12 14:58:02 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/21 00:43:31 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,8 @@ int	size_of_var(char *str)
 char	**split_env(char *str)
 {
 	char	**mtr;
-	int		i;
 	int		size;
 
-	i = 0;
 	mtr = malloc(3 * sizeof(char *));
 	size = size_of_var(str);
 	mtr[0] = malloc(size + 1);

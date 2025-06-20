@@ -6,7 +6,7 @@
 /*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:13:35 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/15 13:23:44 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/21 00:44:07 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,11 +81,11 @@ int ft_export(t_env **lst, char **export_param)
 {
 	int     flag;
 	
+	flag = 0;
 	if (!export_param[1])
 	{
 		env_export(*lst);
 		return (0);
 	}
-	
 	return (export_help(lst, export_param, flag));
 }

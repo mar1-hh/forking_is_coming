@@ -11,7 +11,7 @@ SOURCES = \
 
 OBJECTS = $(SOURCES:.c=.o)
 
-CC = cc
+CC = cc -Wall -Wextra -Werror
 
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a

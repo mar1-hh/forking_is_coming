@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   prepare_heredoc.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 12:46:47 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/20 13:32:35 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/21 00:46:20 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ void	read_froma_stdin(t_redir *redir, t_shell *sh)
 {
 	char	*line;
 	char	*tmp;
-	char	*tmp_2;
 
 	close(redir->fd[0]);
 	line = readline("> ");

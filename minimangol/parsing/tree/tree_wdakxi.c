@@ -7,17 +7,6 @@ t_token	*advance_token(t_token *token, int steps)
 	return (token);
 }
 
-static t_token *skip_redir_and_target(t_token *token)
-{
-	if (token && is_redirection(token->type))
-	{
-		token = token->next;
-		if (token && token->type == TOKEN_WORD)
-			token = token->next;
-	}
-	return token;
-}
-
 static void initialize_ast_fields(t_ast *node, t_token_type type)
 {
 	node->e_token_type = type;
@@ -41,37 +30,6 @@ t_ast *create_ast_node(t_token_type type)
 	return node;
 }
 
-static int is_redir_target(t_token *token)
-{
-	return token->prev && is_redirection(token->prev->type);
-}
-
-static int count_consecutive_words(t_token *token)
-{
-	int count = 0;
-
-	while (token)
-	{
-		if (token->type == TOKEN_WORD)
-		{
-			if (is_redir_target(token))
-			{
-				token = token->next;
-				continue;
-			}
-			count++;
-		}
-		else if (token->type == TOKEN_PIPE)
-			break;
-		token = token->next;
-	}
-	return count;
-}
-
-static void add_token_to_args(t_ast *cmd_node, char *value, int index)
-{
-	cmd_node->args[index] = ft_strdup(value);
-}
 
 static void unlink_redir_pair(t_token **head, t_token *prev, t_token *target)
 {
@@ -195,9 +153,7 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 t_ast *build_command_node(t_token **tokens)
 {
 	t_ast *cmd_node;
-	t_token *original_tokens;
 
-	original_tokens = *tokens;
 	cmd_node = create_ast_node(TOKEN_WORD);
 	if (!cmd_node)
 		return (NULL);
@@ -501,8 +457,6 @@ void	is_dir(char **args)
 
 int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 {
-	int	status;
-
 	node->pid = fork();
 	if (!node->pid)
 	{

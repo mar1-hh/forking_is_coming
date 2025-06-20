@@ -145,15 +145,17 @@ static int handle_quotes(char *input, int i, t_token **tokens, char quote, int i
 
 static int handle_word(char *input, int i, t_token **tokens, int is_space)
 {
-	int start = i;
-	char	*value;
-
-	while (input[i] && !ft_isspace(input[i]) && !ft_strchr(">'\"<|", input[i]))
-		i++;
-	value = ft_substr(input, start, i - start);
-	add_tokens(tokens, value, TOKEN_WORD, is_space, -1);
-	free(value);
-	return (i);
+    int start = i;
+    char *value;
+    
+    while (input[i] && !ft_isspace(input[i]) && 
+           !ft_strchr("><|\"'", input[i]))
+        i++;
+    
+    value = ft_substr(input, start, i - start);
+    add_tokens(tokens, value, TOKEN_WORD, is_space, -1);
+    free(value);
+    return (i);
 }
 
 t_token *lexer(char *input)
@@ -173,18 +175,18 @@ t_token *lexer(char *input)
 			continue;
 		}
 
-		if (ft_strchr("><|", input[i]))
-			result = handle_operator(input, i, &tokens);
-		else if (input[i] == '\'' || input[i] == '"')
-		{
-			result = handle_quotes(input, i, &tokens, input[i], is_space);
-			is_space = 0;
-		}
-		else
-		{
-			result = handle_word(input, i, &tokens, is_space);
-			is_space = 0;
-		}
+if (ft_strchr("><|", input[i]))
+    result = handle_operator(input, i, &tokens);
+else if (input[i] == '\'' || input[i] == '"')
+{
+    result = handle_quotes(input, i, &tokens, input[i], is_space);
+	is_space = 0;
+}
+else
+{
+    result = handle_word(input, i, &tokens, is_space);
+	is_space = 0;
+}
 		if (result == -1)
 		{
 			// free_tokens(tokens);

@@ -14,6 +14,7 @@ t_token	*token_join(t_token **start)
 {
 	t_token	*tmp;
 	t_token	*new_tk;
+	// t_token	*prev;
 	char	*rt_tmp;
 
 	new_tk = malloc(sizeof(t_token));
@@ -22,8 +23,13 @@ t_token	*token_join(t_token **start)
 	tmp = *start;
 	new_tk->value = ft_strdup(tmp->value);
 	cp_lbakiya(tmp, new_tk);
+	if (new_tk->type != TOKEN_WORD)
+	{
+		*start = tmp->next;
+		return (new_tk);
+	}
 	tmp = tmp->next;
-	while (tmp && !tmp->is_space)
+	while (tmp && !tmp->is_space && (tmp->type == TOKEN_WORD))
 	{
 		rt_tmp = new_tk->value;
 		new_tk->value = ft_strjoin(new_tk->value, tmp->value);

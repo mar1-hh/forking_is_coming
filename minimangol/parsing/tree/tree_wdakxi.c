@@ -516,6 +516,19 @@ int	run_execve(t_ast *node, t_shell *sh)
 	exit(1);
 }
 
+void	is_dir(char **args)
+{
+	DIR	*dir;
+
+	dir = opendir(args[0]);
+	if (dir)
+	{
+		printf("minishell: %s is a directory\n", args[0]);
+		closedir(dir);
+		exit(126);
+	}
+}
+
 int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 {
 	int	status;
@@ -523,6 +536,7 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	node->pid = fork();
 	if (!node->pid)
 	{
+		is_dir(node->args);
 		if (node->args && is_builtin(node->args[0]))
 			exit(execute_builtin(node, infd, outfd, sh));
 		if (cs != -1)
@@ -541,14 +555,6 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 		}
 		run_execve(node, sh);
 	}
-<<<<<<< HEAD
-=======
-	if (node->pid < 0)
-	{
-		perror("fork");
-		return (1);
-	}
->>>>>>> eeaac112b20612fe27a0a71996721fdd27532d3f
 	return (0);
 }
 

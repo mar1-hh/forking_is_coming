@@ -31,6 +31,8 @@ char    *take_key(char *line, int *end, t_shell *sh)
 	size = 0;
 	while (line[size] && line[size] != ' ' && line[size] != '\'' && line[size] != '\"' && line[size] != '$')
 		size++;
+	if (line[0] == '?')
+		size = 1;
 	key = ft_calloc(size + 1, sizeof(char));
 	if (!key)
 		return (NULL);

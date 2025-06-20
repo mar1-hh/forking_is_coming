@@ -98,7 +98,6 @@ static void	handle_sign(int sign)
 	int		status;
 
 	pid = waitpid(-1, &status, 0);
-
 	(void)sign;
 	write(2, "\n", 1);
 	if (g_data.hd)

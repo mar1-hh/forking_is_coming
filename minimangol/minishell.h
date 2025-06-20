@@ -125,8 +125,6 @@ int         execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *s
 /* Helper functions */
 int         check_syntax_errors(t_token *tokens);
 void        error(char *str);
-void        print_redirs(t_redir *redirs);
-
 void    flaging_pipe(t_ast *sequence);
 
 void	get_env(t_env **lst, char **env);

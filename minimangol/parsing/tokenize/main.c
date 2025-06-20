@@ -2,7 +2,7 @@
 
 struct s_global	g_data;
 
-static void cleanup(t_token *tokens, t_redir *redirs, t_ast *head, char *input)
+static void	cleanup(t_token *tokens, t_redir *redirs, t_ast *head, char *input)
 {
 	if (tokens)
 		free_tokens(tokens);
@@ -24,34 +24,35 @@ void	print_lst(t_token *token)
 int	wai_st(t_ast *node)
 {
 	int	status;
-	
 
 	if (node->right && node->right->is_pipe)
 	{
 		waitpid(node->right->pid, &status, 0);
 	}
 	else if (node->e_token_type == TOKEN_WORD)
-	{
-		// if (!is_builtin(node->args[0]))
 		waitpid(node->pid, &status, 0);
-	}
 	while (wait(NULL) > 0);
 	return (WEXITSTATUS(status));
 }
 
-static int execute_command_sequence(char *input, t_shell *sh)
+static int	execute_command_sequence(char *input, t_shell *sh)
 {
-	t_ast *head = NULL;
-	t_redir *redirs = NULL;
-	t_token *tokens = NULL;
+	t_ast	*head;
+	t_redir	*redirs;
+	t_token	*tokens;
 	t_token	*new;
 
+	head = NULL;
+	redirs = NULL;
+	tokens = NULL;
 	tokens = lexer(input);
+	if(check_syntax_errors(tokens))
+		return 0;
 	if (!tokens)
 	{
 		printf("Lexer error in input: %s\n", input);
 		free(input);
-		return 1;
+		return (1);
 	}
 	expand_tokens(&tokens, sh);
 	new = joining_tokens(tokens);
@@ -61,16 +62,17 @@ static int execute_command_sequence(char *input, t_shell *sh)
 	{
 		printf("Parser error!\n");
 		cleanup(new, redirs, head, input);
-		return 1;
+		return (1);
 	}
 	if (prepare_all_herdocs(head, sh))
 		return (1);
 	execute_tree(head, 0, 1, -1, sh);
-	if (head->e_token_type == TOKEN_PIPE || (head->args && !is_builtin(head->args[0])))
+	if (head->e_token_type == TOKEN_PIPE ||
+		(head->args && !is_builtin(head->args[0])))
 		sh->exit_status = wai_st(head);
 	cleanup(tokens, redirs, head, input);
 	free_tokens(new);
-	return 0;
+	return (0);
 }
 
 static void	handle_quit(int sign)
@@ -124,18 +126,19 @@ void	some_inits(t_shell *sh)
 	sh->env_lst = NULL;
 }
 
-int main(int ac, char **av, char **env)
+int	main(int ac, char **av, char **env)
 {
-	char *input;
-	t_shell sh;
-	(void)ac;
-	(void)av;
+	char		*input;
+	t_shell		sh;
+	const char	*prompt;
 
+	(void) ac;
+	(void) av;
 	some_inits(&sh);
 	get_env(&(sh.env_lst), env);
 	while (1)
 	{
-		const char *prompt = "\001\033[0;31m\002MINISHELL𒉭 > \001\033[0m\002";
+		prompt = "\001\033[0;31m\002MINISHELL𒉭 > \001\033[0m\002";
 		input = readline(prompt);
 		if (!input)
 		{
@@ -146,16 +149,16 @@ int main(int ac, char **av, char **env)
 		if (!input)
 		{
 			printf("\thala!\n");
-			break;
+			break ;
 		}
 		if (ft_strlen(input) == 0)
 		{
 			free(input);
-			continue;
+			continue ;
 		}
 		if (execute_command_sequence(input, &sh))
-			continue;
+			continue ;
 	}
 	free_env(sh.env_lst);
-	return 0;
+	return (0);
 }

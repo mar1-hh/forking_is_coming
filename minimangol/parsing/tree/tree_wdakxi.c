@@ -222,7 +222,6 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 	return current;
 }
 
-
 t_ast *build_command_node(t_token **tokens)
 {
 	t_ast *cmd_node;
@@ -231,44 +230,44 @@ t_ast *build_command_node(t_token **tokens)
 	original_tokens = *tokens;
 	cmd_node = create_ast_node(TOKEN_WORD);
 	if (!cmd_node)
-		return (NULL);    
-	cmd_node->redirs = handle_redir(tokens);    
+		return (NULL);
+	cmd_node->redirs = handle_redir(tokens);
 	*tokens = merge_consecutive_words(*tokens, cmd_node);
 	return (cmd_node);
 }
 
-
-t_ast *connect_pipe_nodes(t_token **tokens)
+t_ast	*connect_pipe_nodes(t_token **tokens)
 {
-	t_ast *left;
+	t_ast	*left;
+	t_ast	*pipe_node;
 
 	left = build_command_node(tokens);
 	if (!left) 
 		return (NULL);
 	while (*tokens && (*tokens)->type == TOKEN_PIPE)
 	{
-		t_ast *pipe_node = create_ast_node(TOKEN_PIPE);
-		if (!pipe_node) {
+		pipe_node = create_ast_node(TOKEN_PIPE);
+		if (!pipe_node)
+		{
 			free_tree(left);
-			return NULL;
+			return (NULL);
 		}
 		pipe_node->left = left;
 		*tokens = (*tokens)->next;
 		pipe_node->right = build_command_node(tokens);
-		
 		if (!pipe_node->right)
 		{
 			free_tree(pipe_node);
-			return NULL;
+			return (NULL);
 		}
 		left = pipe_node;
 	}
-	return left;
+	return (left);
 }
 
-t_ast *build_ast(t_token *tokens)
+t_ast	*build_ast(t_token *tokens)
 {
-	return connect_pipe_nodes(&tokens);
+	return (connect_pipe_nodes(&tokens));
 }
 
 int	open_err(char *line)
@@ -340,10 +339,10 @@ int my_execve(t_ast *node, t_shell *sh)
 	return (1);
 }
 
-int execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh)
+int	execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh)
 {
 	int	st;
-	
+
 	if (handle_redirection(node, &infd, &outfd))
 		return (1);
 	sh->stdinput_fl = dup(0);
@@ -481,7 +480,6 @@ char	**create_mtr_env(t_env	*env_lst)
 		tmp = ft_strjoin("=", env_lst->value);
 		mtr[i] = ft_strjoin(env_lst->key, tmp);
 		free(tmp);
-		// printf("%s\n", mtr[i]);
 		i++;
 		env_lst = env_lst->next;
 	}
@@ -518,12 +516,10 @@ int	run_execve(t_ast *node, t_shell *sh)
 	exit(1);
 }
 
-
-
-int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
+int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 {
-	int status;
-	
+	int	status;
+
 	node->pid = fork();
 	if (!node->pid)
 	{
@@ -544,11 +540,11 @@ int execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 			close(outfd);
 		}
 		run_execve(node, sh);
-	}    
+	}
 	return (0);
 }
 
-int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
+int	abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 {
 	if (!node->args)
 	{
@@ -565,19 +561,10 @@ int abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	return (0);
 }
 
-void	print_red(t_redir *rd)
+int	execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 {
-	while (rd)
-	{
-		printf("%s\n", rd->file);
-		rd = rd->next;
-	}
-}
+	int	status;
 
-int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
-{
-	int status;
-	
 	status = 1;
 	if (!node)
 		return (1);
@@ -586,8 +573,10 @@ int execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 		flaging_pipe(node);
 		node->right->ar_pipe = malloc(2 * sizeof(int));
 		pipe(node->right->ar_pipe);
-		execute_tree(node->left, fd, node->right->ar_pipe[1], node->right->ar_pipe[0], sh);
-		status = execute_tree(node->right, node->right->ar_pipe[0], outfd, node->right->ar_pipe[1], sh);
+		execute_tree(node->left, fd, node->right->ar_pipe[1]
+			, node->right->ar_pipe[0], sh);
+		status = execute_tree(node->right, node->right->ar_pipe[0]
+				, outfd, node->right->ar_pipe[1], sh);
 		close(node->right->ar_pipe[0]);
 		close(node->right->ar_pipe[1]);
 	}

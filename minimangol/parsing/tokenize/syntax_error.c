@@ -99,9 +99,7 @@ int check_redir_without_file(t_token *tokens)
 	{
 		if (is_redir_token(current->type) && current->type != TOKEN_HEREDOC)
 		{
-			next = current->next;            
-			while (next && next->is_space)
-				next = next->next;            
+			next = current->next;                       
 			if (!next || next->type != TOKEN_WORD)
 			{
 				if (current->type == TOKEN_REDIR_IN)
@@ -110,8 +108,6 @@ int check_redir_without_file(t_token *tokens)
 					printf("minishell: syntax error near unexpected token `>'\n");
 				else if (current->type == TOKEN_APPEND)
 					printf("minishell: syntax error near unexpected token `>>'\n");
-				else if (current->type == TOKEN_HEREDOC)
-					printf("minishell: syntax error near unexpected token `<<'\n");
 				return (1);
 			}
 		}
@@ -136,14 +132,20 @@ int check_consecutive_redirections(t_token *tokens)
 			if (next && next->type == current->type)
 			{
 				if (current->type == TOKEN_REDIR_IN)
+				{
 					printf("minishell: syntax error near unexpected token `<'\n");
+					return (1);
+				}
 				else if (current->type == TOKEN_REDIR_OUT)
+				{
 					printf("minishell: syntax error near unexpected token `>'\n");
+					return (1);
+				}
 				else if (current->type == TOKEN_APPEND)
+				{
 					printf("minishell: syntax error near unexpected token `>>'\n");
-				else if (current->type == TOKEN_HEREDOC)
-					printf("minishell: syntax error near unexpected token `<<'\n");
-				return (1);
+					return (1);
+				}
 			}
 		}
 		current = current->next;
@@ -161,10 +163,11 @@ int check_pipe_after_redir(t_token *tokens)
 	{
 		if (is_redir_token(current->type))
 		{
-			next = current->next;            
+			next = current->next;
+			printf("%s\n", next->value);
 			if (next && next->type == TOKEN_WORD)
 				next = next->next;
-			if (next && next->type == TOKEN_PIPE)
+			else if (next && next->type == TOKEN_PIPE)
 			{
 				printf("minishell: syntax error near unexpected token `|'\n");
 				return (1);
@@ -265,28 +268,28 @@ int check_conflicting_redirections(t_token *tokens)
 	return (0);
 }
 
-// int check_syntax_errors(t_token *tokens)
-// {
-// 	if (!tokens)
-// 		return (1);
-// 	if (check_unclosed_quotes(tokens))
-// 		return (1);
-// 	if (check_redir_without_file(tokens))
-// 		return (1);
-// 	if (check_pipe_position(tokens))
-// 		return (1);    
-// 	if (check_consecutive_pipes(tokens))
-// 		return (1);    
-// 	// if (check_trailing_redir(tokens))
-// 	// 	return (1);
-// 	if (check_pipe_after_redir(tokens))
-// 		return (1);
-// 	if (check_empty_command(tokens))
-// 		return (1);
-// 	// if (check_consecutive_redirections(tokens))
-// 	// 	return (1);
-// 	return (0);
-// }
+int check_syntax_errors(t_token *tokens)
+{
+	if (!tokens)
+		return (1);
+	if (check_unclosed_quotes(tokens))
+		return (1);
+	if (check_redir_without_file(tokens))
+		return (1);
+	if (check_pipe_position(tokens))
+		return (1);    
+	if (check_consecutive_pipes(tokens))
+		return (1);    
+	if (check_trailing_redir(tokens))
+		return (1);
+	if (check_pipe_after_redir(tokens))
+		return (1);
+	if (check_empty_command(tokens))
+		return (1);
+	if (check_consecutive_redirections(tokens))
+		return (1);
+	return (0);
+}
 
 // void print_syntax_error(char *token)
 // {

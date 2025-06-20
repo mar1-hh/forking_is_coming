@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 13:39:43 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/19 20:07:00 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/20 16:09:37 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	rm_node(t_env **lst, char *str)
 {
 	t_env	*tmp;
 	t_env	*env_lst;
-	
+
 	env_lst = *lst;
 	if (!ft_strcmp(env_lst->key, str))
 	{

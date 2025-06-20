@@ -5,18 +5,20 @@ char	*ret_env_v(t_shell *sh, char *str)
 	t_env	*lst;
 
 	if (!ft_strcmp(str, "?"))
+	{
+		free(str);
 		return (ft_itoa(sh->exit_status));
+	}
 	lst = sh->env_lst;
 	while (lst)
 	{
 		if (!ft_strcmp(lst->key, str))
 		{
 			free(str);
-			return lst->value;
+			return (ft_strdup(lst->value));
 		}
 		lst = lst->next;
 	}
-	// printf("1337\n");
 	return (ft_strdup(""));
 }
 
@@ -32,7 +34,6 @@ char    *take_key(char *line, int *end, t_shell *sh)
 	if (!key)
 		return (NULL);
 	ft_memcpy(key, line, size);
-	// printf("%s|||||\n", key);
 	key = ret_env_v(sh, key);
 	*end = size;
 	return (key);
@@ -72,6 +73,7 @@ char	*expand_line(char **line, t_shell *sh, t_token *next)
 			free(exp_var.tmp);
 			exp_var.tmp = exp_var.return_value;
 			i = i + ft_strlen(exp_var.ptr) - 1;
+			free(exp_var.ptr);
 		}
 		i++;
 	}

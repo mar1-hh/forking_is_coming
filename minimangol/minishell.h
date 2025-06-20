@@ -10,8 +10,9 @@
 # include <fcntl.h>
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <sys/dir.h>
 # include <stdbool.h>
-#include <signal.h>
+# include <signal.h>
 # include "libft/libft.h"
 
 typedef enum e_token_type

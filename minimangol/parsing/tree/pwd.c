@@ -3,23 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   pwd.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 13:46:05 by marouane          #+#    #+#             */
-/*   Updated: 2025/05/23 13:46:16 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/19 16:14:50 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-int	ft_pwd()
+int	ft_pwd(t_env *env_lst)
 {
 	char	*ptr;
 
 	ptr = getcwd(NULL, 0);
 	if (!ptr)
 	{
-		perror("pwd");
+		
 		return (1);
 	}
 	printf("%s\n", ptr);

@@ -1,58 +1,60 @@
 #include "../../minishell.h"
 
-int is_redir_token(t_token_type type)
+int	is_redir_token(t_token_type type)
 {
 	return (type == TOKEN_REDIR_IN || type == TOKEN_REDIR_OUT || 
 			type == TOKEN_APPEND || type == TOKEN_HEREDOC);
 }
 
-int is_operator_token(t_token_type type)
+int	is_operator_token(t_token_type type)
 {
 	return (type == TOKEN_PIPE || is_redir_token(type));
 }
 
-int check_unclosed_quotes(t_token *tokens)
+static void	update_quote_state(const char *str, int *s_quote, int *d_quote)
 {
-	t_token		*current;
-	int			single_quote_open;
-	int			double_quote_open;
-	
-	current = tokens;
-	single_quote_open = 0;
-	double_quote_open = 0;
-	while (current)
+	int	i;
+
+	i = 0;
+	while (str[i])
 	{
-		if (current->value)
-		{
-			char *str = current->value;
-			int i = 0;
-			while (str[i])
-			{
-				if (str[i] == '\'' && !double_quote_open)
-					single_quote_open = !single_quote_open;
-				else if (str[i] == '"' && !single_quote_open)
-					double_quote_open = !double_quote_open;
-				i++;
-			}
-		}
-		current = current->next;
+		if (str[i] == '\'' && !(*d_quote))
+			*s_quote = !(*s_quote);
+		else if (str[i] == '"' && !(*s_quote))
+			*d_quote = !(*d_quote);
+		i++;
 	}
-	if (single_quote_open || double_quote_open)
+}
+
+int	check_unclosed_quotes(t_token *tokens)
+{
+	int	sq;
+	int	dq;
+
+	sq = 0;
+	dq = 0;
+	while (tokens)
 	{
-		if (single_quote_open)
-			printf("minishell: syntax error: unclosed single quote\n");
-		else
-			printf("minishell: syntax error: unclosed double quote\n");
+		if (tokens->value)
+			update_quote_state(tokens->value, &sq, &dq);
+		tokens = tokens->next;
+	}
+	if (sq || dq)
+	{
+		printf("minishell: syntax error: unclosed %s quote\n",
+			sq ? "single" : "double");
 		return (1);
 	}
 	return (0);
 }
 
-int check_pipe_position(t_token *tokens)
+int	check_pipe_position(t_token *tokens)
 {
-	t_token *current = tokens;
-	t_token *last_token = NULL;
-	
+	t_token *current;
+	t_token *last_token;
+
+	current = tokens;
+	last_token = NULL;
 	if (current && current->type == TOKEN_PIPE)
 	{
 		printf("minishell: syntax error near unexpected token `|'\n");
@@ -69,14 +71,14 @@ int check_pipe_position(t_token *tokens)
 		printf("minishell: syntax error near unexpected token `|'\n");
 		return (1);
 	}
-	
 	return (0);
 }
 
 int check_consecutive_pipes(t_token *tokens)
 {
-	t_token *current = tokens;
-	
+	t_token *current;
+
+	current = tokens;
 	while (current && current->next)
 	{
 		if (current->type == TOKEN_PIPE && current->next->type == TOKEN_PIPE)
@@ -109,43 +111,6 @@ int check_redir_without_file(t_token *tokens)
 				else if (current->type == TOKEN_APPEND)
 					printf("minishell: syntax error near unexpected token `>>'\n");
 				return (1);
-			}
-		}
-		current = current->next;
-	}
-	return (0);
-}
-
-int check_consecutive_redirections(t_token *tokens)
-{
-	t_token		*current;
-	t_token		*next;
-
-	current = tokens;
-	while (current && current->next)
-	{
-		if (is_redir_token(current->type))
-		{
-			next = current->next;            
-			if (next && next->type == TOKEN_WORD)
-				next = next->next;            
-			if (next && next->type == current->type)
-			{
-				if (current->type == TOKEN_REDIR_IN)
-				{
-					printf("minishell: syntax error near unexpected token `<'\n");
-					return (1);
-				}
-				else if (current->type == TOKEN_REDIR_OUT)
-				{
-					printf("minishell: syntax error near unexpected token `>'\n");
-					return (1);
-				}
-				else if (current->type == TOKEN_APPEND)
-				{
-					printf("minishell: syntax error near unexpected token `>>'\n");
-					return (1);
-				}
 			}
 		}
 		current = current->next;
@@ -231,38 +196,36 @@ int check_empty_command(t_token *tokens)
 	return (0);
 }
 
-int check_conflicting_redirections(t_token *tokens)
+static int	update_redir_flags(int type, int *out, int *append)
 {
-	t_token *current = tokens;
-	int has_stdout_redir = 0;
-	int has_append_redir = 0;
-	
-	while (current)
+	if (type == TOKEN_REDIR_OUT || type == TOKEN_APPEND)
 	{
-		if (current->type == TOKEN_PIPE)
+		if (*out || *append)
 		{
-			has_stdout_redir = 0;
-			has_append_redir = 0;
+			printf("minishell: syntax error: multiple output redirections\n");
+			return (1);
 		}
-		else if (current->type == TOKEN_REDIR_OUT)
-		{
-			if (has_stdout_redir || has_append_redir)
-			{
-				printf("minishell: syntax error: multiple output redirections\n");
-				return (1);
-			}
-			has_stdout_redir = 1;
-		}
-		else if (current->type == TOKEN_APPEND)
-		{
-			if (has_stdout_redir || has_append_redir)
-			{
-				printf("minishell: syntax error: multiple output redirections\n");
-				return (1);
-			}
-			has_append_redir = 1;
-		}
-		current = current->next;
+		if (type == TOKEN_REDIR_OUT)
+			*out = 1;
+		else
+			*append = 1;
+	}
+	return (0);
+}
+
+int	check_conflicting_redirections(t_token *tokens)
+{
+	t_token	*cur = tokens;
+	int		out = 0;
+	int		append = 0;
+
+	while (cur)
+	{
+		if (cur->type == TOKEN_PIPE)
+			out = append = 0;
+		else if (update_redir_flags(cur->type, &out, &append))
+			return (1);
+		cur = cur->next;
 	}
 	return (0);
 }
@@ -285,36 +248,5 @@ int check_syntax_errors(t_token *tokens)
 		return (1);
 	if (check_empty_command(tokens))
 		return (1);
-	if (check_consecutive_redirections(tokens))
-		return (1);
 	return (0);
 }
-
-// void print_syntax_error(char *token)
-// {
-//     printf("minishell: syntax error near unexpected token `%s'\n", token);
-// }
-// int check_invalid_combinations(t_token *tokens)
-// {
-//     t_token *current = tokens;
-	
-//     while (current && current->next)
-//     {
-//         // Check for << followed by >>
-//         if (current->type == TOKEN_HEREDOC && current->next->type == TOKEN_APPEND)
-//         {
-//             printf("minishell: syntax error near unexpected token `>>'\n");
-//             return (1);
-//         }
-		
-//         // Check for >> followed by <<
-//         if (current->type == TOKEN_APPEND && current->next->type == TOKEN_HEREDOC)
-//         {
-//             printf("minishell: syntax error near unexpected token `<<'\n");
-//             return (1);
-//         }
-		
-//         current = current->next;
-//     }
-//     return (0);
-// }

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/21 23:22:14 by achat             #+#    #+#             */
+/*   Updated: 2025/06/21 23:22:14 by achat            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 struct s_global	g_data;
@@ -10,15 +22,6 @@ static void	cleanup(t_token *tokens, t_ast *head, char *input)
 		free(input);
 	if (head)
 		free_tree(head);
-}
-
-void	print_lst(t_token *token)
-{
-	while (token)
-	{
-		printf("%s\n", token->value);
-		token = token->next;
-	}
 }
 
 int	wai_st(t_ast *node)
@@ -45,7 +48,10 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	tokens = NULL;
 	tokens = lexer(input);
 	if(check_syntax_errors(tokens))
-		return 0;
+	{
+		sh->exit_status = 258;
+		return 1;
+	}
 	if (!tokens)
 	{
 		printf("Lexer error in input: %s\n", input);

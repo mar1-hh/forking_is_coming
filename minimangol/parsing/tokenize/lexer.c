@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lexer.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/21 23:22:39 by achat             #+#    #+#             */
+/*   Updated: 2025/06/21 23:22:39 by achat            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 bool	is_redirection(t_token_type type)
@@ -165,15 +177,20 @@ t_token	*lexer(char *input)
 
 t_redir	*handle_redir(t_token **tokens)
 {
-	t_token *curr = *tokens;
-	t_redir *redirs = NULL;
-	t_redir *redir_tail = NULL;
+	t_token	*curr;
+	t_redir	*redirs;
+	t_redir	*redir_tail;
+	t_redir	*new_redir;
 
+	redir_tail = NULL;
+	redirs = NULL;
+	curr = *tokens;
 	while (curr && curr->next && curr->type != TOKEN_PIPE)
 	{
 		if (is_redirection(curr->type))
 		{
-			t_redir *new_redir = create_redir_node(curr->type, curr->next->value, curr->next->quote_type);
+			new_redir = create_redir_node(curr->type,
+					curr->next->value, curr->next->quote_type);
 			if (!redirs) 
 			{
 				redirs = new_redir;
@@ -183,14 +200,12 @@ t_redir	*handle_redir(t_token **tokens)
 			{
 				redir_tail->next = new_redir;
 				redir_tail = new_redir;
-			}            
+			}
 			curr = curr->next->next;
 		}
 		else
-		{
 			curr = curr->next;
-		}
 	}
-	return redirs;
+	return (redirs);
 }
 

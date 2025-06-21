@@ -239,16 +239,16 @@ int check_syntax_errors(t_token *tokens)
 		return (1);
 	if (check_unclosed_quotes(tokens))
 		return (1);
-	// if (check_redir_without_file(tokens))
-	// 	return (1);
+	if (check_redir_without_file(tokens))
+		return (1);
 	if (check_pipe_position(tokens))
 		return (1);    
 	if (check_consecutive_pipes(tokens))
 		return (1);    
 	if (check_trailing_redir(tokens))
 		return (1);
-	// if (check_pipe_after_redir(tokens))
-	// 	return (1);
+	if (check_pipe_after_redir(tokens))
+		return (1);
 	if (check_empty_command(tokens))
 		return (1);
 	return (0);

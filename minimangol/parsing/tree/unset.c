@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 13:39:43 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/20 16:09:37 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/21 16:49:15 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ void	rm_node(t_env **lst, char *str)
 	{
 		tmp = *lst;
 		*lst = tmp->next;
+		free(tmp->value);
+		free(tmp->key);
 		free(tmp);
 	}
 	while (env_lst->next)

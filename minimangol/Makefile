@@ -29,7 +29,6 @@ $(LIBFT):
 	@$(MAKE) -C $(LIBFT_DIR)
 
 $(NAME): $(LIBFT) $(OBJECTS)
-	@echo "$(GREEN)Linking executable...$(RESET)"
 	@$(CC) -o $(NAME) $(OBJECTS) -L$(LIBFT_DIR) -lft $(READLINE_LIB)
 	@echo "$(GREEN)✓ $(NAME) successfully built!$(RESET)"
 

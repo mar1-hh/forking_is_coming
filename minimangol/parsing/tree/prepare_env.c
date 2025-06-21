@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   prepare_env.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 16:21:39 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/21 00:43:31 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/21 14:42:39 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,22 @@ void	get_env(t_env **lst, char **env)
 
 int ft_env(t_env *lst)
 {
+	t_env	*tmp;
+	int		flag;
+
+	flag = 0;
+	tmp = lst;
+	while (tmp)
+	{
+		if (!ft_strcmp(tmp->key, "PATH"))
+			flag = 1;
+		tmp = tmp->next;
+	}
+	if (!flag)
+	{
+		printf("bash: env: No such file or directory\n");
+		return (1);
+	}
 	while (lst)
 	{
 		printf("%s=%s\n", lst->key, lst->value);

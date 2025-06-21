@@ -164,7 +164,6 @@ int check_pipe_after_redir(t_token *tokens)
 		if (is_redir_token(current->type))
 		{
 			next = current->next;
-			printf("%s\n", next->value);
 			if (next && next->type == TOKEN_WORD)
 				next = next->next;
 			else if (next && next->type == TOKEN_PIPE)

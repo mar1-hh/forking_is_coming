@@ -200,12 +200,11 @@ void	expand_tokens_2(t_token **token, t_shell *sh, int is_heredoc, char *line)
 	}
 }
 
-
 void	expand_tokens(t_token **token, t_shell *sh)
 {
 	char	*line;
 	int		is_heredoc;
-	
+
 	is_heredoc = 0;
 	if ((*token)->type == TOKEN_HEREDOC)
 		is_heredoc = 1;

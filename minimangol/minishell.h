@@ -126,6 +126,7 @@ int	check_unclosed_quotes(t_token *tokens);
 /* Redirection functions */
 /* Redirections */
 t_redir     *handle_redir(t_token **tokens);
+char	*get_token_string(t_token_type type);
 int         check_syntax_errors(t_token *tokens);
 
 /* Execution functions */
@@ -136,9 +137,17 @@ int         execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh);
 int         execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh);
 
 /* Helper functions */
+int	check_consecutive_redirections(t_token *tokens);
+int	check_trailing_redir(t_token *tokens);
 int         check_syntax_errors(t_token *tokens);
+int	check_empty_command(t_token *tokens);
+int check_pipe_after_redir(t_token *tokens);
 void        error(char *str);
+int	check_pipe_position(t_token *tokens);
 void    flaging_pipe(t_ast *sequence);
+int	check_conflicting_redirections(t_token *tokens);
+int	check_consecutive_pipes(t_token *tokens);
+int	check_redir_without_file(t_token *tokens);
 int	check_pipe_after_redir(t_token *tokens);
 void	get_env(t_env **lst, char **env);
 int 	ft_env(t_env *lst);

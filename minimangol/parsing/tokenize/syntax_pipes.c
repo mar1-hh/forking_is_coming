@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   syntax_error2.c                                    :+:      :+:    :+:   */
+/*   syntax_pipes.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/22 10:37:40 by achat             #+#    #+#             */
-/*   Updated: 2025/06/22 12:56:17 by achat            ###   ########.fr       */
+/*   Created: 2025/06/22 22:09:10 by achat             #+#    #+#             */
+/*   Updated: 2025/06/22 22:17:57 by achat            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,8 @@
 int	check_pipe_position(t_token *tokens)
 {
 	t_token	*current;
-	t_token	*last_token;
 
 	current = tokens;
-	last_token = NULL;
 	if (current && current->type == TOKEN_PIPE)
 	{
 		printf("minishell: syntax error near unexpected token `|'\n");
@@ -44,73 +42,62 @@ int	check_consecutive_pipes(t_token *tokens)
 	return (0);
 }
 
-int check_empty_command(t_token *tokens)
+static int	is_pipe_with_no_command(t_token *current)
 {
-	t_token		*current;
-	int			has_command;
+	if (current->next && is_operator_token(current->next->type))
+		print_error(get_token_string(current->next->type));
+	else
+		print_error("newline");
+	return (1);
+}
 
-	has_command = 0;
+int	check_empty_command(t_token *tokens)
+{
+	t_token	*current;
+	t_token	*prev;
+	int		has_command;
+
 	current = tokens;
+	prev = NULL;
+	has_command = 0;
 	while (current)
 	{
-		if (current->next && current->next->value)
+		if (current->type == TOKEN_PIPE)
 		{
-			if (!has_command && current->type == TOKEN_PIPE)
-			{
-				print_error(current->next->value);
-				return (1);
-			}
+			if (!has_command)
+				return (is_pipe_with_no_command(current));
 			has_command = 0;
-		}
-		else if (current->next && 
-			current->type == TOKEN_PIPE && !current->next->value)
-		{
-			print_error("newline");
-			return (1);
 		}
 		else if (current->type == TOKEN_WORD)
 			has_command = 1;
+		prev = current;
 		current = current->next;
 	}
+	if (prev && prev->type == TOKEN_PIPE)
+		return (print_error("newline"), 1);
 	return (0);
 }
 
-static int	update_redir_flags(int type, int *out, int *append)
+int	check_pipe_after_redir(t_token *tokens)
 {
-	if (type == TOKEN_REDIR_OUT || type == TOKEN_APPEND)
-	{
-		if (*out || *append)
-		{
-			printf("minishell: syntax error: multiple output redirections\n");
-			return (1);
-		}
-		if (type == TOKEN_REDIR_OUT)
-			*out = 1;
-		else
-			*append = 1;
-	}
-	return (0);
-}
+	t_token	*current;
+	t_token	*next;
 
-int	check_conflicting_redirections(t_token *tokens)
-{
-	t_token	*cur;
-	int		out;
-	int		append;
-
-	cur = tokens;
-	out = 0;
-	append = 0;
-	while (cur)
+	current = tokens;
+	while (current)
 	{
-		if (cur->type == TOKEN_PIPE)
+		if (is_redir_token(current->type))
 		{
-			out = 0;
-			append = 0;
+			next = current->next;
+			if (next && next->type == TOKEN_WORD)
+				next = next->next;
+			if (next && next->type == TOKEN_PIPE)
+			{
+				printf("minishell: syntax error near unexpected token `|'\n");
+				return (1);
+			}
 		}
-		else if (update_redir_flags(cur->type, &out, &append))
-			return (1);
-		cur = cur->next;
+		current = current->next;
 	}
 	return (0);
 }

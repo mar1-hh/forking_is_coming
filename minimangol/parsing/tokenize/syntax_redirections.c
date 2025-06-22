@@ -1,0 +1,125 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   syntax_redirections.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 22:13:31 by achat             #+#    #+#             */
+/*   Updated: 2025/06/22 22:15:27 by achat            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../minishell.h"
+
+int	check_consecutive_redirections(t_token *tokens)
+{
+	t_token	*curr;
+	t_token	*next;
+
+	curr = tokens;
+	while (curr)
+	{
+		if (is_redir_token(curr->type))
+		{
+			next = curr->next;
+			if (next && is_redir_token(next->type))
+			{
+				print_error(get_token_string(next->type));
+				return (1);
+			}
+			if (next && next->type == TOKEN_PIPE)
+			{
+				print_error("|");
+				return (1);
+			}
+		}
+		curr = curr->next;
+	}
+	return (0);
+}
+
+int	check_trailing_redir(t_token *tokens)
+{
+	t_token	*current;
+	t_token	*last_token;
+
+	current = tokens;
+	last_token = NULL;
+	while (current)
+	{
+		last_token = current;
+		current = current->next;
+	}
+	if (last_token && is_redir_token(last_token->type))
+	{
+		printf("minishell: syntax error near unexpected token `newline'\n");
+		return (1);
+	}
+	return (0);
+}
+
+int	check_redir_without_file(t_token *tokens)
+{
+	t_token	*current;
+	t_token	*next;
+
+	current = tokens;
+	while (current)
+	{
+		if (is_redir_token(current->type))
+		{
+			next = current->next;
+			if (!next || next->type != TOKEN_WORD)
+			{
+				if (next && is_operator_token(next->type))
+					print_error(get_token_string(next->type));
+				else
+					print_error("newline");
+				return (1);
+			}
+		}
+		current = current->next;
+	}
+	return (0);
+}
+
+static int	update_redir_flags(int type, int *out, int *append)
+{
+	if (type == TOKEN_REDIR_OUT || type == TOKEN_APPEND)
+	{
+		if (*out || *append)
+		{
+			printf("minishell: syntax error: multiple output redirections\n");
+			return (1);
+		}
+		if (type == TOKEN_REDIR_OUT)
+			*out = 1;
+		else
+			*append = 1;
+	}
+	return (0);
+}
+
+int	check_conflicting_redirections(t_token *tokens)
+{
+	t_token	*cur;
+	int		out;
+	int		append;
+
+	cur = tokens;
+	out = 0;
+	append = 0;
+	while (cur)
+	{
+		if (cur->type == TOKEN_PIPE)
+		{
+			out = 0;
+			append = 0;
+		}
+		else if (update_redir_flags(cur->type, &out, &append))
+			return (1);
+		cur = cur->next;
+	}
+	return (0);
+}

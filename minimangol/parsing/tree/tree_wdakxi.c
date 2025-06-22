@@ -268,7 +268,7 @@ int my_execve(t_ast *node, t_shell *sh)
 	else if (!ft_strcmp(node->args[0], "export"))
 		return (ft_export(&sh->env_lst, node->args));
 	else if (!ft_strcmp(node->args[0], "cd"))
-		return (ft_cd(sh->env_lst, node->args[1]));
+		return (ft_cd(&sh->env_lst, node->args[1]));
 	else if (!ft_strcmp(node->args[0], "unset"))
 		return (ft_unset(&sh->env_lst, node->args));
 	else if (!ft_strcmp(node->args[0], "pwd"))

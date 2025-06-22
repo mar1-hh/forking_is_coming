@@ -155,7 +155,7 @@ char	**split_env(char *str);
 int ft_export(t_env **lst, char **export_param);
 void	add_back_env(t_env **lst, t_env *new);
 t_env	*new_env_node(char **mtr);
-int	ft_cd(t_env *head, char *path);
+int	ft_cd(t_env **head, char *path);
 int	ft_unset(t_env **lst, char **argv);
 int	ft_pwd();
 int ft_echo(char **args);
@@ -180,5 +180,6 @@ char	**split_env(char *str);
 int	size_of_var(char *str);
 t_env	*new_env_node(char **mtr);
 void	add_back_env(t_env **lst, t_env *new);
+void	set_operator_type(char c, char next, int *type, int *len);
 
 #endif

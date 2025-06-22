@@ -9,7 +9,8 @@ SOURCES = \
 	parsing/tree/echo.c parsing/tree/exit.c parsing/tree/prepare_heredoc.c parsing/tokenize/expand.c\
 	parsing/tree/joining_args.c parsing/tree/free_all.c parsing/tokenize/expand_split.c\
 	parsing/tokenize/syntax_pipes.c parsing/tokenize/syntax_main.c parsing/tokenize/syntax_quates.c\
-	parsing/tokenize/syntax_redirections.c
+	parsing/tokenize/syntax_redirections.c parsing/tokenize/lexer_utils.c parsing/tokenize/token_utils.c\
+	parsing/tokenize/redir.c
 
 OBJECTS = $(SOURCES:.c=.o)
 

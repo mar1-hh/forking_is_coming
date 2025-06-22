@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 10:35:04 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/22 20:24:41 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/22 23:52:59 by marouane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,30 @@ int	cd_err(char *old_pwd)
 	return 1;
 }
 
-void	update_old_new(t_env *head, char *old_pwd, char *pwd)
+void	upd_help(t_env **env, char *pwd, int type)
+{
+	char	**mtr;
+
+	mtr = malloc(3 * sizeof(char*));
+	if (type == 1)
+		mtr[0] = ft_strdup("PWD");
+	else
+		mtr[0] = ft_strdup("OLDPWD");
+	mtr[1] = pwd;
+	mtr[2] = NULL;	
+	add_back_env(env, new_env_node(mtr));
+	free_mtx(mtr);
+}
+
+void	update_old_new(t_env **env, char *old_pwd, char *pwd)
 {
 	int	pwd_flag;
 	int	o_pwd_flag;
+	t_env	*head;
 
 	pwd_flag = 0;
 	o_pwd_flag = 0;
+	head = *env;
 	while (head)
 	{
 		if (!ft_strcmp("OLDPWD", head->key))
@@ -42,15 +59,21 @@ void	update_old_new(t_env *head, char *old_pwd, char *pwd)
 		}
 		head = head->next;
 	}
+	if (!pwd_flag)
+		upd_help(env, pwd, 1);
+	if (!o_pwd_flag)
+		upd_help(env, old_pwd, 2);
 }
 
-int	to_home(t_env *head, char *old_pwd)
+int	to_home(t_env **env, char *old_pwd)
 {
 	char	*pwd;
+	t_env	*head;
 	t_env	*tmp;
 
 	pwd = NULL;
 	tmp = head;
+	head = *env;
 	while (head)
 	{
 		if (!ft_strcmp(head->key, "HOME"))
@@ -65,13 +88,11 @@ int	to_home(t_env *head, char *old_pwd)
 	chdir(pwd);
 	free(pwd);
 	pwd = getcwd(NULL, 0);
-	update_old_new(tmp, old_pwd, pwd);
+	update_old_new(env, old_pwd, pwd);
 	return (0);
 }
 
-// unset env handliha hh
-
-int	ft_cd(t_env *head, char *path)
+int	ft_cd(t_env **head, char *path)
 {
 	char	*old_pwd;
 	char	*pwd;

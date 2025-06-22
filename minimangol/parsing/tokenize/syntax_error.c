@@ -111,9 +111,9 @@ int	check_syntax_errors(t_token *tokens)
 	if (check_redir_without_file(tokens))
 		return (1);
 	if (check_pipe_position(tokens))
-		return (1);    
+		return (1);
 	if (check_consecutive_pipes(tokens))
-		return (1);    
+		return (1);
 	if (check_trailing_redir(tokens))
 		return (1);
 	if (check_pipe_after_redir(tokens))

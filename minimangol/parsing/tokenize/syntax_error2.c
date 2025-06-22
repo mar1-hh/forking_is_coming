@@ -6,7 +6,7 @@
 /*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 10:37:40 by achat             #+#    #+#             */
-/*   Updated: 2025/06/22 10:41:08 by achat            ###   ########.fr       */
+/*   Updated: 2025/06/22 12:56:17 by achat            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,17 +20,6 @@ int	check_pipe_position(t_token *tokens)
 	current = tokens;
 	last_token = NULL;
 	if (current && current->type == TOKEN_PIPE)
-	{
-		printf("minishell: syntax error near unexpected token `|'\n");
-		return (1);
-	}
-	while (current)
-	{
-		if (current->type != TOKEN_WORD || current->value)
-			last_token = current;
-		current = current->next;
-	}
-	if (last_token && last_token->type == TOKEN_PIPE)
 	{
 		printf("minishell: syntax error near unexpected token `|'\n");
 		return (1);
@@ -64,19 +53,23 @@ int check_empty_command(t_token *tokens)
 	current = tokens;
 	while (current)
 	{
-		if (current->type == TOKEN_PIPE)
+		if (current->next && current->next->value)
 		{
-			if (!has_command)
+			if (!has_command && current->type == TOKEN_PIPE)
 			{
-				printf("minishell: syntax error near unexpected token `|'\n");
+				print_error(current->next->value);
 				return (1);
 			}
 			has_command = 0;
 		}
-		else if (current->type == TOKEN_WORD)
+		else if (current->next && 
+			current->type == TOKEN_PIPE && !current->next->value)
 		{
-			has_command = 1;
+			print_error("newline");
+			return (1);
 		}
+		else if (current->type == TOKEN_WORD)
+			has_command = 1;
 		current = current->next;
 	}
 	return (0);

@@ -30,7 +30,7 @@ $(LIBFT):
 	@$(MAKE) -C $(LIBFT_DIR)
 
 $(NAME): $(LIBFT) $(OBJECTS)
-	@$(CC) -o $(NAME) $(OBJECTS) -L$(LIBFT_DIR) -lft $(READLINE_LIB)
+	@$(CC) -o $(NAME) $(OBJECTS) -L$(LIBFT_DIR) -lft $(READLINE_LIB) -fsanitize=address
 	@echo "$(GREEN)✓ $(NAME) successfully built!$(RESET)"
 
 %.o: %.c minishell.h

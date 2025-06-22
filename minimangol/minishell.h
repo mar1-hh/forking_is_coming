@@ -167,5 +167,9 @@ void	free_tree(t_ast *head);
 void	free_env(t_env *env);
 int	prepare_herdoc(t_ast *head, t_shell *sh);
 char	**ft_split_exp(char const *s, char c);
+char	**split_env(char *str);
+int	size_of_var(char *str);
+t_env	*new_env_node(char **mtr);
+void	add_back_env(t_env **lst, t_env *new);
 
 #endif

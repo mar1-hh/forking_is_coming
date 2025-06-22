@@ -38,6 +38,58 @@ int	wai_st(t_ast *node)
 	return (WEXITSTATUS(status));
 }
 
+void	print_tk(t_token *tk)
+{
+	while (tk)
+	{
+		printf("%s\n", tk->value);
+		tk = tk->next;
+	}
+}
+
+void	trim_first(t_token *tok)
+{
+	char	*tmp;
+
+	tmp = tok->value;
+	if (tmp[0] == ' ')
+	{
+		tok->value = ft_strdup(tmp + 1);
+		free(tmp);
+	}
+}
+
+void	trim_last(t_token *tok)
+{
+	char	*tmp;
+	int		size;
+
+	tmp = tok->value;
+	size = ft_strlen(tmp);
+	if (tmp[size - 1] == ' ')
+	{
+		tok->value = ft_calloc(1, size);
+		ft_memcpy(tok->value, tmp, size - 1);
+		free(tmp);
+	}
+}
+
+void	trim_first_last(t_token *lst)
+{
+	int	i;
+
+	i = 0;	
+	while (lst)
+	{
+		if (!i && lst->quote_type == -1)
+			trim_first(lst);
+		if (!lst->next && lst->quote_type == -1)
+			trim_last(lst);
+		lst = lst->next;
+		i++;
+	}
+}
+
 static int	execute_command_sequence(char *input, t_shell *sh)
 {
 	t_ast	*head;
@@ -59,6 +111,7 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 		return (1);
 	}
 	expand_tokens(&tokens, sh);
+	trim_first_last(tokens);
 	new = joining_tokens(tokens);
 	head = build_ast(new, sh);
 	if (!head)
@@ -106,11 +159,19 @@ static void	signals(void)
 	signal(SIGQUIT, SIG_IGN);
 }
 
-void	some_inits(t_shell *sh)
+void	some_inits(t_shell *sh, char **env)
 {
+	char	**mtr;
+	
 	signals();
-	sh->exit_status = 0;
 	sh->env_lst = NULL;
+	if (!env[0])
+	{
+		mtr = split_env("PATH=/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/.brew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki:/Users/msaadaou/.brew/bin");
+		add_back_env(&sh->env_lst, new_env_node(mtr));
+		free_mtx(mtr);
+	}
+	sh->exit_status = 0;
 }
 
 int	main(int ac, char **av, char **env)
@@ -121,7 +182,7 @@ int	main(int ac, char **av, char **env)
 
 	(void) ac;
 	(void) av;
-	some_inits(&sh);
+	some_inits(&sh, env);
 	get_env(&(sh.env_lst), env);
 	while (1)
 	{

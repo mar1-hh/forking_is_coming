@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 10:35:04 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/21 13:24:54 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/22 20:24:41 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,24 @@ int	cd_err(char *old_pwd)
 
 void	update_old_new(t_env *head, char *old_pwd, char *pwd)
 {
+	int	pwd_flag;
+	int	o_pwd_flag;
+
+	pwd_flag = 0;
+	o_pwd_flag = 0;
 	while (head)
 	{
 		if (!ft_strcmp("OLDPWD", head->key))
 		{
 			free(head->value);
 			head->value = old_pwd;
+			o_pwd_flag = 1;
 		}
 		else if (!ft_strcmp("PWD", head->key))
 		{
 			free(head->value);
 			head->value = pwd;
+			pwd_flag = 1;
 		}
 		head = head->next;
 	}
@@ -61,6 +68,8 @@ int	to_home(t_env *head, char *old_pwd)
 	update_old_new(tmp, old_pwd, pwd);
 	return (0);
 }
+
+// unset env handliha hh
 
 int	ft_cd(t_env *head, char *path)
 {

@@ -14,7 +14,6 @@ t_token	*token_join(t_token **start)
 {
 	t_token	*tmp;
 	t_token	*new_tk;
-	// t_token	*prev;
 	char	*rt_tmp;
 
 	new_tk = malloc(sizeof(t_token));

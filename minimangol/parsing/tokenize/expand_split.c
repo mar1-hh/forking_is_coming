@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/21 19:56:57 by msaadaou          #+#    #+#             */
-/*   Updated: 2025/06/21 20:02:21 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/22 15:56:26 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,8 @@ static char	*extract_word(char const *str, char c)
 char	**ft_split_exp(char const *s, char c)
 {
 	char	**buffer;
+	char	*tmp;
+	char	is_space;
 	int		i;
 
 	if (!s)
@@ -83,17 +85,30 @@ char	**ft_split_exp(char const *s, char c)
 	if (!buffer)
 		return (NULL);
 	i = 0;
+	is_space = *s;
 	while (*s != '\0')
 	{
 		if (!(*s == c))
 		{
 			buffer[i] = extract_word(s, c);
+			if (is_space == ' ' && !i)
+			{
+				tmp = buffer[i];
+				buffer[i] = ft_strjoin(" ", buffer[i]);
+				free(tmp);
+			}
 			if (!buffer[i++])
 				return (free_buffer(buffer, i - 1));
 			s += ft_strlen(buffer[i - 1]);
 		}
 		else
 			s++;
+	}
+	if (*(s - 1) == ' ')
+	{
+		tmp = buffer[i - 1];
+		buffer[i - 1] = ft_strjoin(buffer[i - 1], " ");
+		free(tmp);
 	}
 	buffer[i] = NULL;
 	return (buffer);

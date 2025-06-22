@@ -29,7 +29,7 @@ char    *take_key(char *line, int *end, t_shell *sh)
 	char	*key;
 
 	size = 0;
-	while (line[size] && line[size] != ' ' && line[size] != '\'' && line[size] != '\"' && line[size] != '$')
+	while (line[size] && (ft_isalnum(line[size]) || line[size] == '_'))
 		size++;
 	if (line[0] == '?')
 		size = 1;
@@ -92,13 +92,16 @@ void	print_nodes(t_token *tk)
 	}
 }
 
-void	add_help(char **mtx, t_token **lst, int is_space)
+void	add_help(char **mtx, t_token **lst, int is_space, t_token *next)
 {
 	int	i;
-	
+	// int	next_space;
+
 	i = 0;
 	while (mtx[i])
 	{
+		// if (mtx[i + 1] && mtx[i + 1][ft_strlen(mtx[i + 1] - 1)] == ' ')
+		// 	next_space = 1;
 		if (!i)
 			add_tokens(lst, mtx[i], TOKEN_WORD, is_space, -1);
 		else
@@ -114,7 +117,7 @@ void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 	t_token *lst;
 
 	lst = NULL;
-	mtx = ft_split(line, ' ');
+	mtx = ft_split_exp(line, ' ');
 	if (!mtx)
 		return ;
 	if (!mtx[0])
@@ -124,7 +127,7 @@ void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 		(*token)->value = ft_strdup("");
 		return ;
 	}
-	add_help(mtx, &lst, is_space);
+	add_help(mtx, &lst, is_space, next);
 	free_mtx(mtx);
 	free_node(*token);
 	*token = lst;
@@ -140,7 +143,7 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 	t_token	*tmp;
 
 	lst = NULL;
-	mtx = ft_split(line, ' ');
+	mtx = ft_split_exp(line, ' ');
 	if (!mtx)
 		return ;
 	if (!mtx[0])
@@ -150,7 +153,7 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 		free(mtx);
 		return ;
 	}
-	add_help(mtx, &lst, is_space);
+	add_help(mtx, &lst, is_space, next);
 	tmp = token->next;
 	token->next = lst;
 	while (lst->next)

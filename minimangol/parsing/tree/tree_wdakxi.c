@@ -19,11 +19,12 @@ t_token	*advance_token(t_token *token, int steps)
 	return (token);
 }
 
-static void initialize_ast_fields(t_ast *node, t_token_type type)
+static void initialize_ast_fields(t_ast *node, t_token_type type, t_shell *sh)
 {
 	node->e_token_type = type;
 	node->cmd = NULL;
 	node->args = NULL;
+	node->sh = sh;
 	node->arg_count = 0;
 	node->ar_pipe = NULL;
 	node->redirs = NULL;
@@ -33,12 +34,12 @@ static void initialize_ast_fields(t_ast *node, t_token_type type)
 	node->is_pipe = 0;
 }
 
-t_ast *create_ast_node(t_token_type type)
+t_ast *create_ast_node(t_token_type type, t_shell *sh)
 {
 	t_ast *node = malloc(sizeof(t_ast));
 	if (!node)
 		return NULL;
-	initialize_ast_fields(node, type);
+	initialize_ast_fields(node, type, sh);
 	return node;
 }
 
@@ -53,18 +54,21 @@ static void unlink_redir_pair(t_token **head, t_token *prev, t_token *target)
 
 t_token *remove_redirection_tokens(t_token **head)
 {
-	t_token *current = *head;
-	t_token *prev = NULL;
+	t_token	*current;
+	t_token	*prev;
+	t_token	*redir_target;
 
+	prev = NULL;
+	current = *head;
 	while (current)
 	{
 		if (is_redirection(current->type))
 		{
-			t_token *redir_target = current->next;
+			redir_target = current->next;
 			if (!redir_target || redir_target->type != TOKEN_WORD)
 			{
 				current = current->next;
-				continue;
+				continue ;
 			}
 			unlink_redir_pair(head, prev, redir_target);
 			current = redir_target->next;
@@ -162,11 +166,11 @@ t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 	return current;
 }
 
-t_ast *build_command_node(t_token **tokens)
+t_ast *build_command_node(t_token **tokens, t_shell *sh)
 {
 	t_ast *cmd_node;
 
-	cmd_node = create_ast_node(TOKEN_WORD);
+	cmd_node = create_ast_node(TOKEN_WORD, sh);
 	if (!cmd_node)
 		return (NULL);
 	cmd_node->redirs = handle_redir(tokens);
@@ -174,17 +178,17 @@ t_ast *build_command_node(t_token **tokens)
 	return (cmd_node);
 }
 
-t_ast	*connect_pipe_nodes(t_token **tokens)
+t_ast	*connect_pipe_nodes(t_token **tokens, t_shell *sh)
 {
 	t_ast	*left;
 	t_ast	*pipe_node;
 
-	left = build_command_node(tokens);
+	left = build_command_node(tokens, sh);
 	if (!left) 
 		return (NULL);
 	while (*tokens && (*tokens)->type == TOKEN_PIPE)
 	{
-		pipe_node = create_ast_node(TOKEN_PIPE);
+		pipe_node = create_ast_node(TOKEN_PIPE, sh);
 		if (!pipe_node)
 		{
 			free_tree(left);
@@ -192,7 +196,7 @@ t_ast	*connect_pipe_nodes(t_token **tokens)
 		}
 		pipe_node->left = left;
 		*tokens = (*tokens)->next;
-		pipe_node->right = build_command_node(tokens);
+		pipe_node->right = build_command_node(tokens, sh);
 		if (!pipe_node->right)
 		{
 			free_tree(pipe_node);
@@ -203,9 +207,9 @@ t_ast	*connect_pipe_nodes(t_token **tokens)
 	return (left);
 }
 
-t_ast	*build_ast(t_token *tokens)
+t_ast	*build_ast(t_token *tokens, t_shell *sh)
 {
-	return (connect_pipe_nodes(&tokens));
+	return (connect_pipe_nodes(&tokens, sh));
 }
 
 int	open_err(char *line)

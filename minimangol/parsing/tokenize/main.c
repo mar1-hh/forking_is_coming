@@ -47,10 +47,10 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	head = NULL;
 	tokens = NULL;
 	tokens = lexer(input);
-	if(check_syntax_errors(tokens))
+	if (check_syntax_errors(tokens))
 	{
 		sh->exit_status = 258;
-		return 1;
+		return (1);
 	}
 	if (!tokens)
 	{
@@ -60,7 +60,7 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	}
 	expand_tokens(&tokens, sh);
 	new = joining_tokens(tokens);
-	head = build_ast(new);
+	head = build_ast(new, sh);
 	if (!head)
 	{
 		printf("Parser error!\n");
@@ -71,7 +71,7 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	if (sh->exit_status)
 		return (1);
 	execute_tree(head, 0, 1, -1, sh);
-	if (head->e_token_type == TOKEN_PIPE ||
+	if (head->e_token_type == TOKEN_PIPE || 
 		(head->args && !is_builtin(head->args[0])))
 		sh->exit_status = wai_st(head);
 	cleanup(tokens, head, input);

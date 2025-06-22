@@ -44,7 +44,8 @@ t_redir	*create_redir_node(t_token_type type, char *file, int is_expnd)
 	return (new_redir);
 }
 
-void	add_tokens(t_token **head, char *value, int type, int is_space, int quote_type) // fix norm al 3abd
+void	add_tokens(t_token **head, char *value, int type
+		, int is_space, int quote_type) // fix norm al 3abd
 {
 	t_token	*new_token;
 	t_token	*last;

@@ -380,6 +380,8 @@ char	*debug_okda(char **env, char *cmd)
 		return (NULL);
 	if (!access(cmd, X_OK))
 		return (ft_strdup(cmd));
+	if (cmd[0] == '.' || cmd[0] == '/')
+		return (NULL);
 	cmdr = ft_strjoin("/", cmd);
 	if (!cmdr)
 		return (NULL);

@@ -3,17 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   token_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 22:30:06 by achat             #+#    #+#             */
-/*   Updated: 2025/06/22 22:31:25 by achat            ###   ########.fr       */
+/*   Updated: 2025/06/23 17:07:33 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	add_tokens(t_token **head, char *value, int type
-		, int is_space, int quote_type) // fix norm al 3abd
+void	add_tokens(t_token **head, char *value, int type, t_qu_sp *s_q)
 {
 	t_token	*new_token;
 	t_token	*last;
@@ -24,8 +23,8 @@ void	add_tokens(t_token **head, char *value, int type
 	new_token->value = ft_strdup(value);
 	new_token->type = type;
 	new_token->next = NULL;
-	new_token->is_space = is_space;
-	new_token->quote_type = quote_type;
+	new_token->is_space = s_q->is_space;
+	new_token->quote_type = s_q->quote_type;
 	if (!*head)
 	{
 		*head = new_token;

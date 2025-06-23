@@ -76,6 +76,12 @@ struct s_ast
 	struct s_ast  *node;
 };
 
+typedef struct	s_qu_sp
+{
+	int	is_space;
+	int	quote_type;
+}	t_qu_sp;
+
 typedef struct	s_env
 {
 	char			*key;
@@ -165,7 +171,7 @@ int prepare_all_herdocs(t_ast *head, t_shell *sh);
 int close_all_herdocs(t_redir *redirs);
 char	*expand_line(char **line, t_shell *sh, t_token *next);
 char	**join_arg(char **args, int *arr, int size);
-void add_tokens(t_token **head, char *value, int type, int is_space, int quote_type);
+void add_tokens(t_token **head, char *value, int type, t_qu_sp *s_q);
 void	expand_tokens(t_token **token, t_shell *sh);
 t_token	*joining_tokens(t_token *old_lst);
 int	is_builtin(char *cmd);

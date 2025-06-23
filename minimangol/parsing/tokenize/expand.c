@@ -100,20 +100,23 @@ void	print_nodes(t_token *tk)
 	}
 }
 
-void	add_help(char **mtx, t_token **lst, int is_space, t_token *next)
+void	add_help(char **mtx, t_token **lst, int is_space)
 {
 	int	i;
+	t_qu_sp	q_s_1;
+	t_qu_sp	q_s_2;
 
-	// int	next_space;
+	q_s_1.is_space = is_space;
+	q_s_1.quote_type = -1;
+	q_s_2.is_space = 1;
+	q_s_2.quote_type = -1;
 	i = 0;
 	while (mtx[i])
 	{
-		// if (mtx[i + 1] && mtx[i + 1][ft_strlen(mtx[i + 1] - 1)] == ' ')
-		// 	next_space = 1;
 		if (!i)
-			add_tokens(lst, mtx[i], TOKEN_WORD, is_space, -1);
+			add_tokens(lst, mtx[i], TOKEN_WORD, &q_s_1);
 		else
-			add_tokens(lst, mtx[i], TOKEN_WORD, 1, -1);
+			add_tokens(lst, mtx[i], TOKEN_WORD, &q_s_2);
 		i++;
 	}
 }
@@ -134,7 +137,7 @@ void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 		(*token)->value = ft_strdup("");
 		return ;
 	}
-	add_help(mtx, &lst, is_space, next);
+	add_help(mtx, &lst, is_space);
 	free_mtx(mtx);
 	free_node(*token);
 	*token = lst;
@@ -160,7 +163,7 @@ void	add_nodes(t_token *token, t_token *next, char *line, int is_space)
 		free(mtx);
 		return ;
 	}
-	add_help(mtx, &lst, is_space, next);
+	add_help(mtx, &lst, is_space);
 	tmp = token->next;
 	token->next = lst;
 	while (lst->next)

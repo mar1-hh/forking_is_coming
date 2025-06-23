@@ -133,8 +133,8 @@ int         check_syntax_errors(t_token *tokens);
 int        handle_redirection(t_ast *node, int *infd, int *outfd);
 t_redir *handle_redir(t_token **tokens);
 char        *debug_okda(char **env, char *cmd);
-int         execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh);
-int         execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh);
+int         execute_tree(t_ast *node, int fd, int outfd, int cs);
+int         execute_command(t_ast *node, int infd, int outfd, int cs);
 
 /* Helper functions */
 int	check_consecutive_redirections(t_token *tokens);

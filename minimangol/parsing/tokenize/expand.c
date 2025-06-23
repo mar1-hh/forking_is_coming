@@ -23,7 +23,7 @@ char	*ret_env_v(t_shell *sh, char *str)
 	return (ft_strdup(""));
 }
 
-char    *take_key(char *line, int *end, t_shell *sh)
+char	*take_key(char *line, int *end, t_shell *sh)
 {
 	int		size;
 	char	*key;
@@ -54,6 +54,15 @@ int	is_valide(t_token *next, char *line, int i)
 	return (0);
 }
 
+void	expand_line_help(t_expand *exp_var, int i)
+{
+	ft_memcpy(exp_var->return_value, exp_var->tmp, i);
+	ft_memcpy(exp_var->return_value + i, exp_var->ptr, ft_strlen(exp_var->ptr));
+	ft_memcpy(exp_var->return_value + i + ft_strlen(exp_var->ptr), exp_var->tmp
+		+ i + exp_var->offset + 1, ft_strlen(exp_var->tmp + i + exp_var->offset
+			+ 1));
+}
+
 char	*expand_line(char **line, t_shell *sh, t_token *next)
 {
 	t_expand	exp_var;
@@ -68,11 +77,10 @@ char	*expand_line(char **line, t_shell *sh, t_token *next)
 		if (is_valide(next, exp_var.tmp, i))
 		{
 			exp_var.ptr = take_key(exp_var.tmp + i + 1, &exp_var.offset, sh);
-			exp_var.size = i + ft_strlen(exp_var.ptr) + ft_strlen(exp_var.tmp + exp_var.offset + i);
+			exp_var.size = i + ft_strlen(exp_var.ptr) + ft_strlen(exp_var.tmp
+					+ exp_var.offset + i);
 			exp_var.return_value = ft_calloc(exp_var.size + 1, 1);
-			ft_memcpy(exp_var.return_value, exp_var.tmp, i);
-			ft_memcpy(exp_var.return_value + i, exp_var.ptr, ft_strlen(exp_var.ptr));
-			ft_memcpy(exp_var.return_value + i + ft_strlen(exp_var.ptr), exp_var.tmp + i + exp_var.offset + 1, ft_strlen(exp_var.tmp + i + exp_var.offset + 1));
+			expand_line_help(&exp_var, i);
 			free(exp_var.tmp);
 			exp_var.tmp = exp_var.return_value;
 			i = i + ft_strlen(exp_var.ptr) - 1;
@@ -85,7 +93,7 @@ char	*expand_line(char **line, t_shell *sh, t_token *next)
 
 void	print_nodes(t_token *tk)
 {
-	while (tk) 
+	while (tk)
 	{
 		printf("%s\n", tk->value);
 		tk = tk->next;
@@ -95,8 +103,8 @@ void	print_nodes(t_token *tk)
 void	add_help(char **mtx, t_token **lst, int is_space, t_token *next)
 {
 	int	i;
-	// int	next_space;
 
+	// int	next_space;
 	i = 0;
 	while (mtx[i])
 	{
@@ -110,11 +118,10 @@ void	add_help(char **mtx, t_token **lst, int is_space, t_token *next)
 	}
 }
 
-
 void	add_first_node(t_token **token, t_token *next, char *line, int is_space)
 {
 	char	**mtx;
-	t_token *lst;
+	t_token	*lst;
 
 	lst = NULL;
 	mtx = ft_split_exp(line, ' ');
@@ -171,7 +178,8 @@ void	is_here_doc(t_token *tmp, int *is_heredoc)
 		*is_heredoc = 0;
 }
 
-void	expand_tokens_2(t_token **token, t_shell *sh, int is_heredoc, char *line)
+void	expand_tokens_2(t_token **token, t_shell *sh, int is_heredoc,
+		char *line)
 {
 	t_token	*tmp;
 

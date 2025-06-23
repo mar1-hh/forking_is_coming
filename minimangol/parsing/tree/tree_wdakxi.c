@@ -473,6 +473,16 @@ void	is_dir(char **args)
 	}
 }
 
+int	pid_fail(int pid)
+{
+	if (pid < 0)
+	{
+		perror("fork");
+		return (1);
+	}
+	return (0);
+}
+
 int	execute_command(t_ast *node, int infd, int outfd, int cs)
 {
 	node->pid = fork();
@@ -497,12 +507,7 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs)
 		}
 		run_execve(node, node->sh);
 	}
-	if (node->pid < 0)
-	{
-		perror("fork");
-		return (1);
-	}
-	return (0);
+	return (pid_fail(node->pid));
 }
 
 int	abs_execute(t_ast *node, int infd, int outfd, int cs)
@@ -524,6 +529,23 @@ int	abs_execute(t_ast *node, int infd, int outfd, int cs)
 	return (0);
 }
 
+void	cls_pipe(t_ast *node)
+{
+	close(node->right->ar_pipe[0]);
+	close(node->right->ar_pipe[1]);
+}
+
+int	exec_word(t_ast *node, int fd, int outfd, int cs)
+{
+	if (abs_execute(node, fd, outfd, cs))
+	{
+		close_all_herdocs(node->redirs);
+		return (1);
+	}
+	close_all_herdocs(node->redirs);
+	return (0);
+}
+
 int	execute_tree(t_ast *node, int fd, int outfd, int cs)
 {
 	if (!node)
@@ -536,28 +558,18 @@ int	execute_tree(t_ast *node, int fd, int outfd, int cs)
 		if (execute_tree(node->left, fd, node->right->ar_pipe[1]
 			, node->right->ar_pipe[0]))
 		{
-			close(node->right->ar_pipe[0]);
-			close(node->right->ar_pipe[1]);
+			cls_pipe(node);
 			return (1);
 		}
 		if (execute_tree(node->right, node->right->ar_pipe[0]
 					, outfd, node->right->ar_pipe[1]))
 		{
-			close(node->right->ar_pipe[0]);
-			close(node->right->ar_pipe[1]);
+			cls_pipe(node);
 			return (1);
 		}
-		close(node->right->ar_pipe[0]);
-		close(node->right->ar_pipe[1]);
+		cls_pipe(node);
 	}
 	else if (node->e_token_type == TOKEN_WORD)
-	{
-		if (abs_execute(node, fd, outfd, cs))
-		{
-			close_all_herdocs(node->redirs);
-			return (1);
-		}
-		close_all_herdocs(node->redirs);
-	}
+		return (exec_word(node, fd, outfd, cs));
 	return (0);
 }

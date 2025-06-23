@@ -104,7 +104,10 @@ t_token	*lexer(char *input)
 		}
 		result = handle_lex_token(input, i, &tokens, &is_space);
 		if (result == -1)
+		{
+			free_tokens(tokens);
 			return (NULL);
+		}
 		i = result;
 	}
 	return (tokens);

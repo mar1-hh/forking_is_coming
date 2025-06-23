@@ -102,6 +102,7 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	if (check_syntax_errors(tokens))
 	{
 		sh->exit_status = 258;
+		free_tokens(tokens);
 		return (1);
 	}
 	if (!tokens)

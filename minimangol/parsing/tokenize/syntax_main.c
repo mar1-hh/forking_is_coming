@@ -6,7 +6,7 @@
 /*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 22:08:14 by achat             #+#    #+#             */
-/*   Updated: 2025/06/22 22:19:37 by achat            ###   ########.fr       */
+/*   Updated: 2025/06/23 16:52:51 by achat            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,6 @@ int	check_syntax_errors(t_token *tokens)
 {
 	if (!tokens)
 		return (1);
-	if (check_unclosed_quotes(tokens))
-		return (1);
 	if (check_pipe_position(tokens))
 		return (1);
 	if (check_consecutive_pipes(tokens))
@@ -46,8 +44,6 @@ int	check_syntax_errors(t_token *tokens)
 	if (check_pipe_after_redir(tokens))
 		return (1);
 	if (check_empty_command(tokens))
-		return (1);
-	if (check_conflicting_redirections(tokens))
 		return (1);
 	return (0);
 }

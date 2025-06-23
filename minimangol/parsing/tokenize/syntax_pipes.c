@@ -6,7 +6,7 @@
 /*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 22:09:10 by achat             #+#    #+#             */
-/*   Updated: 2025/06/22 22:17:57 by achat            ###   ########.fr       */
+/*   Updated: 2025/06/23 16:53:16 by achat            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,12 +86,13 @@ int	check_pipe_after_redir(t_token *tokens)
 	current = tokens;
 	while (current)
 	{
-		if (is_redir_token(current->type))
+		if (current->type == TOKEN_REDIR_IN || 
+			current->type == TOKEN_REDIR_OUT || current->type == TOKEN_APPEND)
 		{
 			next = current->next;
 			if (next && next->type == TOKEN_WORD)
 				next = next->next;
-			if (next && next->type == TOKEN_PIPE)
+			else if (next && next->type == TOKEN_PIPE)
 			{
 				printf("minishell: syntax error near unexpected token `|'\n");
 				return (1);

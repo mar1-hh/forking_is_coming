@@ -6,7 +6,7 @@
 /*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 22:13:31 by achat             #+#    #+#             */
-/*   Updated: 2025/06/22 22:15:27 by achat            ###   ########.fr       */
+/*   Updated: 2025/06/23 15:53:50 by achat            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,46 +80,6 @@ int	check_redir_without_file(t_token *tokens)
 			}
 		}
 		current = current->next;
-	}
-	return (0);
-}
-
-static int	update_redir_flags(int type, int *out, int *append)
-{
-	if (type == TOKEN_REDIR_OUT || type == TOKEN_APPEND)
-	{
-		if (*out || *append)
-		{
-			printf("minishell: syntax error: multiple output redirections\n");
-			return (1);
-		}
-		if (type == TOKEN_REDIR_OUT)
-			*out = 1;
-		else
-			*append = 1;
-	}
-	return (0);
-}
-
-int	check_conflicting_redirections(t_token *tokens)
-{
-	t_token	*cur;
-	int		out;
-	int		append;
-
-	cur = tokens;
-	out = 0;
-	append = 0;
-	while (cur)
-	{
-		if (cur->type == TOKEN_PIPE)
-		{
-			out = 0;
-			append = 0;
-		}
-		else if (update_redir_flags(cur->type, &out, &append))
-			return (1);
-		cur = cur->next;
 	}
 	return (0);
 }

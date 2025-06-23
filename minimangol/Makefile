@@ -19,7 +19,7 @@ CC = cc
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-READLINE_PATH = /users/achat/homebrew/opt/readline
+READLINE_PATH = /goinfre/msaadaou/homebrew/opt/readline
 
 READLINE_INCLUDE = -I$(READLINE_PATH)/include
 READLINE_LIB = -L$(READLINE_PATH)/lib -lreadline -lncurses
@@ -32,7 +32,7 @@ $(LIBFT):
 	@$(MAKE) -C $(LIBFT_DIR)
 
 $(NAME): $(LIBFT) $(OBJECTS)
-	@$(CC) -o $(NAME) $(OBJECTS) -L$(LIBFT_DIR) -lft $(READLINE_LIB) -fsanitize=address
+	@$(CC) -o $(NAME) $(OBJECTS) -L$(LIBFT_DIR) -lft $(READLINE_LIB)
 	@echo "$(GREEN)✓ $(NAME) successfully built!$(RESET)"
 
 %.o: %.c minishell.h

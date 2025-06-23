@@ -526,9 +526,6 @@ int	abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 
 int	execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 {
-	int	status;
-
-	status = 1;
 	if (!node)
 		return (1);
 	if (node->e_token_type == TOKEN_PIPE)
@@ -536,19 +533,31 @@ int	execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 		flaging_pipe(node);
 		node->right->ar_pipe = malloc(2 * sizeof(int));
 		pipe(node->right->ar_pipe);
-		execute_tree(node->left, fd, node->right->ar_pipe[1]
-			, node->right->ar_pipe[0], sh);
-		status = execute_tree(node->right, node->right->ar_pipe[0]
-				, outfd, node->right->ar_pipe[1], sh);
+		if (execute_tree(node->left, fd, node->right->ar_pipe[1]
+			, node->right->ar_pipe[0], sh))
+		{
+			close(node->right->ar_pipe[0]);
+			close(node->right->ar_pipe[1]);
+			return (1);
+		}
+		if (execute_tree(node->right, node->right->ar_pipe[0]
+					, outfd, node->right->ar_pipe[1], sh))
+		{
+			close(node->right->ar_pipe[0]);
+			close(node->right->ar_pipe[1]);
+			return (1);
+		}
 		close(node->right->ar_pipe[0]);
 		close(node->right->ar_pipe[1]);
 	}
 	else if (node->e_token_type == TOKEN_WORD)
 	{
-		status = abs_execute(node, fd, outfd, cs, sh);
-		if (status == 1)
+		if (abs_execute(node, fd, outfd, cs, sh))
+		{
+			close_all_herdocs(node->redirs);
 			return (1);
+		}
 		close_all_herdocs(node->redirs);
 	}
-	return (status);
+	return (0);
 }

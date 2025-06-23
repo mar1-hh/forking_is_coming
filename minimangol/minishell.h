@@ -176,6 +176,7 @@ void	expand_tokens(t_token **token, t_shell *sh);
 t_token	*joining_tokens(t_token *old_lst);
 int	is_builtin(char *cmd);
 void	free_mtx(char **mtr);
+int	check_pipe_after_redir(t_token *tokens);
 void free_tokens(t_token *tokens);
 void	free_node(t_token *token);
 void	free_tree(t_ast *head);

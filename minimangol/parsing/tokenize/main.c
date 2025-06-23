@@ -124,7 +124,7 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	sh->exit_status = prepare_herdoc(head, sh);
 	if (sh->exit_status)
 		return (1);
-	execute_tree(head, 0, 1, -1, sh);
+	execute_tree(head, 0, 1, -1);
 	if (head->e_token_type == TOKEN_PIPE || 
 		(head->args && !is_builtin(head->args[0])))
 		sh->exit_status = wai_st(head);

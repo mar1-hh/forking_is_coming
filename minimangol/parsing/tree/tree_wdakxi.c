@@ -473,14 +473,14 @@ void	is_dir(char **args)
 	}
 }
 
-int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
+int	execute_command(t_ast *node, int infd, int outfd, int cs)
 {
 	node->pid = fork();
 	if (!node->pid)
 	{
 		is_dir(node->args);
 		if (node->args && is_builtin(node->args[0]))
-			exit(execute_builtin(node, infd, outfd, sh));
+			exit(execute_builtin(node, infd, outfd, node->sh));
 		if (cs != -1)
 			close(cs);
 		if (handle_redirection(node, &infd, &outfd))
@@ -495,7 +495,7 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 			dup2(outfd, 1);
 			close(outfd);
 		}
-		run_execve(node, sh);
+		run_execve(node, node->sh);
 	}
 	if (node->pid < 0)
 	{
@@ -505,30 +505,27 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
 	return (0);
 }
 
-int	abs_execute(t_ast *node, int infd, int outfd, int cs, t_shell *sh)
+int	abs_execute(t_ast *node, int infd, int outfd, int cs)
 {
 	if (!node->args)
 	{
 		if (handle_redirection(node, &infd, &outfd))
-			sh->exit_status = 1;
+			node->sh->exit_status = 1;
 	}
 	else if (node->is_pipe || (!is_builtin(node->args[0])))
 	{
-		if (execute_command(node, infd, outfd, cs, sh))
+		if (execute_command(node, infd, outfd, cs))
 			return (1);
 	}
 	else
 	{
-		sh->exit_status = execute_builtin(node, infd, outfd, sh);
+		node->sh->exit_status = execute_builtin(node, infd, outfd, node->sh);
 	}
 	return (0);
 }
 
-int	execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
+int	execute_tree(t_ast *node, int fd, int outfd, int cs)
 {
-	int	status;
-
-	status = 1;
 	if (!node)
 		return (1);
 	if (node->e_token_type == TOKEN_PIPE)
@@ -536,19 +533,31 @@ int	execute_tree(t_ast *node, int fd, int outfd, int cs, t_shell *sh)
 		flaging_pipe(node);
 		node->right->ar_pipe = malloc(2 * sizeof(int));
 		pipe(node->right->ar_pipe);
-		execute_tree(node->left, fd, node->right->ar_pipe[1]
-			, node->right->ar_pipe[0], sh);
-		status = execute_tree(node->right, node->right->ar_pipe[0]
-				, outfd, node->right->ar_pipe[1], sh);
+		if (execute_tree(node->left, fd, node->right->ar_pipe[1]
+			, node->right->ar_pipe[0]))
+		{
+			close(node->right->ar_pipe[0]);
+			close(node->right->ar_pipe[1]);
+			return (1);
+		}
+		if (execute_tree(node->right, node->right->ar_pipe[0]
+					, outfd, node->right->ar_pipe[1]))
+		{
+			close(node->right->ar_pipe[0]);
+			close(node->right->ar_pipe[1]);
+			return (1);
+		}
 		close(node->right->ar_pipe[0]);
 		close(node->right->ar_pipe[1]);
 	}
 	else if (node->e_token_type == TOKEN_WORD)
 	{
-		status = abs_execute(node, fd, outfd, cs, sh);
-		if (status == 1)
+		if (abs_execute(node, fd, outfd, cs))
+		{
+			close_all_herdocs(node->redirs);
 			return (1);
+		}
 		close_all_herdocs(node->redirs);
 	}
-	return (status);
+	return (0);
 }

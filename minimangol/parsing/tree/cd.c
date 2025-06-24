@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 10:35:04 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/22 23:52:59 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/24 12:22:08 by achat            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,10 +69,8 @@ int	to_home(t_env **env, char *old_pwd)
 {
 	char	*pwd;
 	t_env	*head;
-	t_env	*tmp;
 
 	pwd = NULL;
-	tmp = head;
 	head = *env;
 	while (head)
 	{

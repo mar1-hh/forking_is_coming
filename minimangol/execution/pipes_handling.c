@@ -3,15 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   pipes_handling.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
+<<<<<<< HEAD
 /*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 08:01:11 by marouane          #+#    #+#             */
 /*   Updated: 2025/06/24 11:45:39 by achat            ###   ########.fr       */
+=======
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/18 08:01:11 by marouane          #+#    #+#             */
+/*   Updated: 2025/06/24 12:15:40 by msaadaou         ###   ########.fr       */
+>>>>>>> 9253f33e8628bd0bbce17f831c2631abb4d304b0
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../minishell.h"
 
+<<<<<<< HEAD
 
 void	add_pipe_front(t_pipe **head, t_ast *node)
 {
@@ -43,3 +50,5 @@ t_pipe	*create_pipe_lst(t_ast *node)
 	}
 	return (head);
 }
+=======
+>>>>>>> 9253f33e8628bd0bbce17f831c2631abb4d304b0

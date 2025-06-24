@@ -200,5 +200,10 @@ int	size_of_var(char *str);
 t_env	*new_env_node(char **mtr);
 void	add_back_env(t_env **lst, t_env *new);
 void	set_operator_type(char c, char next, int *type, int *len);
+int	pid_fail(int pid);
+void	is_dir(char **args);
+int	run_execve(t_ast *node, t_shell *sh);
+int	env_size(t_env *env_lst);
+int	execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh);
 
 #endif

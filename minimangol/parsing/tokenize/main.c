@@ -90,21 +90,6 @@ void	trim_first_last(t_token *lst)
 	}
 }
 
-void targaryan(t_token *tokens, t_ast *head, t_shell *sh, t_token *new)
-{
-	expand_tokens(&tokens, sh);
-	trim_first_last(tokens);
-	new = joining_tokens(tokens);
-	head = build_ast(new, sh);
-	sh->exit_status = prepare_herdoc(head, sh);
-	if (sh->exit_status)
-		return (1);
-	execute_tree(head, 0, 1, -1);
-	if (head->e_token_type == TOKEN_PIPE || 
-		(head->args && !is_builtin(head->args[0])))
-		sh->exit_status = wai_st(head);
-}
-
 static int	execute_command_sequence(char *input, t_shell *sh)
 {
 	t_ast	*head;
@@ -126,7 +111,23 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 		free(input);
 		return (1);
 	}
-	targaryan(tokens, head, sh, new);
+	expand_tokens(&tokens, sh);
+	trim_first_last(tokens);
+	new = joining_tokens(tokens);
+	head = build_ast(new, sh);
+	if (!head)
+	{
+		printf("Parser error!\n");
+		cleanup(new, head, input);
+		return (1);
+	}
+	sh->exit_status = prepare_herdoc(head, sh);
+	if (sh->exit_status)
+		return (1);
+	execute_tree(head, 0, 1, -1);
+	if (head->e_token_type == TOKEN_PIPE || 
+		(head->args && !is_builtin(head->args[0])))
+		sh->exit_status = wai_st(head);
 	cleanup(tokens, head, input);
 	free_tokens(new);
 	return (0);

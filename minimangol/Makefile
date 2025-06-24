@@ -10,7 +10,7 @@ SOURCES = \
 	parsing/tree/joining_args.c parsing/tree/free_all.c parsing/tokenize/expand_split.c\
 	parsing/tokenize/syntax_pipes.c parsing/tokenize/syntax_main.c parsing/tokenize/syntax_quates.c\
 	parsing/tokenize/syntax_redirections.c parsing/tokenize/lexer_utils.c parsing/tokenize/token_utils.c\
-	parsing/tokenize/redir.c
+	parsing/tokenize/redir.c execution/exec_tree_help.c execution/exec_tree.c
 
 OBJECTS = $(SOURCES:.c=.o)
 

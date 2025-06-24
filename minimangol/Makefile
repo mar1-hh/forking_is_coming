@@ -20,7 +20,7 @@ CC = cc -Wall -Wextra -Werror
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-READLINE_PATH = /users/achat/homebrew/opt/readline
+READLINE_PATH = /goinfre/msaadaou/homebrew/opt/readline
 
 READLINE_INCLUDE = -I$(READLINE_PATH)/include
 READLINE_LIB = -L$(READLINE_PATH)/lib -lreadline -lncurses

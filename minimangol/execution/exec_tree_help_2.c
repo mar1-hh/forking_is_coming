@@ -6,13 +6,13 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 12:44:27 by msaadaou          #+#    #+#             */
-/*   Updated: 2025/06/24 12:49:35 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/24 13:53:56 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int my_execve(t_ast *node, t_shell *sh)
+int	my_execve(t_ast *node, t_shell *sh)
 {
 	if (!ft_strcmp(node->args[0], "env"))
 		return (ft_env(sh->env_lst));
@@ -28,7 +28,6 @@ int my_execve(t_ast *node, t_shell *sh)
 		return (ft_echo(node->args));
 	else if (!ft_strcmp(node->args[0], "exit"))
 		ft_exit(node->args, sh);
-
 	return (1);
 }
 

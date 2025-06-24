@@ -95,7 +95,7 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	t_ast	*head;
 	t_token	*tokens;
 	t_token	*new;
-`
+
 	head = NULL;
 	tokens = NULL;
 	tokens = lexer(input);

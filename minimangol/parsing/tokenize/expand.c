@@ -216,25 +216,20 @@ void	expand_tokens(t_token **token, t_shell *sh)
 	char	*line;
 	int		is_heredoc;
 
+	line = NULL;
 	is_heredoc = 0;
 	if ((*token)->type == TOKEN_HEREDOC)
 		is_heredoc = 1;
 	else if ((*token)->type == TOKEN_WORD && (*token)->quote_type == -1)
 	{
-		if (!is_heredoc)
-		{
-			line = expand_line(&(*token)->value, sh, (*token)->next);
-			add_first_node(token, (*token)->next, line, (*token)->is_space);
-			free(line);
-		}
+		line = expand_line(&(*token)->value, sh, (*token)->next);
+		add_first_node(token, (*token)->next, line, (*token)->is_space);
+		free(line);
 	}
 	else if ((*token)->type == TOKEN_WORD && (*token)->quote_type == 2)
 	{
-		if (!is_heredoc)
-		{
-			line = expand_line(&(*token)->value, sh, (*token)->next);
-			(*token)->value = line;
-		}
+		line = expand_line(&(*token)->value, sh, (*token)->next);
+		(*token)->value = line;
 	}
 	expand_tokens_2(token, sh, is_heredoc, line);
 }

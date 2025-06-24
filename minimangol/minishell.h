@@ -182,9 +182,8 @@ int	check_syntax_errors(t_token *tokens);
 int prepare_all_herdocs(t_ast *head, t_shell *sh);
 int close_all_herdocs(t_redir *redirs);
 char	*expand_line(char **line, t_shell *sh, t_token *next);
-char	**join_arg(char **args, int *arr, int size);
 void add_tokens(t_token **head, char *value, int type, t_qu_sp *s_q);
-void	expand_tokens(t_token **token, t_shell *sh);
+int	expand_tokens(t_token **token, t_shell *sh);
 t_token	*joining_tokens(t_token *old_lst);
 int	is_builtin(char *cmd);
 void	free_mtx(char **mtr);
@@ -205,5 +204,6 @@ void	is_dir(char **args);
 int	run_execve(t_ast *node, t_shell *sh);
 int	env_size(t_env *env_lst);
 int	execute_builtin(t_ast *node, int infd, int outfd, t_shell *sh);
+int	count_words(const char *s, char c);
 
 #endif

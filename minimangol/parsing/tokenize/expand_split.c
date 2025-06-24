@@ -6,13 +6,13 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/21 19:56:57 by msaadaou          #+#    #+#             */
-/*   Updated: 2025/06/22 15:56:26 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/24 20:08:49 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-static int	count_words(const char *s, char c)
+int	count_words(const char *s, char c)
 {
 	size_t	i;
 	int		flag;

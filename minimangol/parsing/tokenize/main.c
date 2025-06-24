@@ -81,7 +81,7 @@ void	trim_first_last(t_token *lst)
 	i = 0;	
 	while (lst)
 	{
-		if (!i && lst->quote_type == -1)
+		if ((!i && lst->quote_type == -1) || (lst->is_space && lst->quote_type == -1))
 			trim_first(lst);
 		if (!lst->next && lst->quote_type == -1)
 			trim_last(lst);
@@ -111,7 +111,12 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 		free(input);
 		return (1);
 	}
-	expand_tokens(&tokens, sh);
+	if (expand_tokens(&tokens, sh))
+	{
+		free_tokens(tokens);
+		sh->exit_status = 1;
+		return (1);
+	}
 	trim_first_last(tokens);
 	new = joining_tokens(tokens);
 	head = build_ast(new, sh);

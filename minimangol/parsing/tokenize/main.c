@@ -103,17 +103,13 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	{
 		sh->exit_status = 258;
 		free_tokens(tokens);
-		return (1);
-	}
-	if (!tokens)
-	{
-		printf("Lexer error in input: %s\n", input);
 		free(input);
 		return (1);
 	}
 	if (expand_tokens(&tokens, sh))
 	{
 		free_tokens(tokens);
+		free(input);
 		sh->exit_status = 1;
 		return (1);
 	}

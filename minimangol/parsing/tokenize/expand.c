@@ -185,12 +185,13 @@ void	is_redir_tk(t_token *token, int *flag)
 {
 	if (token->type == TOKEN_APPEND || token->type == TOKEN_REDIR_IN || token->type == TOKEN_REDIR_OUT)
 		*flag = 1;
-	*flag = 0;
+	else
+		*flag = 0;
 }
 
 int		is_ambeguous(char *line)
 {
-	if (!ft_strlen(0) || count_words(line, ' ') > 1)
+	if (!ft_strlen(line) || count_words(line, ' ') > 1)
 		return (1);
 	return (0);
 }
@@ -199,6 +200,7 @@ int	expand_tokens_2(t_token **token, t_shell *sh, int is_heredoc,
 		int is_redir)
 {
 	t_token	*tmp;
+	char	*tmp_2;
 	char	*line;
 
 	tmp = *token;
@@ -208,15 +210,18 @@ int	expand_tokens_2(t_token **token, t_shell *sh, int is_heredoc,
 		{
 			if (!is_heredoc)
 			{
+				tmp_2 = ft_strdup(tmp->next->value);
 				line = expand_line(&tmp->next->value, sh, tmp->next->next);
 				if (is_redir && is_ambeguous(line))
 				{
 					free(line);
-					printf("minishell: %s: ambiguous redirect\n", tmp->next->value);
+					printf("minishell: %s: ambiguous redirect\n", tmp_2);
+					free(tmp_2);
 					return (1);
 				}
 				add_nodes(tmp, tmp->next->next, line, tmp->next->is_space);
 				free(line);
+				free(tmp_2);
 			}
 		}
 		else if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == 2)
@@ -229,7 +234,6 @@ int	expand_tokens_2(t_token **token, t_shell *sh, int is_heredoc,
 		}
 		is_here_doc(tmp, &is_heredoc);
 		is_redir_tk(tmp->next, &is_redir);
-		printf("%d\n",is_redir);
 		tmp = tmp->next;
 	}
 	return (0);

@@ -36,56 +36,19 @@ static void initialize_ast_fields(t_ast *node, t_token_type type, t_shell *sh)
 
 t_ast *create_ast_node(t_token_type type, t_shell *sh)
 {
-	t_ast *node = malloc(sizeof(t_ast));
+	t_ast	*node;
+
+	node = malloc(sizeof(t_ast));
 	if (!node)
-		return NULL;
+		return (NULL);
 	initialize_ast_fields(node, type, sh);
-	return node;
+	return (node);
 }
 
-
-static void unlink_redir_pair(t_token **head, t_token *prev, t_token *target)
-{
-	if (prev)
-		prev->next = target->next;
-	else
-		*head = target->next;
-}
-
-t_token *remove_redirection_tokens(t_token **head)
-{
-	t_token	*current;
-	t_token	*prev;
-	t_token	*redir_target;
-
-	prev = NULL;
-	current = *head;
-	while (current)
-	{
-		if (is_redirection(current->type))
-		{
-			redir_target = current->next;
-			if (!redir_target || redir_target->type != TOKEN_WORD)
-			{
-				current = current->next;
-				continue ;
-			}
-			unlink_redir_pair(head, prev, redir_target);
-			current = redir_target->next;
-		}
-		else
-		{
-			prev = current;
-			current = current->next;
-		}
-	}
-	return *head;
-}
-
-static char **grow_args_array(char **args, int *capacity)
+static char	**grow_args_array(char **args, int *capacity)
 {
 	*capacity *= 2;
-	return ft_realloc(args, sizeof(char *) * (*capacity));
+	return (ft_realloc(args, sizeof(char *) * (*capacity)));
 }
 
 static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count)
@@ -95,8 +58,8 @@ static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count)
 	i = 0;
 	cmd_node->args = malloc(sizeof(char *) * (count + 1));
 	if (!cmd_node->args)
-		return;
-	while(i < count)
+		return ;
+	while (i < count)
 	{
 		cmd_node->args[i] = args[i];
 		i++;
@@ -106,9 +69,9 @@ static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count)
 	cmd_node->cmd = ft_strdup(cmd_node->args[0]);
 }
 
-static int culc_words(t_token *token)
+static int	culc_words(t_token *token)
 {
-	int count;
+	int	count;
 
 	count = 0;
 	while (token && token->type != TOKEN_PIPE)
@@ -120,55 +83,65 @@ static int culc_words(t_token *token)
 			token = token->next;
 			if (token && token->type == TOKEN_WORD)
 				token = token->next;
-			continue;
+			continue ;
 		}
 		token = token->next;
 	}
 	return (count + 1);
 }
 
+static t_token *handle_word_token(t_token *current, char ***args, int *count, int *capacity)
+{
+	if (*count >= *capacity - 1)
+	{
+		*args = grow_args_array(*args, capacity);
+		if (!*args)
+			return (NULL);
+	}
+	(*args)[(*count)++] = ft_strdup(current->value);
+	return (current->next);
+}
+
+static t_token *skip_redirection(t_token *current)
+{
+	current = current->next;
+	if (current && current->type == TOKEN_WORD)
+		current = current->next;
+	return (current);
+}
+
 t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
 {
-	t_token *current = tokens;
-	char **temp_args;
-	int word_count = 0;
-	int capacity = culc_words(tokens);
+	t_token	*current;
+	int		word_count;
+	int		capacity;
+	char	**temp_args;
+
+	current = tokens;
+	word_count = 0;
+	capacity = culc_words(tokens);
 	temp_args = malloc(sizeof(char *) * capacity);
-
-
 	if (!temp_args)
-		return tokens;
+		return (tokens);
 	while (current && current->type != TOKEN_PIPE)
 	{
 		if (current->type == TOKEN_WORD)
-		{
-			if (word_count >= capacity - 1)
-			{
-				temp_args = grow_args_array(temp_args, &capacity);
-				if (!temp_args)
-					return tokens;
-			}
-			temp_args[word_count++] = ft_strdup(current->value);
-			current = current->next;
-		}
+			current = handle_word_token(current, &temp_args, 
+					&word_count, &capacity);
 		else if (is_redirection(current->type))
-		{
-			current = current->next;
-			if (current && current->type == TOKEN_WORD)
-				current = current->next;
-		}
+			current = skip_redirection(current);
 		else
 			current = current->next;
 	}
 	if (word_count > 0)
 		copy_args_to_cmd_node(cmd_node, temp_args, word_count);
 	free(temp_args);
-	return current;
+	return (current);
 }
 
 t_ast *build_command_node(t_token **tokens, t_shell *sh)
 {
-	t_ast *cmd_node;
+	t_ast	*cmd_node;
 
 	cmd_node = create_ast_node(TOKEN_WORD, sh);
 	if (!cmd_node)

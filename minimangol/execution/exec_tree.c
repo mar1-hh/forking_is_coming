@@ -3,10 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   exec_tree.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 11:29:39 by msaadaou          #+#    #+#             */
+<<<<<<< HEAD
+/*   Updated: 2025/06/25 10:23:15 by achat            ###   ########.fr       */
+=======
 /*   Updated: 2025/06/25 10:48:21 by msaadaou         ###   ########.fr       */
+>>>>>>> cdff85b9380c048ce4dfec4a32d9aadd9fbbcf60
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +38,6 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs)
 			dup2(outfd, 1);
 			close(outfd);
 		}
-		signal(SIGQUIT, SIG_DFL);
 		run_execve(node, node->sh);
 	}
 	return (pid_fail(node->pid));

@@ -196,6 +196,36 @@ int		is_ambeguous(char *line)
 	return (0);
 }
 
+void	expand_tokens_3(t_token *tmp, t_shell *sh, int is_heredoc)
+{
+	char	*line;
+	
+	if (!is_heredoc)
+	{
+		line = expand_line(&tmp->next->value, sh, tmp->next->next);
+		tmp->next->value = line;
+	}
+}
+
+int	is_ambg(int is_redir, char *line, char *tmp)
+{
+	if (is_redir && is_ambeguous(line))
+	{
+		free(line);
+		printf("minishell: %s: ambiguous redirect\n", tmp);
+		free(tmp);
+		return (1);
+	}
+	free(tmp);
+	return (0);
+}
+
+void	is_her_red(t_token *tmp, int *is_heredoc, int *is_redir)
+{
+	is_here_doc(tmp, is_heredoc);
+	is_redir_tk(tmp->next, is_redir);
+}
+
 int	expand_tokens_2(t_token **token, t_shell *sh, int is_heredoc,
 		int is_redir)
 {
@@ -212,28 +242,15 @@ int	expand_tokens_2(t_token **token, t_shell *sh, int is_heredoc,
 			{
 				tmp_2 = ft_strdup(tmp->next->value);
 				line = expand_line(&tmp->next->value, sh, tmp->next->next);
-				if (is_redir && is_ambeguous(line))
-				{
-					free(line);
-					printf("minishell: %s: ambiguous redirect\n", tmp_2);
-					free(tmp_2);
+				if (is_ambg(is_redir, line, tmp_2))
 					return (1);
-				}
 				add_nodes(tmp, tmp->next->next, line, tmp->next->is_space);
 				free(line);
-				free(tmp_2);
 			}
 		}
 		else if (tmp->next->type == TOKEN_WORD && tmp->next->quote_type == 2)
-		{
-			if (!is_heredoc)
-			{
-				line = expand_line(&tmp->next->value, sh, tmp->next->next);
-				tmp->next->value = line;
-			}
-		}
-		is_here_doc(tmp, &is_heredoc);
-		is_redir_tk(tmp->next, &is_redir);
+			expand_tokens_3(tmp, sh, is_heredoc);
+		is_her_red(tmp, &is_heredoc, &is_redir);
 		tmp = tmp->next;
 	}
 	return (0);

@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/21 19:56:57 by msaadaou          #+#    #+#             */
-/*   Updated: 2025/06/24 20:08:49 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 13:34:24 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,22 @@ static char	*extract_word(char const *str, char c)
 	return (word);
 }
 
+void	split_exp_help(char **buffer, char const *s, char c, int i)
+{
+	char	is_space;
+	char	*tmp;
+
+	is_space = s[0];
+	buffer[i] = extract_word(s, c);
+	if (is_space == ' ' && !i)
+	{
+		printf("1337\n");
+		tmp = buffer[i];
+		buffer[i] = ft_strjoin(" ", buffer[i]);
+		free(tmp);
+	}
+}
+
 char	**ft_split_exp(char const *s, char c)
 {
 	char	**buffer;
@@ -79,8 +95,6 @@ char	**ft_split_exp(char const *s, char c)
 	char	is_space;
 	int		i;
 
-	if (!s)
-		return (NULL);
 	buffer = malloc((count_words(s, c) + 1) * sizeof(char *));
 	if (!buffer)
 		return (NULL);
@@ -90,13 +104,7 @@ char	**ft_split_exp(char const *s, char c)
 	{
 		if (!(*s == c))
 		{
-			buffer[i] = extract_word(s, c);
-			if (is_space == ' ' && !i)
-			{
-				tmp = buffer[i];
-				buffer[i] = ft_strjoin(" ", buffer[i]);
-				free(tmp);
-			}
+			split_exp_help(buffer, s, c, i);
 			if (!buffer[i++])
 				return (free_buffer(buffer, i - 1));
 			s += ft_strlen(buffer[i - 1]);

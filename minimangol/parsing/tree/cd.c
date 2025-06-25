@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 10:35:04 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/24 12:22:08 by achat            ###   ########.fr       */
+/*   Updated: 2025/06/25 11:34:25 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	upd_help(t_env **env, char *pwd, int type)
 		mtr[0] = ft_strdup("OLDPWD");
 	mtr[1] = pwd;
 	mtr[2] = NULL;	
-	add_back_env(env, new_env_node(mtr));
+	add_back_env(env, new_env_node(mtr, 0));
 	free_mtx(mtr);
 }
 

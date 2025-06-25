@@ -98,6 +98,7 @@ typedef struct	s_env
 {
 	char			*key;
 	char			*value;
+	int				ghost;
 	struct s_env	*next;
 }	t_env;
 
@@ -121,17 +122,13 @@ typedef struct s_expand
 	// int		i;
 }   t_expand;
 
-/* Tokenization functions */
 t_token     *lexer(char *input);
 t_token	*merge_consecutive_words(t_token *tokens, t_ast *cmd_node);
 t_ast	*connect_pipe_nodes(t_token **tokens, t_shell *sh);
-
 void        free_tokens(t_token *tokens);
 int	check_pipe_position(t_token *tokens);
 int	check_consecutive_pipes(t_token *tokens);
 int check_empty_command(t_token *tokens);
-
-/* AST functions */
 t_ast *create_ast_node(t_token_type type, t_shell *sh);
 t_ast	*build_ast(t_token *tokens, t_shell *sh);
 bool is_redirection(t_token_type type);
@@ -141,20 +138,14 @@ int	is_operator_token(t_token_type type);
 int check_trailing_redir(t_token *tokens);
 int	check_consecutive_redirections(t_token *tokens);
 int	check_unclosed_quotes(t_token *tokens);
-/* Redirection functions */
-/* Redirections */
 t_redir     *handle_redir(t_token **tokens);
 char	*get_token_string(t_token_type type);
 int         check_syntax_errors(t_token *tokens);
-
-/* Execution functions */
 int        handle_redirection(t_ast *node, int *infd, int *outfd);
 t_redir *handle_redir(t_token **tokens);
 char        *debug_okda(char **env, char *cmd);
 int         execute_tree(t_ast *node, int fd, int outfd, int cs);
 int         execute_command(t_ast *node, int infd, int outfd, int cs);
-
-/* Helper functions */
 int	check_consecutive_redirections(t_token *tokens);
 int	check_trailing_redir(t_token *tokens);
 int         check_syntax_errors(t_token *tokens);
@@ -172,7 +163,6 @@ int 	ft_env(t_env *lst);
 char	**split_env(char *str);
 int ft_export(t_env **lst, char **export_param);
 void	add_back_env(t_env **lst, t_env *new);
-t_env	*new_env_node(char **mtr);
 int	ft_cd(t_env **head, char *path);
 int	ft_unset(t_env **lst, char **argv);
 int	ft_pwd();
@@ -196,7 +186,7 @@ int	prepare_herdoc(t_ast *head, t_shell *sh);
 char	**ft_split_exp(char const *s, char c);
 char	**split_env(char *str);
 int	size_of_var(char *str);
-t_env	*new_env_node(char **mtr);
+t_env	*new_env_node(char **mtr, int flag);
 void	add_back_env(t_env **lst, t_env *new);
 void	set_operator_type(char c, char next, int *type, int *len);
 int	pid_fail(int pid);

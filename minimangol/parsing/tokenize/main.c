@@ -170,7 +170,7 @@ void	some_inits(t_shell *sh, char **env)
 	if (!env[0])
 	{
 		mtr = split_env("PATH=/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/goinfre/homebrew/bin:/Users/msaadaou/.brew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki:/Users/msaadaou/.brew/bin");
-		add_back_env(&sh->env_lst, new_env_node(mtr));
+		add_back_env(&sh->env_lst, new_env_node(mtr, 1));
 		free_mtx(mtr);
 	}
 	sh->exit_status = 0;

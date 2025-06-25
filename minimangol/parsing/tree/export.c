@@ -3,26 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/20 15:13:35 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/21 00:44:07 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/25 11:42:30 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-int env_export(t_env *lst)
+int	env_export(t_env *lst)
 {
 	while (lst)
 	{
-		printf("declare -x %s=\"%s\"\n", lst->key, lst->value);
+		if (!lst->ghost)
+			printf("declare -x %s=\"%s\"\n", lst->key, lst->value);
+		else
+			printf("declare -x %s\n", lst->key);
 		lst = lst->next;
 	}
 	return (0);
 }
 
-int export_valide(char *ptr)
+int	export_valide(char *ptr)
 {
 	if (!ft_isalpha(ptr[0]) && ptr[0] != '_')
 	{
@@ -32,7 +35,7 @@ int export_valide(char *ptr)
 	return (1);
 }
 
-void	export_help_2(t_env **lst, char **mtr, int flag)
+void	export_help_2(t_env **lst, char **mtr, int flag, int is_ghost)
 {
 	t_env	*temp;
 
@@ -49,20 +52,24 @@ void	export_help_2(t_env **lst, char **mtr, int flag)
 		temp = temp->next;
 	}
 	if (!flag)
-		add_back_env(lst, new_env_node(mtr));
+		add_back_env(lst, new_env_node(mtr, is_ghost));
 }
 
 int	export_help(t_env **lst, char **export_param, int flag)
 {
-	int	i;
+	int		i;
 	char	**mtr;
 	int		st;
-	
+	int		is_ghost;
+
 	st = 0;
 	i = 1;
 	while (export_param[i])
 	{
+		is_ghost = 0;
 		flag = 0;
+		if (!ft_strchr(export_param[i], '='))
+			is_ghost = 1;
 		mtr = split_env(export_param[i]);
 		if (!export_valide(mtr[0]))
 		{
@@ -70,17 +77,17 @@ int	export_help(t_env **lst, char **export_param, int flag)
 			i++;
 			continue ;
 		}
-		export_help_2(lst, mtr, flag);
+		export_help_2(lst, mtr, flag, is_ghost);
 		free_mtx(mtr);
 		i++;
 	}
 	return (st);
 }
 
-int ft_export(t_env **lst, char **export_param)
+int	ft_export(t_env **lst, char **export_param)
 {
-	int     flag;
-	
+	int	flag;
+
 	flag = 0;
 	if (!export_param[1])
 	{

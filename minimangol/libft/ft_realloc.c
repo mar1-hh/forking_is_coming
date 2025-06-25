@@ -17,7 +17,6 @@ void	*ft_realloc(void *ptr, size_t newsize)
 	char	*newptr;
 	size_t	cursize;
 
-	// newptr = NULL;
 	if (!ptr)
 		return (malloc(newsize));
 	cursize = sizeof(ptr);

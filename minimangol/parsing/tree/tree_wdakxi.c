@@ -19,7 +19,6 @@ t_token	*advance_token(t_token *token, int steps)
 	return (token);
 }
 
-
 int	culc_words(t_token *token)
 {
 	int	count;
@@ -41,7 +40,7 @@ int	culc_words(t_token *token)
 	return (count + 1);
 }
 
-t_ast *build_command_node(t_token **tokens, t_shell *sh)
+t_ast	*build_command_node(t_token **tokens, t_shell *sh)
 {
 	t_ast	*cmd_node;
 

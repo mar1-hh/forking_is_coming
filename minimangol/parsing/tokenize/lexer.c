@@ -1,12 +1,23 @@
-#include "../../minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lexer.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/25 17:03:07 by achat             #+#    #+#             */
+/*   Updated: 2025/06/25 17:03:07 by achat            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "../../minishell.h"
 
 static int	handle_operator(char *input, int i, t_token **tokens)
 {
-	char *value;
-	int type;
-	int len;
-	t_qu_sp q_s;
+	char	*value;
+	int		type;
+	int		len;
+	t_qu_sp	q_s;
 
 	q_s.is_space = -1;
 	q_s.quote_type = -1;
@@ -19,9 +30,9 @@ static int	handle_operator(char *input, int i, t_token **tokens)
 
 static int	handle_quotes(char *input, int i, t_token **tokens, t_qu_sp *q_s)
 {
-	int start;
-	char *value;
-	char quote;
+	int		start;
+	char	*value;
+	char	quote;
 
 	start = i;
 	if (q_s->quote_type == 1)
@@ -44,9 +55,9 @@ static int	handle_quotes(char *input, int i, t_token **tokens, t_qu_sp *q_s)
 
 static int	handle_word(char *input, int i, t_token **tokens, int is_space)
 {
-	int start;
-	char *value;
-	t_qu_sp q_s;
+	int		start;
+	char	*value;
+	t_qu_sp	q_s;
 
 	q_s.is_space = is_space;
 	q_s.quote_type = -1;
@@ -61,8 +72,8 @@ static int	handle_word(char *input, int i, t_token **tokens, int is_space)
 
 int	handle_lex_token(char *input, int i, t_token **tokens, int *is_space)
 {
-	int result;
-	t_qu_sp q_s;
+	int		result;
+	t_qu_sp	q_s;
 
 	if (ft_strchr("><|", input[i]))
 		result = handle_operator(input, i, tokens);
@@ -86,10 +97,10 @@ int	handle_lex_token(char *input, int i, t_token **tokens, int *is_space)
 
 t_token	*lexer(char *input)
 {
-	t_token *tokens;
-	int i;
-	int result;
-	int is_space;
+	t_token		*tokens;
+	int			i;
+	int			result;
+	int			is_space;
 
 	i = 0;
 	tokens = NULL;

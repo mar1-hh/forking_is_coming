@@ -14,7 +14,7 @@ SOURCES = \
 	execution/return_path.c execution/redir.c parsing/tokenize/expand_split_utils.c parsing/tokenize/expand_help.c\
 	parsing/tokenize/expand_help_2.c parsing/tokenize/expand_help_3.c parsing/tokenize/handle_input_sign.c\
 	parsing/tokenize/triming.c parsing/tokenize/main_helper.c parsing/tree/cd_err.c parsing/tree/free_mtx.c\
-	parsing/tree/env_help.c parsing/tree/init_tree.c parsing/tree/merge_tokens.c
+	parsing/tree/env_help.c parsing/tree/init_tree.c parsing/tree/merge_tokens.c parsing/tokenize/sg_ex.c
 
 OBJECTS = $(SOURCES:.c=.o)
 
@@ -23,7 +23,7 @@ CC = cc -Wall -Wextra -Werror
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-READLINE_PATH = /goinfre/msaadaou/homebrew/opt/readline
+READLINE_PATH = /users/achat/homebrew/opt/readline
 
 READLINE_INCLUDE = -I$(READLINE_PATH)/include
 READLINE_LIB = -L$(READLINE_PATH)/lib -lreadline -lncurses

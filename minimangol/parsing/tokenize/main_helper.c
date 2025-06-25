@@ -12,7 +12,6 @@
 
 #include "../../minishell.h"
 
-
 static void	cleanup(t_token *tokens, t_ast *head, char *input)
 {
 	if (tokens)
@@ -25,17 +24,26 @@ static void	cleanup(t_token *tokens, t_ast *head, char *input)
 
 int	wai_st(t_ast *node)
 {
-	int status;
+	int	status;
 
 	if (node->right && node->right->is_pipe)
 	{
 		waitpid(node->right->pid, &status, 0);
 	}
 	else if (node->e_token_type == TOKEN_WORD)
+	{
+		signal (SIGINT, SIG_IGN);
 		waitpid(node->pid, &status, 0);
+		signal(SIGINT, handle_sign);
+	}
 	while (wait(NULL) > 0)
 		;
-	return (WEXITSTATUS(status));
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	else if (WIFSIGNALED(status))
+		return (128 + WTERMSIG(status));
+	else
+		return (1);
 }
 
 static int	handle_syntax_and_expand(char *input, t_shell *sh,
@@ -62,8 +70,8 @@ static int	handle_syntax_and_expand(char *input, t_shell *sh,
 static t_ast	*build_ast_from_tokens(t_token *tokens, t_shell *sh,
 		char *input)
 {
-	t_token *new;
-	t_ast *head;
+	t_token	*new;
+	t_ast	*head;
 
 	trim_first_last(tokens);
 	new = joining_tokens(tokens);
@@ -87,8 +95,8 @@ static t_ast	*build_ast_from_tokens(t_token *tokens, t_shell *sh,
 
 int	execute_command_sequence(char *input, t_shell *sh)
 {
-	t_ast *head;
-	t_token *tokens;
+	t_ast		*head;
+	t_token		*tokens;
 
 	tokens = NULL;
 	if (handle_syntax_and_expand(input, sh, &tokens))

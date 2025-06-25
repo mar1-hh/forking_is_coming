@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   handle_input_sign.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 15:24:03 by msaadaou          #+#    #+#             */
-/*   Updated: 2025/06/25 16:22:20 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 17:04:21 by achat            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-static void	handle_sign(int sign)
+void	handle_sign(int sign)
 {
 	pid_t	pid;
 	int		status;
@@ -36,15 +36,9 @@ static void	signals(void)
 
 void	some_inits(t_shell *sh, char **env)
 {
-	// char	**mtr;
 	(void)env;
 	signals();
 	sh->env_lst = NULL;
-	// if (!env[0])
-	// {
-	// 	add_back_env(&sh->env_lst, new_env_node(mtr, 1));
-	// 	free_mtx(mtr);
-	// }
 	sh->exit_status = 0;
 }
 

@@ -1,15 +1,27 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_strcpy.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/25 17:05:31 by achat             #+#    #+#             */
+/*   Updated: 2025/06/25 17:05:31 by achat            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "libft.h"
 
 char	*ft_strcpy(char *s1, char *s2)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (s2[i])
 	{
-		s1[i] = s2[i]; // so this will make s1 = to whatever s2 is looping through the string
+		s1[i] = s2[i];
 		i++;
 	}
-	s1[i] = s2[i];  // now that we are finsihing looping though s1[i] will equal s2[i]
+	s1[i] = s2[i];
 	return (s1);
 }

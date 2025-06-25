@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/21 19:56:57 by msaadaou          #+#    #+#             */
-/*   Updated: 2025/06/25 13:34:24 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 13:44:54 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,26 +72,35 @@ static char	*extract_word(char const *str, char c)
 	return (word);
 }
 
-void	split_exp_help(char **buffer, char const *s, char c, int i)
+void	split_exp_help(char **buffer, char const *s, char is_space, int i)
 {
-	char	is_space;
 	char	*tmp;
 
-	is_space = s[0];
-	buffer[i] = extract_word(s, c);
+	buffer[i] = extract_word(s, ' ');
 	if (is_space == ' ' && !i)
 	{
-		printf("1337\n");
 		tmp = buffer[i];
 		buffer[i] = ft_strjoin(" ", buffer[i]);
 		free(tmp);
 	}
 }
 
+void	split_exp_help_2(char **buffer, char const *s, int i)
+{
+	char	*tmp;
+
+	if (*(s - 1) == ' ')
+	{
+		tmp = buffer[i - 1];
+		buffer[i - 1] = ft_strjoin(buffer[i - 1], " ");
+		free(tmp);
+	}
+	buffer[i] = NULL;
+}
+
 char	**ft_split_exp(char const *s, char c)
 {
 	char	**buffer;
-	char	*tmp;
 	char	is_space;
 	int		i;
 
@@ -104,7 +113,7 @@ char	**ft_split_exp(char const *s, char c)
 	{
 		if (!(*s == c))
 		{
-			split_exp_help(buffer, s, c, i);
+			split_exp_help(buffer, s, is_space, i);
 			if (!buffer[i++])
 				return (free_buffer(buffer, i - 1));
 			s += ft_strlen(buffer[i - 1]);
@@ -112,12 +121,6 @@ char	**ft_split_exp(char const *s, char c)
 		else
 			s++;
 	}
-	if (*(s - 1) == ' ')
-	{
-		tmp = buffer[i - 1];
-		buffer[i - 1] = ft_strjoin(buffer[i - 1], " ");
-		free(tmp);
-	}
-	buffer[i] = NULL;
+	split_exp_help_2(buffer, s, i);
 	return (buffer);
 }

@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 16:21:39 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/21 14:42:39 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 11:46:40 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,14 @@ char	**split_env(char *str)
 	mtr[0] = malloc(size + 1);
 	ft_memcpy(mtr[0], str, size + 1);
 	mtr[0][size] = 0;
-	mtr[1] = malloc(ft_strlen(str + size + 1) + 1);
+	mtr[1] = ft_calloc(ft_strlen(str + size + 1) + 1, 1);
 	ft_memcpy(mtr[1], str + size + 1, ft_strlen(str + size + 1) + 1);
 	mtr[2] = NULL;
 	return (mtr); 
 }
 
 
-t_env	*new_env_node(char **mtr)
+t_env	*new_env_node(char **mtr, int flag)
 {
 	t_env	*node;
 
@@ -49,6 +49,7 @@ t_env	*new_env_node(char **mtr)
 	node->key = ft_strdup(mtr[0]);
 	node->value = ft_strdup(mtr[1]);
 	node->next = NULL;
+	node->ghost = flag;
 	return (node);
 }
 
@@ -81,7 +82,7 @@ void	get_env(t_env **lst, char **env)
 	while (env[i])
 	{
 		mtr = split_env(env[i]);
-		add_back_env(lst, new_env_node(mtr));
+		add_back_env(lst, new_env_node(mtr, 0));
 		free_mtx(mtr);
 		i++;
 	}
@@ -89,25 +90,12 @@ void	get_env(t_env **lst, char **env)
 
 int ft_env(t_env *lst)
 {
-	t_env	*tmp;
-	int		flag;
-
-	flag = 0;
-	tmp = lst;
-	while (tmp)
-	{
-		if (!ft_strcmp(tmp->key, "PATH"))
-			flag = 1;
-		tmp = tmp->next;
-	}
-	if (!flag)
-	{
-		printf("bash: env: No such file or directory\n");
-		return (1);
-	}
 	while (lst)
 	{
-		printf("%s=%s\n", lst->key, lst->value);
+		if (!lst->ghost)
+		{
+			printf("%s=%s\n", lst->key, lst->value);
+		}
 		lst = lst->next;
 	}
 	return (0);

@@ -6,21 +6,11 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 16:21:39 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/25 13:30:13 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:16:45 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
-
-int	size_of_var(char *str)
-{
-	int	i;
-	
-	i = 0;
-	while (str[i] && str[i] != '=')
-		i++;
-	return (i);
-}
 
 char	**split_env(char *str)
 {
@@ -35,9 +25,8 @@ char	**split_env(char *str)
 	mtr[1] = ft_calloc(ft_strlen(str + size + 1) + 1, 1);
 	ft_memcpy(mtr[1], str + size + 1, ft_strlen(str + size + 1) + 1);
 	mtr[2] = NULL;
-	return (mtr); 
+	return (mtr);
 }
-
 
 t_env	*new_env_node(char **mtr, int flag)
 {
@@ -60,7 +49,7 @@ void	add_back_env(t_env **lst, t_env *new)
 	if (!lst || !new)
 		return ;
 	if (!(*lst))
-		*lst = new;	
+		*lst = new;
 	else
 	{
 		temp = *lst;
@@ -69,7 +58,6 @@ void	add_back_env(t_env **lst, t_env *new)
 		temp->next = new;
 	}
 }
-
 
 void	get_env(t_env **lst, char **env)
 {
@@ -88,7 +76,7 @@ void	get_env(t_env **lst, char **env)
 	}
 }
 
-int ft_env(t_env *lst)
+int	ft_env(t_env *lst)
 {
 	while (lst)
 	{

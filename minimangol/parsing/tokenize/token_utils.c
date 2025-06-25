@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 22:30:06 by achat             #+#    #+#             */
-/*   Updated: 2025/06/23 17:07:33 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:15:39 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,6 @@ void	add_tokens(t_token **head, char *value, int type, t_qu_sp *s_q)
 
 bool	is_redirection(t_token_type type)
 {
-	return (type == TOKEN_REDIR_IN || 
-		type == TOKEN_REDIR_OUT 
-		|| type == TOKEN_APPEND
-		|| type == TOKEN_HEREDOC);
+	return (type == TOKEN_REDIR_IN || type == TOKEN_REDIR_OUT
+		|| type == TOKEN_APPEND || type == TOKEN_HEREDOC);
 }

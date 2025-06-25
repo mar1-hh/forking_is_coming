@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   exit.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 13:54:28 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/06 18:27:30 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/25 15:40:46 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-void    ft_exit(char **args, t_shell *sh)
+void	ft_exit(char **args, t_shell *sh)
 {
-    if (!args[1])
-        exit(sh->exit_status);
-    exit(ft_atoi(args[1]));
+	if (!args[1])
+		exit(sh->exit_status);
+	exit(ft_atoi(args[1]));
 }

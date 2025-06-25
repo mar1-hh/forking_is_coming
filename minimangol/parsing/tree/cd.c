@@ -6,38 +6,38 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 10:35:04 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/25 11:34:25 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:15:55 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-int	cd_err(char *old_pwd)
-{
-	perror("cd");
-	free(old_pwd);
-	return 1;
-}
-
 void	upd_help(t_env **env, char *pwd, int type)
 {
 	char	**mtr;
 
-	mtr = malloc(3 * sizeof(char*));
+	mtr = malloc(3 * sizeof(char *));
 	if (type == 1)
 		mtr[0] = ft_strdup("PWD");
 	else
 		mtr[0] = ft_strdup("OLDPWD");
 	mtr[1] = pwd;
-	mtr[2] = NULL;	
+	mtr[2] = NULL;
 	add_back_env(env, new_env_node(mtr, 0));
 	free_mtx(mtr);
 }
 
+void	update_old_new_help(t_env *env, char *pwd, int *flag)
+{
+	free(env->value);
+	env->value = pwd;
+	*flag = 1;
+}
+
 void	update_old_new(t_env **env, char *old_pwd, char *pwd)
 {
-	int	pwd_flag;
-	int	o_pwd_flag;
+	int		pwd_flag;
+	int		o_pwd_flag;
 	t_env	*head;
 
 	pwd_flag = 0;
@@ -46,17 +46,9 @@ void	update_old_new(t_env **env, char *old_pwd, char *pwd)
 	while (head)
 	{
 		if (!ft_strcmp("OLDPWD", head->key))
-		{
-			free(head->value);
-			head->value = old_pwd;
-			o_pwd_flag = 1;
-		}
+			update_old_new_help(head, old_pwd, &o_pwd_flag);
 		else if (!ft_strcmp("PWD", head->key))
-		{
-			free(head->value);
-			head->value = pwd;
-			pwd_flag = 1;
-		}
+			update_old_new_help(head, pwd, &pwd_flag);
 		head = head->next;
 	}
 	if (!pwd_flag)

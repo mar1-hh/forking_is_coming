@@ -1,27 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pwd.c                                              :+:      :+:    :+:   */
+/*   env_help.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/23 13:46:05 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/25 16:17:00 by msaadaou         ###   ########.fr       */
+/*   Created: 2025/06/25 15:44:03 by msaadaou          #+#    #+#             */
+/*   Updated: 2025/06/25 16:16:03 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-int	ft_pwd(void)
+int	size_of_var(char *str)
 {
-	char	*ptr;
+	int	i;
 
-	ptr = getcwd(NULL, 0);
-	if (!ptr)
-	{
-		return (1);
-	}
-	printf("%s\n", ptr);
-	free(ptr);
-	return (0);
+	i = 0;
+	while (str[i] && str[i] != '=')
+		i++;
+	return (i);
 }

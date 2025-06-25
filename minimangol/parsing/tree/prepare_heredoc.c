@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 12:46:47 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/21 11:47:44 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:16:51 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,20 +85,6 @@ int	prepare_herdoc(t_ast *head, t_shell *sh)
 		waitpid(pid, &st, 0);
 		if (WIFSIGNALED(st))
 			return (1);
-	}
-	return (0);
-}
-
-int	close_all_herdocs(t_redir *redirs)
-{
-	while (redirs)
-	{
-		if (redirs->type == TOKEN_HEREDOC)
-		{
-			close(redirs->fd[0]);
-			close(redirs->fd[1]);
-		}
-		redirs = redirs->next;
 	}
 	return (0);
 }

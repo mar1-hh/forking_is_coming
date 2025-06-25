@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   syntax_quates.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 22:06:55 by achat             #+#    #+#             */
-/*   Updated: 2025/06/22 22:07:52 by achat            ###   ########.fr       */
+/*   Updated: 2025/06/25 16:15:25 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ void	print_error(char *s)
 
 int	is_redir_token(t_token_type type)
 {
-	return (type == TOKEN_REDIR_IN || type == TOKEN_REDIR_OUT || 
-		type == TOKEN_APPEND || type == TOKEN_HEREDOC);
+	return (type == TOKEN_REDIR_IN || type == TOKEN_REDIR_OUT
+		|| type == TOKEN_APPEND || type == TOKEN_HEREDOC);
 }
 
 int	is_operator_token(t_token_type type)

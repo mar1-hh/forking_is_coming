@@ -3,21 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   pipes_handling.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marouane <marouane@student.42.fr>          +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/18 14:09:38 by marouane          #+#    #+#             */
-/*   Updated: 2025/06/15 23:45:35 by marouane         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:16:42 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-
-void    flaging_pipe(t_ast *sequence)
+void	flaging_pipe(t_ast *sequence)
 {
-    if (!sequence)
-        return ;
-    sequence->is_pipe = 1;
-    flaging_pipe(sequence->left);
-    flaging_pipe(sequence->right);
+	if (!sequence)
+		return ;
+	sequence->is_pipe = 1;
+	flaging_pipe(sequence->left);
+	flaging_pipe(sequence->right);
 }

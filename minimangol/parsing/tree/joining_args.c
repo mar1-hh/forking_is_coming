@@ -1,5 +1,16 @@
-#include "../../minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   joining_args.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/25 16:16:27 by msaadaou          #+#    #+#             */
+/*   Updated: 2025/06/25 16:16:30 by msaadaou         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "../../minishell.h"
 
 void	cp_lbakiya(t_token *old, t_token *new)
 {
@@ -8,6 +19,13 @@ void	cp_lbakiya(t_token *old, t_token *new)
 	new->next = NULL;
 	new->quote_type = old->quote_type;
 	new->prev = old->prev;
+}
+
+void	token_join_help(t_token *new_tk, t_token *tmp, char *rt_tmp)
+{
+	if (tmp->quote_type == 2 || tmp->quote_type == 1)
+		new_tk->quote_type = 2;
+	free(rt_tmp);
 }
 
 t_token	*token_join(t_token **start)
@@ -32,9 +50,7 @@ t_token	*token_join(t_token **start)
 	{
 		rt_tmp = new_tk->value;
 		new_tk->value = ft_strjoin(new_tk->value, tmp->value);
-		if (tmp->quote_type == 2 || tmp->quote_type == 1)
-			new_tk->quote_type = 2;
-		free(rt_tmp);
+		token_join_help(new_tk, tmp, rt_tmp);
 		tmp = tmp->next;
 	}
 	*start = tmp;
@@ -44,7 +60,7 @@ t_token	*token_join(t_token **start)
 void	add_f_lkhr(t_token **head, t_token *new)
 {
 	t_token	*tmp;
-	
+
 	tmp = *head;
 	if (!*head)
 	{
@@ -70,4 +86,3 @@ t_token	*joining_tokens(t_token *old_lst)
 	}
 	return (new_lst);
 }
-

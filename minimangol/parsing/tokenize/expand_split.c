@@ -6,35 +6,11 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/21 19:56:57 by msaadaou          #+#    #+#             */
-/*   Updated: 2025/06/25 13:44:54 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:12:34 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
-
-int	count_words(const char *s, char c)
-{
-	size_t	i;
-	int		flag;
-	int		counter;
-
-	i = 0;
-	flag = 0;
-	counter = 0;
-	while (s[i])
-	{
-		if (s[i] != c)
-		{
-			if (!flag)
-				counter++;
-			flag = 1;
-		}
-		else
-			flag = 0;
-		i++;
-	}
-	return (counter);
-}
 
 static void	*free_buffer(char **buffer, int len)
 {
@@ -60,7 +36,7 @@ static char	*extract_word(char const *str, char c)
 	i = 0;
 	while (!(str[len] == c) && str[len] != '\0')
 		len++;
-	word = malloc(sizeof (char) * (len + 1));
+	word = malloc(sizeof(char) * (len + 1));
 	if (!word)
 		return (NULL);
 	while (i < len)

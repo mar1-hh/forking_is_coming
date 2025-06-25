@@ -1,23 +1,8 @@
 #include "../../minishell.h"
 
-void	free_mtx(char **mtr)
-{
-	int	i;
-
-	if (!mtr)
-		return ;
-	i = 0;
-	while (mtr[i])
-	{
-		free(mtr[i]);
-		i++;
-	}
-	free(mtr);
-}
-
 void	free_tokens(t_token *tokens)
 {
-	t_token *tmp;
+	t_token	*tmp;
 
 	while (tokens)
 	{
@@ -30,7 +15,7 @@ void	free_tokens(t_token *tokens)
 
 void	fr_rdi_lst(t_redir *tokens)
 {
-	t_redir *tmp;
+	t_redir	*tmp;
 
 	while (tokens)
 	{
@@ -50,7 +35,7 @@ void	free_node(t_token *token)
 void	free_env(t_env *env)
 {
 	t_env	*tmp;
-	
+
 	while (env)
 	{
 		tmp = env;

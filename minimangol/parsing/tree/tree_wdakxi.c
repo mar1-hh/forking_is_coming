@@ -19,57 +19,8 @@ t_token	*advance_token(t_token *token, int steps)
 	return (token);
 }
 
-static void initialize_ast_fields(t_ast *node, t_token_type type, t_shell *sh)
-{
-	node->e_token_type = type;
-	node->cmd = NULL;
-	node->args = NULL;
-	node->sh = sh;
-	node->arg_count = 0;
-	node->ar_pipe = NULL;
-	node->redirs = NULL;
-	node->left = NULL;
-	node->right = NULL;
-	node->pid = 0;
-	node->is_pipe = 0;
-}
 
-t_ast *create_ast_node(t_token_type type, t_shell *sh)
-{
-	t_ast	*node;
-
-	node = malloc(sizeof(t_ast));
-	if (!node)
-		return (NULL);
-	initialize_ast_fields(node, type, sh);
-	return (node);
-}
-
-static char	**grow_args_array(char **args, int *capacity)
-{
-	*capacity *= 2;
-	return (ft_realloc(args, sizeof(char *) * (*capacity)));
-}
-
-static void copy_args_to_cmd_node(t_ast *cmd_node, char **args, int count)
-{
-	int i;
-
-	i = 0;
-	cmd_node->args = malloc(sizeof(char *) * (count + 1));
-	if (!cmd_node->args)
-		return ;
-	while (i < count)
-	{
-		cmd_node->args[i] = args[i];
-		i++;
-	}
-	cmd_node->args[count] = NULL;
-	cmd_node->arg_count = count;
-	cmd_node->cmd = ft_strdup(cmd_node->args[0]);
-}
-
-static int	culc_words(t_token *token)
+int	culc_words(t_token *token)
 {
 	int	count;
 
@@ -88,55 +39,6 @@ static int	culc_words(t_token *token)
 		token = token->next;
 	}
 	return (count + 1);
-}
-
-static t_token *handle_word_token(t_token *current, char ***args, int *count, int *capacity)
-{
-	if (*count >= *capacity - 1)
-	{
-		*args = grow_args_array(*args, capacity);
-		if (!*args)
-			return (NULL);
-	}
-	(*args)[(*count)++] = ft_strdup(current->value);
-	return (current->next);
-}
-
-static t_token *skip_redirection(t_token *current)
-{
-	current = current->next;
-	if (current && current->type == TOKEN_WORD)
-		current = current->next;
-	return (current);
-}
-
-t_token *merge_consecutive_words(t_token *tokens, t_ast *cmd_node)
-{
-	t_token	*current;
-	int		word_count;
-	int		capacity;
-	char	**temp_args;
-
-	current = tokens;
-	word_count = 0;
-	capacity = culc_words(tokens);
-	temp_args = malloc(sizeof(char *) * capacity);
-	if (!temp_args)
-		return (tokens);
-	while (current && current->type != TOKEN_PIPE)
-	{
-		if (current->type == TOKEN_WORD)
-			current = handle_word_token(current, &temp_args, 
-					&word_count, &capacity);
-		else if (is_redirection(current->type))
-			current = skip_redirection(current);
-		else
-			current = current->next;
-	}
-	if (word_count > 0)
-		copy_args_to_cmd_node(cmd_node, temp_args, word_count);
-	free(temp_args);
-	return (current);
 }
 
 t_ast *build_command_node(t_token **tokens, t_shell *sh)

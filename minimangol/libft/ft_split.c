@@ -12,111 +12,89 @@
 
 #include "libft.h"
 
-static size_t	count_tokens(const char *s, char c);
-static size_t	fller(char **tokens_v, const char *s, char c);
-static size_t	ft_free(char **tokens_v, int position, size_t buffer);
-
-char	**ft_split(const char *s, char c)
+static int	count_words(const char *s, char c)
 {
-	size_t	tokens;
-	char	**tokens_v;
+	size_t	i;
+	int		flag;
+	int		counter;
 
-	if (NULL == s)
-		return (NULL);
-	tokens = 0;
-	tokens = count_tokens(s, c);
-	tokens_v = ft_calloc(tokens + 1, sizeof(char *));
-	if (!tokens_v)
-		return (NULL);
-	tokens_v[tokens] = NULL;
-	if (fller(tokens_v, s, c))
-		return (NULL);
-	return (tokens_v);
+	i = 0;
+	flag = 0;
+	counter = 0;
+	while (s[i])
+	{
+		if (s[i] != c)
+		{
+			if (!flag)
+				counter++;
+			flag = 1;
+		}
+		else
+			flag = 0;
+		i++;
+	}
+	return (counter);
 }
 
-static size_t	ft_free(char **tokens_v, int position, size_t buffer)
+static void	*free_buffer(char **buffer, int len)
 {
 	int	i;
 
 	i = 0;
-	tokens_v[position] = malloc(buffer);
-	if (NULL == tokens_v[position])
+	while (i < len)
 	{
-		while (i < position)
-		{
-			free(tokens_v[i++]);
-		}
-		free(tokens_v);
-		return (1);
+		free(buffer[i]);
+		i++;
 	}
-	return (0);
+	free(buffer);
+	return (NULL);
 }
 
-static size_t	count_tokens(const char *s, char delimiter) {
-    size_t tokens = 0;
-    int inside_token = 0;
+static char	*extract_word(char const *str, char c)
+{
+	int		len;
+	int		i;
+	char	*word;
 
-    while (*s) {
-        // Skip delimiters
-        while (*s == delimiter && *s) s++;
-
-        // Process non-delimiter characters
-        inside_token = 0;
-        while (*s != delimiter && *s) {
-            if (*s == '(' || *s == ')') {
-                if (inside_token) tokens++; // End previous token
-                tokens++; // Count parenthesis as a token
-                inside_token = 0;
-                s++;
-            } else {
-                if (!inside_token) {
-                    tokens++;
-                    inside_token = 1;
-                }
-                s++;
-            }
-        }
-    }
-    return tokens;
+	len = 0;
+	i = 0;
+	while (!(str[len] == c) && str[len] != '\0')
+		len++;
+	word = malloc(sizeof (char) * (len + 1));
+	if (!word)
+		return (NULL);
+	while (i < len)
+	{
+		word[i] = str[i];
+		i++;
+	}
+	word[i] = '\0';
+	return (word);
 }
 
-// Modified fller to handle parentheses splitting
-static size_t	fller(char **tokens_v, const char *s, char c) {
-    size_t len;
-    int i = 0;
-    const char *start;
+char	**ft_split(char const *s, char c)
+{
+	char	**buffer;
+	int		i;
 
-    while (*s) {
-        // Skip delimiters
-        while (*s == c && *s) s++;
-        start = s;
-        len = 0;
-
-        while (*s != c && *s) {
-            if (*s == '(' || *s == ')') {
-                // Save current token if any
-                if (len > 0) {
-                    if (ft_free(tokens_v, i, len + 1)) return 1;
-                    ft_strlcpy(tokens_v[i++], start, len + 1);
-                }
-                // Save parenthesis
-                if (ft_free(tokens_v, i, 2)) return 1;
-                tokens_v[i][0] = *s;
-                tokens_v[i++][1] = '\0';
-                s++;
-                start = s;
-                len = 0;
-            } else {
-                len++;
-                s++;
-            }
-        }
-
-        // Save remaining part
-        if (len > 0) {
-            if (ft_free(tokens_v, i, len + 1)) return 1;
-            ft_strlcpy(tokens_v[i++], start, len + 1);
-        }
-    }
-    return 0;
+	if (!s)
+		return (NULL);
+	buffer = malloc((count_words(s, c) + 1) * sizeof(char *));
+	if (!buffer)
+		return (NULL);
+	i = 0;
+	while (*s != '\0')
+	{
+		if (!(*s == c))
+		{
+			buffer[i] = extract_word(s, c);
+			if (!buffer[i++])
+				return (free_buffer(buffer, i - 1));
+			s += ft_strlen(buffer[i - 1]);
+		}
+		else
+			s++;
+	}
+	buffer[i] = NULL;
+	return (buffer);
 }

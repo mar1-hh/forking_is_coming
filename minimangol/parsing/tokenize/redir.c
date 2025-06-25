@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redir.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 22:31:55 by achat             #+#    #+#             */
-/*   Updated: 2025/06/22 22:34:45 by achat            ###   ########.fr       */
+/*   Updated: 2025/06/25 16:15:10 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ t_redir	*create_redir_node(t_token_type type, char *file, int is_expnd)
 	if (!new_redir)
 		return (NULL);
 	new_redir->file = ft_strdup(file);
-	if (!new_redir->file) 
+	if (!new_redir->file)
 	{
 		free(new_redir);
 		return (NULL);
@@ -64,8 +64,8 @@ t_redir	*handle_redir(t_token **tokens)
 	{
 		if (is_redirection(curr->type))
 		{
-			new_redir = create_redir_node(curr->type,
-					curr->next->value, curr->next->quote_type);
+			new_redir = create_redir_node(curr->type, curr->next->value,
+					curr->next->quote_type);
 			append_redir(&redirs, &redir_tail, new_redir);
 			curr = curr->next->next;
 		}

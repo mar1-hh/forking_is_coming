@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   syntax_pipes.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 22:09:10 by achat             #+#    #+#             */
-/*   Updated: 2025/06/23 16:53:16 by achat            ###   ########.fr       */
+/*   Updated: 2025/06/25 16:15:20 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,8 +86,8 @@ int	check_pipe_after_redir(t_token *tokens)
 	current = tokens;
 	while (current)
 	{
-		if (current->type == TOKEN_REDIR_IN || 
-			current->type == TOKEN_REDIR_OUT || current->type == TOKEN_APPEND)
+		if (current->type == TOKEN_REDIR_IN || current->type == TOKEN_REDIR_OUT
+			|| current->type == TOKEN_APPEND)
 		{
 			next = current->next;
 			if (next && next->type == TOKEN_WORD)

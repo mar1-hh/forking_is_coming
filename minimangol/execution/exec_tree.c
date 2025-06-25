@@ -3,14 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_tree.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: achat <achat@student.42.fr>                +#+  +:+       +#+        */
+/*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 11:29:39 by msaadaou          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2025/06/25 10:23:15 by achat            ###   ########.fr       */
-=======
-/*   Updated: 2025/06/25 10:48:21 by msaadaou         ###   ########.fr       */
->>>>>>> cdff85b9380c048ce4dfec4a32d9aadd9fbbcf60
+/*   Updated: 2025/06/25 16:12:05 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +17,7 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs)
 	node->pid = fork();
 	if (!node->pid)
 	{
+		signal(SIGQUIT, SIG_DFL);
 		is_dir(node->args);
 		if (node->args && is_builtin(node->args[0]))
 			exit(execute_builtin(node, infd, outfd, node->sh));

@@ -185,7 +185,7 @@ void	is_redir_tk(t_token *token, int *flag)
 {
 	if (token->type == TOKEN_APPEND || token->type == TOKEN_REDIR_IN || token->type == TOKEN_REDIR_OUT)
 		*flag = 1;
-	else
+	else if (token->type != TOKEN_WORD && !token->is_space)
 		*flag = 0;
 }
 

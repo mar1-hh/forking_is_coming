@@ -6,7 +6,7 @@
 /*   By: msaadaou <msaadaou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 11:29:39 by msaadaou          #+#    #+#             */
-/*   Updated: 2025/06/24 13:53:53 by msaadaou         ###   ########.fr       */
+/*   Updated: 2025/06/25 10:48:21 by msaadaou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ int	execute_command(t_ast *node, int infd, int outfd, int cs)
 			dup2(outfd, 1);
 			close(outfd);
 		}
+		signal(SIGQUIT, SIG_DFL);
 		run_execve(node, node->sh);
 	}
 	return (pid_fail(node->pid));

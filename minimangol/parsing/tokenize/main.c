@@ -12,8 +12,6 @@
 
 #include "../../minishell.h"
 
-struct s_global	g_data;
-
 static void	cleanup(t_token *tokens, t_ast *head, char *input)
 {
 	if (tokens)
@@ -36,15 +34,6 @@ int	wai_st(t_ast *node)
 		waitpid(node->pid, &status, 0);
 	while (wait(NULL) > 0);
 	return (WEXITSTATUS(status));
-}
-
-void	print_tk(t_token *tk)
-{
-	while (tk)
-	{
-		printf("%s\n", tk->value);
-		tk = tk->next;
-	}
 }
 
 void	trim_first(t_token *tok)
@@ -78,10 +67,12 @@ void	trim_first_last(t_token *lst)
 {
 	int	i;
 
-	i = 0;	
+	i = 0;
 	while (lst)
 	{
-		if ((!i && lst->quote_type == -1) || (lst->is_space && lst->quote_type == -1))
+		if ((!i && lst->quote_type == -1) || 
+			(lst->is_space && 
+				lst->quote_type == -1))
 			trim_first(lst);
 		if (!lst->next && lst->quote_type == -1)
 			trim_last(lst);
@@ -90,29 +81,31 @@ void	trim_first_last(t_token *lst)
 	}
 }
 
-static int	execute_command_sequence(char *input, t_shell *sh)
+static int	handle_syntax_and_expand(char *input, t_shell *sh, t_token **tokens)
 {
-	t_ast	*head;
-	t_token	*tokens;
-	t_token	*new;
-
-	head = NULL;
-	tokens = NULL;
-	tokens = lexer(input);
-	if (check_syntax_errors(tokens))
+	*tokens = lexer(input);
+	if (check_syntax_errors(*tokens))
 	{
 		sh->exit_status = 258;
-		free_tokens(tokens);
+		free_tokens(*tokens);
 		free(input);
 		return (1);
 	}
-	if (expand_tokens(&tokens, sh))
+	if (expand_tokens(tokens, sh))
 	{
-		free_tokens(tokens);
+		free_tokens(*tokens);
 		free(input);
 		sh->exit_status = 1;
 		return (1);
 	}
+	return (0);
+}
+
+static t_ast	*build_ast_from_tokens(t_token *tokens, t_shell *sh, char *input)
+{
+	t_token	*new;
+	t_ast	*head;
+
 	trim_first_last(tokens);
 	new = joining_tokens(tokens);
 	head = build_ast(new, sh);
@@ -120,17 +113,35 @@ static int	execute_command_sequence(char *input, t_shell *sh)
 	{
 		printf("Parser error!\n");
 		cleanup(new, head, input);
-		return (1);
+		return (NULL);
 	}
 	sh->exit_status = prepare_herdoc(head, sh);
 	if (sh->exit_status)
+	{
+		cleanup(tokens, head, input);
+		free_tokens(new);
+		return (NULL);
+	}
+	free_tokens(new);
+	return (head);
+}
+
+static int	execute_command_sequence(char *input, t_shell *sh)
+{
+	t_ast	*head;
+	t_token	*tokens;
+
+	tokens = NULL;
+	if (handle_syntax_and_expand(input, sh, &tokens))
+		return (1);
+	head = build_ast_from_tokens(tokens, sh, input);
+	if (!head)
 		return (1);
 	execute_tree(head, 0, 1, -1);
 	if (head->e_token_type == TOKEN_PIPE || 
 		(head->args && !is_builtin(head->args[0])))
 		sh->exit_status = wai_st(head);
 	cleanup(tokens, head, input);
-	free_tokens(new);
 	return (0);
 }
 
@@ -142,11 +153,6 @@ static void	handle_sign(int sign)
 	pid = waitpid(-1, &status, 0);
 	(void)sign;
 	write(2, "\n", 1);
-	if (g_data.hd)
-	{
-		g_data.interrupted = 1;
-		return ;
-	}
 	if (pid == -1)
 	{
 		rl_replace_line("", 0);
@@ -164,7 +170,7 @@ static void	signals(void)
 void	some_inits(t_shell *sh, char **env)
 {
 	char	**mtr;
-	
+
 	signals();
 	sh->env_lst = NULL;
 	if (!env[0])
@@ -176,32 +182,46 @@ void	some_inits(t_shell *sh, char **env)
 	sh->exit_status = 0;
 }
 
+static char	*get_user_input(void)
+{
+	const char	*prompt = "\001\033[0;31m\002MINISHELL𒉭 > \001\033[0m\002";
+	char		*input;
+
+	input = readline(prompt);
+	if (!input)
+	{
+		printf("exit\n");
+		exit(1);
+	}
+	add_history(input);
+	return (input);
+}
+
+static int	handle_input(char *input, t_shell *sh)
+{
+	if (ft_strlen(input) == 0)
+	{
+		free(input);
+		return (1);
+	}
+	if (execute_command_sequence(input, sh))
+		return (1);
+	return (0);
+}
+
 int	main(int ac, char **av, char **env)
 {
-	char		*input;
-	t_shell		sh;
-	const char	*prompt;
+	t_shell	sh;
+	char	*input;
 
-	(void) ac;
-	(void) av;
+	(void)ac;
+	(void)av;
 	some_inits(&sh, env);
 	get_env(&(sh.env_lst), env);
 	while (1)
 	{
-		prompt = "\001\033[0;31m\002MINISHELL𒉭 > \001\033[0m\002";
-		input = readline(prompt);
-		if (!input)
-		{
-			printf("exit\n");
-			exit (1);
-		}
-		add_history(input);
-		if (ft_strlen(input) == 0)
-		{
-			free(input);
-			continue ;
-		}
-		if (execute_command_sequence(input, &sh))
+		input = get_user_input();
+		if (handle_input(input, &sh))
 			continue ;
 	}
 	free_env(sh.env_lst);

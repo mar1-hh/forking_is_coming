@@ -42,15 +42,6 @@ typedef struct s_token	t_token;
 typedef struct s_ast	t_ast;
 typedef struct s_shell	t_shell;
 
-struct s_global
-{
-	int				status;
-	int				hd;
-	int				interrupted;
-};
-
-extern struct s_global	g_data;
-
 struct s_token
 {
 	char            *value;
